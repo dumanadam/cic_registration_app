@@ -99,6 +99,17 @@ export function AuthProvider({ children }) {
     return upd;
   }
 
+  function bookSession(sessiondetails) {
+    console.log("booksession auth");
+    let upd = db
+      .ref("users/" + auth.currentUser.uid)
+      .update(sessiondetails)
+      .catch((e) => {
+        console.log("session auth error>", e);
+      });
+    return upd;
+  }
+
   function deleteProfile(password) {
     return auth.currentUser.updatePassword(password);
   }
@@ -114,6 +125,7 @@ export function AuthProvider({ children }) {
     deleteProfile,
     updateFirstName,
     updateSurname,
+    bookSession,
     userDetails,
   };
   return (
