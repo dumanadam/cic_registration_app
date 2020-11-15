@@ -24,6 +24,10 @@ export default function Sessions() {
   }, [session]);
 
   useEffect(() => {
+    console.log("userDetails", userDetails);
+  }, [userDetails]);
+
+  useEffect(() => {
     setSession(findFriday());
   }, []);
 
@@ -35,7 +39,7 @@ export default function Sessions() {
     promises.push(bookSession(session));
     Promise.all(promises)
       .then(() => {
-        history.push("/");
+        history.push("/sessionConfirmed");
       })
       .catch(() => {
         setError("Failed to Update Account");
@@ -64,15 +68,14 @@ export default function Sessions() {
 
     return {
       jumaDate: nextFriday,
-      jumaSession: "1:30 pm",
     };
   }
 
-  function handleClick(index) {
-    //console.log("index is ", index);
+  function handleClick(time) {
+    console.log("index is ", time);
     setSession({
       ...session,
-      jumaSession: sessionTimes[index].time,
+      jumaSession: time,
     });
   }
 
@@ -94,13 +97,13 @@ export default function Sessions() {
             </div>{" "}
             <ListGroup
               className="mt-3 mb-5 ml-3 d-flex justify-content-between align-items-center"
-              defaultActiveKey="#130"
+              defaultActiveKey={"#" + userDetails.jumaSession}
             >
               <ListGroup.Item
                 action
-                href="#130"
+                href={"#" + sessionTimes[0].time}
                 className="d-flex justify-content-between align-items-center"
-                onClick={() => handleClick(0)}
+                onClick={() => handleClick(sessionTimes[0].time)}
               >
                 1:30 pm
                 <Badge variant="warning" pill>
@@ -109,9 +112,9 @@ export default function Sessions() {
               </ListGroup.Item>
               <ListGroup.Item
                 action
-                href="#230"
+                href={"#" + sessionTimes[1].time}
                 className="d-flex justify-content-between align-items-center"
-                onClick={() => handleClick(1)}
+                onClick={() => handleClick(sessionTimes[1].time)}
               >
                 2:30 pm
                 <Badge variant="warning" pill>
@@ -120,9 +123,9 @@ export default function Sessions() {
               </ListGroup.Item>
               <ListGroup.Item
                 action
-                href="#sessionc"
+                href={"#" + sessionTimes[2].time}
                 className="d-flex justify-content-between align-items-center"
-                onClick={() => handleClick(2)}
+                onClick={() => handleClick(sessionTimes[2].time)}
               >
                 3:30 pm
                 <Badge variant="warning" pill>
@@ -142,7 +145,7 @@ export default function Sessions() {
           </Form>
         </Card.Body>
       </Card>
-      <div className="w-100 text-center mt-2">
+      <div className="w-100 text-center mt-2 ">
         <Link to="/">Cancel</Link>
       </div>
     </>

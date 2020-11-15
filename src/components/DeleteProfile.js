@@ -36,8 +36,10 @@ export default function DeleteProfile() {
   return (
     <>
       <Card>
+        <Card.Header className="h3 text-center text-danger">
+          Delete Profile
+        </Card.Header>
         <Card.Body>
-          <h2 className="text-center mb-4">Delete Profile</h2>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group id="password">
@@ -45,18 +47,27 @@ export default function DeleteProfile() {
               <Form.Control
                 type="password"
                 ref={passwordRef}
-                placeholder="Leave blank to keep the same"
+                placeholder="Enter password to confirm"
               />
             </Form.Group>
-            <Button disabled={loading} className="w-100" type="submit">
+            <Button
+              disabled={loading}
+              className="w-100"
+              variant="danger"
+              type="submit"
+            >
               Delete Profile
             </Button>
           </Form>
+          <Form.Group>
+            <Link className="text-light " to="/">
+              <Button disabled={loading} className="w-100 mt-2" variant="dark">
+                Cancel
+              </Button>
+            </Link>
+          </Form.Group>
         </Card.Body>
       </Card>
-      <div className="w-100 text-center mt-2">
-        <Link to="/">Cancel</Link>
-      </div>
     </>
   );
 }

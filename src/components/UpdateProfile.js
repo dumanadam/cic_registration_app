@@ -2,6 +2,12 @@ import React, { useRef, useState, useEffect } from "react";
 import { Card, Form, Button, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
+import PageTitle from "./PageTitle";
+import {
+  BsChevronBarRight,
+  BsChevronBarLeft,
+  BsGearFill,
+} from "react-icons/bs";
 
 export default function UpdateProfile() {
   var emailRef = useRef();
@@ -21,11 +27,17 @@ export default function UpdateProfile() {
   const [loading, setLoading] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [surName, setSurName] = useState("");
+  const [settingsButton, setSettingsButton] = useState(false);
+  const [pageTitle, setpageTitle] = useState("");
   const history = useHistory();
 
   useEffect(() => {
     console.log("updateprofile userdetails >>", userDetails);
   }, [userDetails]);
+
+  useEffect(() => {
+    setpageTitle(PageTitle("Update Profile"));
+  }, []);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -66,11 +78,27 @@ export default function UpdateProfile() {
       });
   }
 
+  function openSettings(props) {
+    setSettingsButton(!settingsButton);
+  }
+
+  function renderDelete() {
+    return (
+      <div className="col-8" variant="light">
+        <Link to="/delete-profile" className="btn btn-danger w-100 ">
+          Delete Profile
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <>
       <Card>
-        <Card.Body>
-          <h2 className="text-center mb-4">Update Profile</h2>
+        <Card.Header className="h3 text-center" style={{ color: "#004619" }}>
+          Update Profile
+        </Card.Header>
+        <Card.Body style={{ minHeight: "57vh" }}>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group id="firstname">
@@ -115,15 +143,40 @@ export default function UpdateProfile() {
                 placeholder="Leave blank to keep the same"
               />
             </Form.Group>
-            <Button disabled={loading} className="w-100" type="submit">
-              Update Profile
-            </Button>
+            <Form.Group className="mt-4">
+              <Button
+                disabled={loading}
+                className="w-100 "
+                variant="outline-success"
+                type="submit"
+              >
+                Confirm
+              </Button>
+              <Link className="text-light " to="/">
+                <Button variant="dark w-100 mt-2 ">Cancel</Button>
+              </Link>
+            </Form.Group>
+            <div className="row ">
+              <div className="col">
+                <Form.Label
+                  variant="light"
+                  onClick={(props) => openSettings(props)}
+                  className="text-primary"
+                >
+                  {" "}
+                  <BsGearFill></BsGearFill>
+                  {settingsButton ? (
+                    <BsChevronBarRight></BsChevronBarRight>
+                  ) : (
+                    <BsChevronBarLeft></BsChevronBarLeft>
+                  )}
+                </Form.Label>
+              </div>
+              {settingsButton ? renderDelete() : ""}
+            </div>
           </Form>
         </Card.Body>
       </Card>
-      <div className="w-100 text-center mt-2">
-        <Link to="/">Cancel</Link>
-      </div>
     </>
   );
 }

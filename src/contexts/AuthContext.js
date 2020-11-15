@@ -16,7 +16,6 @@ export function AuthProvider({ children }) {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
       setLoading(false);
-      console.log("user", user);
       if (user) getCurrentUserDetails();
     });
 
@@ -25,7 +24,7 @@ export function AuthProvider({ children }) {
 
   function getCurrentUserDetails() {
     db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
-      console.log("updated data data: ", snapshot.val());
+      console.log("getting latest userdetails");
       setUserDetails(snapshot.val());
     });
   }
