@@ -24,12 +24,19 @@ export function AuthProvider({ children }) {
 
   function getCurrentUserDetails() {
     db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
-      console.log("getting latest userdetails");
+      console.log("*Google DB*getting latest userdetails");
       setUserDetails(snapshot.val());
     });
   }
 
-  function signup(email, password, firstName, surname) {
+  function signup(
+    email,
+    password,
+    firstName,
+    surName,
+    mobileNum,
+    agreeNewsletter
+  ) {
     return auth
       .createUserWithEmailAndPassword(email, password)
       .then((newUser) => {
@@ -38,13 +45,14 @@ export function AuthProvider({ children }) {
         db.ref("users/" + auth.currentUser.uid)
           .set({
             firstname: firstName,
-            surname: surname,
+            surname: surName,
+            mobile: mobileNum,
             jumaDate: "",
-            jumaSession: 0,
+            jumaSession: "",
             cancelCount: 0,
             warningCount: 0,
             banned: 0,
-            newsletter: 0,
+            newsletter: agreeNewsletter,
           })
           .catch((e) => {
             console.log("auth context error>", e);

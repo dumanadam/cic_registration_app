@@ -79,74 +79,97 @@ export default function Sessions() {
     });
   }
 
+  function checkKey() {
+    if (userDetails.jumaSession == "") {
+      return "#" + "2:30 pm";
+    } else {
+      return "#" + userDetails.jumaSession;
+    }
+  }
+
   return (
     <>
-      <Card>
-        <Card.Body>
-          <h2 className="text-center mb-4">CIC Juma Bookings</h2>
-          {error && <Alert variant="danger">{error}</Alert>}
-          <div>
-            <strong className="mt-3 mr-5">Next Juma Date :</strong>{" "}
-            {session.jumaDate}
-          </div>
-          <div>
-            <div className="text-center mb-4 mt-4 text-">
-              <strong>
-                <u>Available Sessions</u>
-              </strong>
+      <div className="text-light">
+        <Card
+          className=" border-0 h-100"
+          bg="transparent"
+          style={{ minHeight: "57vh" }}
+        >
+          <Card.Header className="h3 text-center text-light border-1">
+            Bookings
+          </Card.Header>
+          <Card.Body className="mt-0 pt-0">
+            {error && <Alert variant="danger">{error}</Alert>}
+            <div className="mt-4">
+              <strong className="mr-5">Next Juma Date :</strong>{" "}
+              {session.jumaDate}
+            </div>
+            <div>
+              <div className="text-center mb-4 mt-3 text-">
+                <strong>
+                  <u>Available Sessions</u>
+                </strong>
+              </div>{" "}
+              <ListGroup
+                className="mt-3 mb-5 d-flex justify-content-between align-items-center"
+                defaultActiveKey={checkKey()}
+              >
+                <ListGroup.Item
+                  action
+                  href={"#" + sessionTimes[0].time}
+                  className="d-flex justify-content-between align-items-center"
+                  onClick={() => handleClick(sessionTimes[0].time)}
+                >
+                  1:30 pm
+                  <Badge variant="warning" pill>
+                    14
+                  </Badge>
+                </ListGroup.Item>
+                <ListGroup.Item
+                  action
+                  href={"#" + sessionTimes[1].time}
+                  className="d-flex justify-content-between align-items-center"
+                  onClick={() => handleClick(sessionTimes[1].time)}
+                >
+                  2:30 pm
+                  <Badge variant="warning" pill>
+                    6
+                  </Badge>
+                </ListGroup.Item>
+                <ListGroup.Item
+                  action
+                  href={"#" + sessionTimes[2].time}
+                  className="d-flex justify-content-between align-items-center"
+                  onClick={() => handleClick(sessionTimes[2].time)}
+                >
+                  3:30 pm
+                  <Badge variant="warning" pill>
+                    25
+                  </Badge>
+                </ListGroup.Item>
+              </ListGroup>
+            </div>
+            <div className="text-center mb-4 mt-4">
+              <strong className="mt-3 mr-2">Selected Session :</strong>
+              {session.jumaSession}
             </div>{" "}
-            <ListGroup
-              className="mt-3 mb-5 ml-3 d-flex justify-content-between align-items-center"
-              defaultActiveKey={"#" + userDetails.jumaSession}
-            >
-              <ListGroup.Item
-                action
-                href={"#" + sessionTimes[0].time}
-                className="d-flex justify-content-between align-items-center"
-                onClick={() => handleClick(sessionTimes[0].time)}
-              >
-                1:30 pm
-                <Badge variant="warning" pill>
-                  14
-                </Badge>
-              </ListGroup.Item>
-              <ListGroup.Item
-                action
-                href={"#" + sessionTimes[1].time}
-                className="d-flex justify-content-between align-items-center"
-                onClick={() => handleClick(sessionTimes[1].time)}
-              >
-                2:30 pm
-                <Badge variant="warning" pill>
-                  6
-                </Badge>
-              </ListGroup.Item>
-              <ListGroup.Item
-                action
-                href={"#" + sessionTimes[2].time}
-                className="d-flex justify-content-between align-items-center"
-                onClick={() => handleClick(sessionTimes[2].time)}
-              >
-                3:30 pm
-                <Badge variant="warning" pill>
-                  25
-                </Badge>
-              </ListGroup.Item>
-            </ListGroup>
-          </div>
-          <div className="text-center mb-4 mt-4">
-            <strong className="mt-3 mr-2">Selected Session :</strong>
-            {session.jumaSession}
-          </div>{" "}
-          <Form onSubmit={handleSubmit}>
-            <Button disabled={loading} className="w-100" type="submit">
-              Book Session
-            </Button>
-          </Form>
-        </Card.Body>
-      </Card>
-      <div className="w-100 text-center mt-2 ">
-        <Link to="/">Cancel</Link>
+            <Form onSubmit={handleSubmit}>
+              <div id="bottom-navigation">
+                <Button disabled={loading} className="w-100" type="submit">
+                  Book Session
+                </Button>
+                <Link className="text-light " to="/">
+                  <Button
+                    disabled={loading}
+                    variant="outline-light w-100 border-0"
+                  >
+                    Cancel
+                  </Button>
+                </Link>
+              </div>
+            </Form>
+          </Card.Body>
+        </Card>
       </div>
     </>
   );

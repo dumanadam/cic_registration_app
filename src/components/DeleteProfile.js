@@ -35,39 +35,45 @@ export default function DeleteProfile() {
 
   return (
     <>
-      <Card>
-        <Card.Header className="h3 text-center text-danger">
-          Delete Profile
-        </Card.Header>
-        <Card.Body>
-          {error && <Alert variant="danger">{error}</Alert>}
-          <Form onSubmit={handleSubmit}>
-            <Form.Group id="password">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                ref={passwordRef}
-                placeholder="Enter password to confirm"
-              />
-            </Form.Group>
-            <Button
-              disabled={loading}
-              className="w-100"
-              variant="danger"
-              type="submit"
-            >
-              Delete Profile
-            </Button>
-          </Form>
-          <Form.Group>
-            <Link className="text-light " to="/">
-              <Button disabled={loading} className="w-100 mt-2" variant="dark">
-                Cancel
+      <div className="text-light">
+        <Card className=" border-0" bg="transparent">
+          <Card.Header className="h3 text-center text-light border-1">
+            Delete Profile
+          </Card.Header>
+          <Card.Body className="mt-0 pt-0" style={{ minHeight: "57vh" }}>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Form onSubmit={handleSubmit}>
+              <Form.Group id="password">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  ref={passwordRef}
+                  placeholder="Enter password to confirm"
+                />
+              </Form.Group>
+              <Button
+                disabled={loading}
+                className="w-100"
+                variant="danger"
+                type="submit"
+              >
+                Delete Profile
               </Button>
-            </Link>
-          </Form.Group>
-        </Card.Body>
-      </Card>
+            </Form>
+            <Form.Group>
+              <Link className="text-light " to="/">
+                <Button
+                  disabled={loading}
+                  className="w-100 mt-2"
+                  variant="dark"
+                >
+                  Cancel
+                </Button>
+              </Link>
+            </Form.Group>
+          </Card.Body>
+        </Card>
+      </div>
     </>
   );
 }
