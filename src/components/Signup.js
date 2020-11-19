@@ -5,8 +5,10 @@ import { Link, useHistory } from "react-router-dom";
 import PrivacyPolicy from "./PrivacyPolicy";
 import { FiSquare, FiCheckSquare } from "react-icons/fi";
 import MediaQuery, { useMediaQuery } from "react-responsive";
+
 import MQuery from "./MQueury";
 import bgImage from "../assets/images/bg2.jpg";
+import ErrorHeader from "./ErrorHeader";
 
 export default function Signup(props) {
   const emailRef = useRef();
@@ -17,21 +19,31 @@ export default function Signup(props) {
   const mobileRef = useRef();
   const { signup } = useAuth();
   const [error, setError] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState("");
   const [loading, setLoading] = useState(false);
   const history = useHistory();
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState("");
   const [agreePrivacy, setagreePrivacy] = useState(true);
   const [agreeNewsletter, setAgreeNewsletter] = useState(true);
   const [errorState, setErrorState] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [firstRun, setfirstRun] = useState(true);
 
   const [agreeColour, setAgreeColour] = useState(
     "outline-primary-* text-primary shadow-none"
   );
 
   console.log("signup props", props);
+  console.log("signup show", show);
   //console.log("signup props.errorstate", props.errorState);
+
+  useEffect(() => {
+    if (show == "" && firstRun == true) {
+      console.log("setshow");
+      setShow(true);
+    }
+    setfirstRun(false);
+  }, []);
 
   useEffect(() => {
     if (agreeNewsletter === true) {
@@ -86,8 +98,8 @@ export default function Signup(props) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  return (
-    <>
+  function privacyModal() {
+    return (
       <Modal
         show={show}
         onHide={handleClose}
@@ -127,16 +139,17 @@ export default function Signup(props) {
           </div>
         </Modal.Footer>
       </Modal>
+    );
+  }
+
+  return (
+    <>
+      {!show ? null : privacyModal()}
       <Card className=" border-0" bg="transparent">
-        {errorMessage == "" ? (
-          <Card.Header className="h3 text-center text-light border-1">
-            Juma Registration
-          </Card.Header>
-        ) : (
-          <Alert variant="danger text-center h6 mb-0 " style={{}}>
-            {errorMessage}
-          </Alert>
-        )}
+        {ErrorHeader({
+          headerText: "Juma Registration",
+          errorMessage: errorMessage,
+        })}
 
         <Card.Body className="mt-2 pt-0" style={{ minHeight: "57vh" }}>
           <Form onSubmit={handleSubmit}>
@@ -181,7 +194,12 @@ export default function Signup(props) {
               <div className="col-6">
                 <Form.Group id="password">
                   <Form.Label className="text-light">Password</Form.Label>
-                  <Form.Control type="password" ref={passwordRef} required />
+                  <Form.Control
+                    type="password"
+                    autoComplete="current-password"
+                    ref={passwordRef}
+                    required
+                  />
                 </Form.Group>
               </div>
               <div className="col-6">
@@ -190,6 +208,7 @@ export default function Signup(props) {
                   <Form.Control
                     type="password"
                     ref={passwordConfirmRef}
+                    autoComplete="current-password"
                     required
                   />
                 </Form.Group>
@@ -200,10 +219,10 @@ export default function Signup(props) {
               Sign Up
             </Button>
           </Form>
-          <Link className="text-light " to="/login">
+          <Link className="" to="/login">
             <Button
               disabled={loading}
-              variant="outline-dark w-100 mt-0 text-light border-0"
+              variant="outline-light w-100 mt-2 border-0"
             >
               Already have an account? <span variant="">Log In</span>
             </Button>

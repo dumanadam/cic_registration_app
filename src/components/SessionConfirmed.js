@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Card, Alert, Form, Button } from "react-bootstrap";
+import {
+  Card,
+  Alert,
+  Form,
+  Button,
+  Row,
+  Col,
+  Container,
+} from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
 import PageTitle from "./PageTitle";
+import NavButtons from "./NavButtons";
 
 var QRCode = require("qrcode.react");
 
@@ -103,7 +112,22 @@ export default function SessionConfirmed() {
       </div>
     ));
   }
-
+  const buttonDetails = {
+    b1: {
+      buttonText: "Change Session",
+      link: "/sessions",
+      loading: loading,
+    },
+    b2: {
+      buttonText: "Cancel Booking",
+      link: "/",
+      loading: loading,
+    },
+    b3: {
+      buttonText: "Return To Dashboard",
+      link: "/",
+    },
+  };
   return (
     <>
       <Card>
@@ -139,29 +163,7 @@ export default function SessionConfirmed() {
             </Alert>
           )}
 
-          <div class="container mt-4 " id="navigation">
-            <div class="row" id="top-navigation">
-              <Button disabled={loading} className="col mr-2">
-                <Link className="text-light" to="/sessions">
-                  Change Session
-                </Link>
-              </Button>
-
-              <Button variant="danger col">
-                <Link className="text-light" to="/">
-                  Cancel Booking
-                </Link>
-              </Button>
-            </div>
-
-            <div id="bottom-navigation">
-              <Button variant="dark w-100 mt-4">
-                <Link className="text-light" to="/">
-                  Return to Dashboard
-                </Link>
-              </Button>
-            </div>
-          </div>
+          {NavButtons(3, buttonDetails)}
         </Card.Body>
       </Card>
     </>

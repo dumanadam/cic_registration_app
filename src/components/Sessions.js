@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import moment from "moment";
 var QRCode = require("qrcode.react");
+var md5Qr = require("md5");
 
 export default function Sessions() {
   const passwordRef = useRef();
@@ -20,7 +21,7 @@ export default function Sessions() {
   ];
 
   useEffect(() => {
-    console.log("session", session);
+    //  console.log("session", session);
   }, [session]);
 
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function Sessions() {
 
     return {
       jumaDate: nextFriday,
+      jumaSesssion: sessionTimes[2],
     };
   }
 
@@ -80,7 +82,7 @@ export default function Sessions() {
   }
 
   function checkKey() {
-    if (userDetails.jumaSession == "") {
+    if (userDetails.jumaSession === "") {
       return "#" + "2:30 pm";
     } else {
       return "#" + userDetails.jumaSession;
@@ -154,19 +156,17 @@ export default function Sessions() {
               {session.jumaSession}
             </div>{" "}
             <Form onSubmit={handleSubmit}>
-              <div id="bottom-navigation">
-                <Button disabled={loading} className="w-100" type="submit">
-                  Book Session
+              <Button disabled={loading} className="w-100" type="submit">
+                Book Session
+              </Button>
+              <Link className="text-light " to="/">
+                <Button
+                  disabled={loading}
+                  variant="outline-light w-100 border-0"
+                >
+                  Cancel
                 </Button>
-                <Link className="text-light " to="/">
-                  <Button
-                    disabled={loading}
-                    variant="outline-light w-100 border-0"
-                  >
-                    Cancel
-                  </Button>
-                </Link>
-              </div>
+              </Link>
             </Form>
           </Card.Body>
         </Card>

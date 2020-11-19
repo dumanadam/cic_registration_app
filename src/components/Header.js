@@ -2,7 +2,6 @@ import React from "react";
 import logo from "../cic.png";
 import covidlogo from "../assets/images/covidsafe.png";
 import { Card, Container } from "react-bootstrap";
-import { auth } from "../firebase";
 
 const Header = () => {
   //console.log("headerprops", props);

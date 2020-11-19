@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { Card, Form, Button, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
-import Header from "./Header";
+import ErrorHeader from "./ErrorHeader";
 
 export default function Login(props) {
   const emailRef = useRef();
@@ -10,6 +10,8 @@ export default function Login(props) {
   const { login } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorState, setErrorState] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const history = useHistory();
 
   async function handleSubmit(e) {
@@ -20,9 +22,12 @@ export default function Login(props) {
       setLoading(true);
       await login(emailRef.current.value, passwordRef.current.value);
       history.push("/");
-    } catch {
-      setError("Failed to sign in");
-      console.log("error", e);
+    } catch (e) {
+      console.log(e.message);
+      setErrorState(!errorState);
+      setErrorMessage(e.message);
+      //setError(e.message);
+      setTimeout(() => setErrorMessage(""), 5000);
     }
 
     setLoading(false);
@@ -31,12 +36,13 @@ export default function Login(props) {
   return (
     <>
       <Card className=" border-0" bg="transparent">
-        <Card.Header className="h3 text-center text-light border-1">
-          Login
-        </Card.Header>
+        {ErrorHeader({
+          headerText: "Login",
+          errorMessage: errorMessage,
+        })}
         <Card.Body className="mt-0 pt-0" style={{ minHeight: "57vh" }}>
           {error && <Alert variant="danger">{error}</Alert>}
-          <Form onSubmit={handleSubmit} className="mt-0">
+          <Form onSubmit={handleSubmit} className="mt-0 text-light">
             <Form.Group id="email">
               <Form.Label>Email</Form.Label>
               <Form.Control
@@ -44,6 +50,7 @@ export default function Login(props) {
                 ref={emailRef}
                 required
                 placeholder={props.wid}
+                autoComplete="usernmame"
               />
             </Form.Group>
             <Form.Group id="password">
@@ -53,6 +60,7 @@ export default function Login(props) {
                 ref={passwordRef}
                 required
                 placeholder={props.hei}
+                autoComplete="current-password"
               />
             </Form.Group>
             <Button disabled={loading} className="w-100" type="submit">
