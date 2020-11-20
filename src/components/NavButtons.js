@@ -12,7 +12,8 @@ import {
 import { Link } from "react-router-dom";
 
 const NavButtons = (buttonCount, buttonDetails) => {
-  console.log(buttonDetails.b1.loading);
+  console.log("buttonDetails", buttonDetails);
+  console.log("buttonDetails.b2.classname", buttonDetails.b2.classname);
 
   switch (buttonCount) {
     case 1:
@@ -36,16 +37,25 @@ const NavButtons = (buttonCount, buttonDetails) => {
             <Link className="text-light col p-0" to={buttonDetails.b2.link}>
               <Button
                 disabled={buttonDetails.b1.loading}
-                className=" w-100"
-                variant="danger"
+                variant={
+                  buttonDetails.b2.classnames
+                    ? buttonDetails.b2.classnames
+                    : "danger w-100"
+                }
               >
                 {buttonDetails.b2.buttonText}
               </Button>
             </Link>
           </Row>
           <Row>
-            <Link className="text-dark w-100" to={buttonDetails.b3.link}>
-              <Button variant="outline-dark border-0 w-100 mt-4">
+            <Link className="text-light w-100" to={buttonDetails.b3.link}>
+              <Button
+                variant={
+                  buttonDetails.b3.classnames
+                    ? buttonDetails.b3.classnames + " border-0 w-100 mt-4"
+                    : "outline-dark border-0 w-100 mt-4"
+                }
+              >
                 {buttonDetails.b3.buttonText}
               </Button>
             </Link>

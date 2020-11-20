@@ -2,12 +2,13 @@ import React, { useRef, useState, useEffect } from "react";
 import { Card, Form, Button, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
-import PageTitle from "./PageTitle";
+
 import {
   BsChevronBarRight,
   BsChevronBarLeft,
   BsGearFill,
 } from "react-icons/bs";
+import PageTitle from "../components/PageTitle";
 
 export default function UpdateProfile() {
   var emailRef = useRef();

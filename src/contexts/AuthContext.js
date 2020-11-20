@@ -53,6 +53,7 @@ export function AuthProvider({ children }) {
             warningCount: 0,
             banned: 0,
             newsletter: agreeNewsletter,
+            admin: 0,
           })
           .catch((e) => {
             console.log("auth context error>", e);

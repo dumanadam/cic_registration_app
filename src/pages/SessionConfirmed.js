@@ -11,9 +11,8 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
-import PageTitle from "./PageTitle";
-import NavButtons from "./NavButtons";
-
+import PageTitle from "../components/PageTitle";
+import NavButtons from "../components/NavButtons";
 var QRCode = require("qrcode.react");
 
 export default function SessionConfirmed(confirmedSession) {

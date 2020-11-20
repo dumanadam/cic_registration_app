@@ -1,16 +1,16 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Container } from "react-bootstrap";
-import Signup from "./Signup";
+import Signup from "../pages/Signup";
 import Login from "./Login";
-import ForgotPassword from "./ForgotPassword";
-import Dashboard from "./Dashboard";
+import ForgotPassword from "../pages/ForgotPassword";
+import Dashboard from "../pages/Dashboard";
 import { AuthProvider } from "../contexts/AuthContext";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
-import UpdateProfile from "./UpdateProfile";
-import DeleteProfile from "./DeleteProfile";
-import Sessions from "./Sessions";
-import SessionConfirmed from "./SessionConfirmed";
+import UpdateProfile from "../pages/UpdateProfile";
+import DeleteProfile from "../pages/DeleteProfile";
+import Sessions from "../pages/Sessions";
+import SessionConfirmed from "../pages/SessionConfirmed";
 import bgImage from "../assets/images/bg.jpg";
 import bgImage2 from "../assets/images/bg2.jpg";
 import bgImage3 from "../assets/images/bg3.jpg";
@@ -20,6 +20,9 @@ import PrivacyPolicy from "./PrivacyPolicy";
 import MediaQuery, { useMediaQuery } from "react-responsive";
 import MQuery from "./MQueury";
 import GetWindow from "./GetWindow";
+
+import CreateSession from "../pages/CreateSession";
+import AdminDashboard from "../pages/AdminDashboard";
 
 function App() {
   const { height, width } = GetWindow();
@@ -94,6 +97,12 @@ function App() {
             <AuthProvider>
               <Switch>
                 <PrivateRoute exact path="/" component={Dashboard} />
+                <PrivateRoute exact path="/admin" component={AdminDashboard} />
+                <PrivateRoute
+                  exact
+                  path="/create-session"
+                  component={CreateSession}
+                />
                 <PrivateRoute
                   path="/update-profile"
                   component={UpdateProfile}
@@ -104,7 +113,7 @@ function App() {
                 />
                 <PrivateRoute path="/Sessions" component={Sessions} />
                 <PrivateRoute
-                  path="/SessionConfirmed"
+                  path="/session-confirmed"
                   component={SessionConfirmed}
                 />
                 <Route

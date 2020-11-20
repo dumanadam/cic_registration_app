@@ -2,14 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Card, Form, Button, Alert, Modal } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
-import PrivacyPolicy from "./PrivacyPolicy";
+import PrivacyPolicy from "../components/PrivacyPolicy";
 import { FiSquare, FiCheckSquare } from "react-icons/fi";
 import MediaQuery, { useMediaQuery } from "react-responsive";
 
-import MQuery from "./MQueury";
+import MQuery from "../components/MQueury";
 import bgImage from "../assets/images/bg2.jpg";
-import ErrorHeader from "./ErrorHeader";
-
+import ErrorHeader from "../components/ErrorHeader";
 export default function Signup(props) {
   const emailRef = useRef();
   const passwordRef = useRef();

@@ -3,12 +3,11 @@ import { Card, Form, Button, Alert, ListGroup, Badge } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import moment from "moment";
-import SessionList from "./SessionList";
+import SessionList from "../components/SessionList";
 var QRCode = require("qrcode.react");
 var md5Qr = require("md5");
 
 export default function Sessions() {
-  const passwordRef = useRef();
   const { currentUser, userDetails, bookSession } = useAuth();
   const [error, setError] = useState("");
   const [session, setSession] = useState({});
@@ -111,37 +110,35 @@ export default function Sessions() {
   return (
     <>
       <div className="text-light">
-        <Card
-          className=" border-0 h-100 text-center"
-          bg="transparent"
-          style={{ minHeight: "57vh" }}
-        >
+        <Card className=" border-0  text-center" bg="transparent">
           <Card.Header className="h3 text-center text-light border-1">
             Bookings
           </Card.Header>
           <Card.Body className="mt-0 pt-0 ">
             {error && <Alert variant="danger">{error}</Alert>}
-            <div className="mt-4">
-              <strong className="mr-5">Next Juma Date :</strong>{" "}
-              {session.jumaDate}
-            </div>
-            <div>
-              <div className="text-center mb-4 mt-3 text-">
-                <strong>
-                  <u>Available Sessions</u>
-                </strong>
+            <div style={{ height: "50vh" }}>
+              <div className="pt-4">
+                <strong className="mr-5">Next Juma Date :</strong>{" "}
+                {session.jumaDate}
+              </div>
+              <div>
+                <div className="text-center mb-2 mt-3 text-">
+                  <strong>
+                    <u>Available Sessions</u>
+                  </strong>
+                </div>{" "}
+                <ListGroup
+                  className="d-flex justify-content-between align-items-center w-100"
+                  defaultActiveKey={checkKey()}
+                >
+                  {SessionList(listDetails)}
+                </ListGroup>
+              </div>
+              <div className="text-center ">
+                <strong className=" mr-2">Selected Session :</strong>
+                {session.jumaSession}
               </div>{" "}
-              <ListGroup
-                className="mt-3 mb-5 d-flex justify-content-between align-items-center w-100"
-                defaultActiveKey={checkKey()}
-              >
-                {SessionList(listDetails)}
-              </ListGroup>
             </div>
-            <div className="text-center mb-4 mt-4">
-              <strong className="mt-3 mr-2">Selected Session :</strong>
-              {session.jumaSession}
-            </div>{" "}
             <Form onSubmit={handleSubmit}>
               <Button disabled={loading} className="w-100" type="submit">
                 Book Session
@@ -151,7 +148,7 @@ export default function Sessions() {
                   disabled={loading}
                   variant="outline-light w-100 border-0 mt-2"
                 >
-                  Cancel
+                  Dashboard
                 </Button>
               </Link>
             </Form>
