@@ -44,7 +44,7 @@ const NavButtons = (buttonCount, buttonDetails) => {
             </Link>
           </Row>
           <Row>
-            <Link className="text-dark w-100" to={buttonDetails.b1.link}>
+            <Link className="text-dark w-100" to={buttonDetails.b3.link}>
               <Button variant="outline-dark border-0 w-100 mt-4">
                 {buttonDetails.b3.buttonText}
               </Button>

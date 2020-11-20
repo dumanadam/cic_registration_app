@@ -19,8 +19,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     setpageTitle(PageTitle("Dashboard"));
-    console.log("userDetails", userDetails);
-    console.log("TEXTDEF", TEXTDEFINITION);
+    console.log("Dashboard userDetails", userDetails);
   }, []);
 
   async function handleLogout(e) {
@@ -53,10 +52,9 @@ export default function Dashboard() {
 
   function printSessionInfo() {
     let result = bookingsText.map((rowDetails) => {
-      console.log("1", rowDetails.detail);
       let sessionCheck =
         rowDetails.detail === "" ? "No Booking" : rowDetails.detail;
-      console.log("sessioncheck", sessionCheck);
+
       return (
         <Row className="mt-4 mb-4">
           <Col
@@ -106,7 +104,7 @@ export default function Dashboard() {
           </Card.Header>
           <Card.Body className="mt-0 pt-0">
             {error && <Alert variant="danger">{error}</Alert>}
-            <Row classname="mb-4" bg="dark">
+            <Row className="mb-4" bg="dark">
               {sessionCheck()}
             </Row>
             {printSessionInfo()}

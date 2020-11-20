@@ -3,6 +3,7 @@ import { Card, Form, Button, Alert, ListGroup, Badge } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import moment from "moment";
+import SessionList from "./SessionList";
 var QRCode = require("qrcode.react");
 var md5Qr = require("md5");
 
@@ -20,13 +21,14 @@ export default function Sessions() {
     { time: "3:30 pm" },
   ];
 
-  useEffect(() => {
+  /*   useEffect(() => {
     //  console.log("session", session);
-  }, [session]);
+  }, [session]); */
 
   useEffect(() => {
     console.log("userDetails", userDetails);
-  }, [userDetails]);
+    console.log(session);
+  }, [session]);
 
   useEffect(() => {
     setSession(findFriday());
@@ -42,9 +44,10 @@ export default function Sessions() {
       .then(() => {
         history.push("/sessionConfirmed");
       })
-      .catch(() => {
-        setError("Failed to Update Account");
+      .catch((e) => {
         console.log("delete error=>", error);
+        console.log("delete error=>", e);
+        setError("Failed to Update Account");
       })
       .finally(() => {
         setLoading(false);
@@ -74,10 +77,19 @@ export default function Sessions() {
   }
 
   function handleClick(time) {
-    console.log("index is ", time);
+    let toMD5 = {
+      firstname: userDetails.firstname,
+      surname: userDetails.surname,
+      jumaDate: session.jumaDate,
+      jumaSession: time,
+    };
+
+    console.log(md5Qr(JSON.stringify(toMD5)));
+
     setSession({
       ...session,
       jumaSession: time,
+      sessionHash: md5Qr(JSON.stringify(toMD5)),
     });
   }
 
@@ -88,19 +100,26 @@ export default function Sessions() {
       return "#" + userDetails.jumaSession;
     }
   }
+  let listDetails = {
+    defaultActiveKey: checkKey,
+    sessionTimes: sessionTimes,
+    handleClick: handleClick,
+    session: session,
 
+    checkKey: checkKey,
+  };
   return (
     <>
       <div className="text-light">
         <Card
-          className=" border-0 h-100"
+          className=" border-0 h-100 text-center"
           bg="transparent"
           style={{ minHeight: "57vh" }}
         >
           <Card.Header className="h3 text-center text-light border-1">
             Bookings
           </Card.Header>
-          <Card.Body className="mt-0 pt-0">
+          <Card.Body className="mt-0 pt-0 ">
             {error && <Alert variant="danger">{error}</Alert>}
             <div className="mt-4">
               <strong className="mr-5">Next Juma Date :</strong>{" "}
@@ -113,42 +132,10 @@ export default function Sessions() {
                 </strong>
               </div>{" "}
               <ListGroup
-                className="mt-3 mb-5 d-flex justify-content-between align-items-center"
+                className="mt-3 mb-5 d-flex justify-content-between align-items-center w-100"
                 defaultActiveKey={checkKey()}
               >
-                <ListGroup.Item
-                  action
-                  href={"#" + sessionTimes[0].time}
-                  className="d-flex justify-content-between align-items-center"
-                  onClick={() => handleClick(sessionTimes[0].time)}
-                >
-                  1:30 pm
-                  <Badge variant="warning" pill>
-                    14
-                  </Badge>
-                </ListGroup.Item>
-                <ListGroup.Item
-                  action
-                  href={"#" + sessionTimes[1].time}
-                  className="d-flex justify-content-between align-items-center"
-                  onClick={() => handleClick(sessionTimes[1].time)}
-                >
-                  2:30 pm
-                  <Badge variant="warning" pill>
-                    6
-                  </Badge>
-                </ListGroup.Item>
-                <ListGroup.Item
-                  action
-                  href={"#" + sessionTimes[2].time}
-                  className="d-flex justify-content-between align-items-center"
-                  onClick={() => handleClick(sessionTimes[2].time)}
-                >
-                  3:30 pm
-                  <Badge variant="warning" pill>
-                    25
-                  </Badge>
-                </ListGroup.Item>
+                {SessionList(listDetails)}
               </ListGroup>
             </div>
             <div className="text-center mb-4 mt-4">
@@ -162,7 +149,7 @@ export default function Sessions() {
               <Link className="text-light " to="/">
                 <Button
                   disabled={loading}
-                  variant="outline-light w-100 border-0"
+                  variant="outline-light w-100 border-0 mt-2"
                 >
                   Cancel
                 </Button>

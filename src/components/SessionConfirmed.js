@@ -16,19 +16,17 @@ import NavButtons from "./NavButtons";
 
 var QRCode = require("qrcode.react");
 
-export default function SessionConfirmed() {
+export default function SessionConfirmed(confirmedSession) {
   const { userDetails, bookSession } = useAuth();
   const [error, setError] = useState("");
   const [session, setSession] = useState({});
-  const [latestQr, setLatestQr] = useState({});
+
   const [pageTitle, setpageTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const sessionOptions = [{ label: "Send QR Code email" }];
-  var qrString = {};
 
   useEffect(() => {
-    setQrString();
     setError({
       text: "Address :31 Nicholson St, Coburg 3058",
       subtext: "Confirmation has been sent to your email.",
@@ -38,27 +36,12 @@ export default function SessionConfirmed() {
 
   useEffect(() => {
     setpageTitle(PageTitle("Dashboard"));
+    console.log(confirmedSession);
   }, []);
 
   useEffect(() => {
     console.log("userdetails", userDetails);
   }, [userDetails]);
-
-  useEffect(() => {
-    console.log("latestQR", JSON.stringify(latestQr));
-    //  console.log("latestQR parse", JSON.parse(latestQr));
-  }, []);
-
-  console.log("latestQR", latestQr.toString());
-
-  function setQrString() {
-    setLatestQr({
-      firstname: userDetails.firstname,
-      surname: userDetails.surname,
-      jumaDate: userDetails.jumaDate,
-      jumaSession: userDetails.jumaSession,
-    });
-  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -139,7 +122,7 @@ export default function SessionConfirmed() {
             <QRCode
               style={{}}
               renderAs="SVG"
-              value="test"
+              value={userDetails.sessionHash}
               fgColor="#004619"
               //bgColor="#faa61a"
             />
