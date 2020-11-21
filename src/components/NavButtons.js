@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useHistory } from "react-router-dom";
 
 import {
   Card,
@@ -9,11 +10,49 @@ import {
   Col,
   Container,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
 
 const NavButtons = (buttonCount, buttonDetails) => {
-  console.log("buttonDetails", buttonDetails);
-  console.log("buttonDetails.b2.classname", buttonDetails.b2.classname);
+  let directB3;
+
+  async function handlePageLogout() {
+    console.log(" nav logout func");
+    const logout = await buttonDetails.b3.logout();
+    console.log("return of call to dashboard logout", logout);
+  }
+
+  function handleBotButton() {
+    if (buttonDetails.b3.logout == true) {
+      return (
+        <Link className="text-light w-100" to={buttonDetails.b3.link}>
+          <Button
+            onClick={handlePageLogout()}
+            variant={
+              buttonDetails.b3.classnames
+                ? buttonDetails.b3.classnames + " border-0 w-100 mt-4"
+                : "outline-dark border-0 w-100 mt-4"
+            }
+          >
+            {buttonDetails.b3.buttonText}
+          </Button>
+        </Link>
+      );
+    } else {
+      return (
+        <Link className="text-light w-100" to={buttonDetails.b3.link}>
+          <Button
+            onClick={handleBotButton}
+            variant={
+              buttonDetails.b3.classnames
+                ? buttonDetails.b3.classnames + " border-0 w-100 mt-4"
+                : "outline-dark border-0 w-100 mt-4"
+            }
+          >
+            {buttonDetails.b3.buttonText}
+          </Button>
+        </Link>
+      );
+    }
+  }
 
   switch (buttonCount) {
     case 1:
@@ -47,19 +86,7 @@ const NavButtons = (buttonCount, buttonDetails) => {
               </Button>
             </Link>
           </Row>
-          <Row>
-            <Link className="text-light w-100" to={buttonDetails.b3.link}>
-              <Button
-                variant={
-                  buttonDetails.b3.classnames
-                    ? buttonDetails.b3.classnames + " border-0 w-100 mt-4"
-                    : "outline-dark border-0 w-100 mt-4"
-                }
-              >
-                {buttonDetails.b3.buttonText}
-              </Button>
-            </Link>
-          </Row>
+          <Row>{handleBotButton()}</Row>
         </Container>
       );
     default:

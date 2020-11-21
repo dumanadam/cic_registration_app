@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
       if (user) getCurrentUserDetails();
     });
-
+    console.log("unsubscribe", unsubscribe);
     return unsubscribe;
   }, []);
 
@@ -108,7 +108,7 @@ export function AuthProvider({ children }) {
   }
 
   function bookSession(sessiondetails) {
-    console.log("booksession auth");
+    console.log("booksession auth", sessiondetails);
     let upd = db
       .ref("users/" + auth.currentUser.uid)
       .update(sessiondetails)

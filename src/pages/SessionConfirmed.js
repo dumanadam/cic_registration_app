@@ -96,7 +96,7 @@ export default function SessionConfirmed(confirmedSession) {
   }
   const buttonDetails = {
     b1: {
-      buttonText: "Change Session",
+      buttonText: "Update Session",
       link: "/sessions",
       loading: loading,
     },
@@ -108,6 +108,7 @@ export default function SessionConfirmed(confirmedSession) {
     b3: {
       buttonText: "Return To Dashboard",
       link: "/",
+      dashboard: true,
     },
   };
   return (
@@ -117,34 +118,28 @@ export default function SessionConfirmed(confirmedSession) {
           Booking Confirmed
         </Card.Header>
         <Card.Body style={{ minHeight: "57vh" }}>
-          <div className="mt-4 text-center w-100">
-            <QRCode
-              style={{}}
-              renderAs="SVG"
-              value={userDetails.sessionHash}
-              fgColor="#004619"
-              //bgColor="#faa61a"
-            />
+          <div style={{ height: "50vh" }}>
+            <div className="pt-4 text-center w-100">
+              <QRCode
+                style={{}}
+                renderAs="SVG"
+                value={userDetails.sessionHash}
+                fgColor="#004619"
+                //bgColor="#faa61a"
+              />
+            </div>
+            <Card.Title className="pt-4 text-left">
+              {userDetails.jumaSession}
+            </Card.Title>
+            <Card.Subtitle className="text-muted text-left">
+              {userDetails.jumaDate}
+            </Card.Subtitle>
+            <Card.Title className="pt-4 text-left">Please Note : </Card.Title>
+            <Card.Subtitle className=" text-muted text-left">
+              Screenshot or take a photo with your phone. Please show CIC staff
+              on arrival.
+            </Card.Subtitle>
           </div>
-          <Card.Title className="mt-4 text-left">
-            {userDetails.jumaSession}
-          </Card.Title>
-          <Card.Subtitle className="mb-2 text-muted text-left">
-            {userDetails.jumaDate}
-          </Card.Subtitle>
-          <Card.Title className="mt-4 text-left">Please Note : </Card.Title>
-          <Card.Subtitle className="mb-2 text-muted text-left">
-            Screenshot or take a photo with your phone. Please show CIC staff on
-            arrival.
-          </Card.Subtitle>
-
-          {error && (
-            <Alert variant={error.variant} className="mt-4">
-              {error.text}
-              <div>{error.subtext}</div>
-            </Alert>
-          )}
-
           {NavButtons(3, buttonDetails)}
         </Card.Body>
       </Card>

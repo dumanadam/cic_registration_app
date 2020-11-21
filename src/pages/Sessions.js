@@ -26,7 +26,7 @@ export default function Sessions() {
 
   useEffect(() => {
     console.log("userDetails", userDetails);
-    console.log(session);
+    console.log("session", session);
   }, [session]);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function Sessions() {
     promises.push(bookSession(session));
     Promise.all(promises)
       .then(() => {
-        history.push("/sessionConfirmed");
+        history.push("/session-confirmed");
       })
       .catch((e) => {
         console.log("delete error=>", error);
@@ -71,7 +71,7 @@ export default function Sessions() {
 
     return {
       jumaDate: nextFriday,
-      jumaSesssion: sessionTimes[2],
+      jumaSession: sessionTimes[2].time,
     };
   }
 

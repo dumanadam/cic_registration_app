@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [dashboardNavButtons, setDashboardNavButtons] = useState("");
   const history = useHistory();
   const bookingsText = [
-    { title: "As SalamuAleykum", detail: userDetails.firstname },
+    { title: "SalamuAleykum", detail: userDetails.firstname },
     { title: "Booked Date :", detail: userDetails.jumaDate },
     { title: "Booked Session :", detail: userDetails.jumaSession },
   ];
@@ -35,6 +35,7 @@ export default function Dashboard() {
       buttonText: "Logout",
       classnames: "outline-light",
       link: "/",
+      logout: handleLogout,
     },
   };
 
@@ -47,13 +48,14 @@ export default function Dashboard() {
     console.log("Dashboard userDetails", userDetails);
   }, []);
 
-  async function handleLogout(e) {
+  async function handleLogout() {
+    console.log("logout func");
     setError("");
 
     try {
       await logout();
       history.push("/login");
-    } catch {
+    } catch (e) {
       setError("Failed to Logout");
       console.log("error", e);
     }
@@ -84,7 +86,7 @@ export default function Dashboard() {
         <Row className="mt-4 mb-4">
           <Col
             xl={7}
-            xs={7}
+            xs={6}
             className="text-warning text-right"
             style={{ fontSize: "18px" }}
           >
@@ -96,7 +98,6 @@ export default function Dashboard() {
         </Row>
       );
     });
-    console.log("result", result);
 
     return result;
   }
