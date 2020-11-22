@@ -3,6 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import TEXTDEFINITION from "../text/TextDefinition.js";
 import { Card, Alert, Form, Button, Row, Col, Spinner } from "react-bootstrap";
 import ShowModal from "./ShowModal.js";
+import ErrorHeader from "./ErrorHeader.js";
 
 const MainShell = (WrappedComponent) => {
   function printSpinner(props) {
@@ -25,9 +26,10 @@ const MainShell = (WrappedComponent) => {
     return (
       <div className="text-light">
         <Card className=" border-0 " bg="transparent">
-          <Card.Header className="h3 text-center text-light border-1">
-            {props.myprops.headerText}
-          </Card.Header>
+          {ErrorHeader({
+            headerText: props.myProps.headerText,
+            errorMessage: props.myProps.error,
+          })}
           <Card.Body className="mt-0 pt-0 ">
             <WrappedComponent {...props} />
           </Card.Body>

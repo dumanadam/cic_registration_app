@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import MainShell from "../MainShell";
 
 function DeleteProfileBody(props) {
-  console.log("del body props.myprops", props);
+  console.log("del body props.myProps", props);
   return (
     <>
       <Row className="pt-1 text-left " style={{ minHeight: "50vh" }}>
@@ -16,16 +16,16 @@ function DeleteProfileBody(props) {
             <Form.Label>Password</Form.Label>
             <Form.Control
               type="password"
-              ref={props.myprops.passwordRef}
+              ref={props.myProps.passwordRef}
               placeholder="Enter password to confirm"
               className=""
             />
             <Button
-              disabled={props.myprops.loading}
+              disabled={props.myProps.loading}
               className="w-100 "
               variant="danger"
               type="submit"
-              style={{ marginTop: "43vh" }}
+              style={{ marginTop: "40vh" }}
             >
               Delete Profile
             </Button>
@@ -36,7 +36,7 @@ function DeleteProfileBody(props) {
       <Form.Group>
         <Link className="text-light " to="/">
           <Button
-            disabled={props.myprops.loading}
+            disabled={props.myProps.loading}
             className="w-100 mt-2  "
             variant="outline-light"
           >

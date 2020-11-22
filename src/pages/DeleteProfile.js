@@ -22,11 +22,24 @@ function DeleteProfile(props) {
         headerText: TEXTDEFINITION.DELETE_CARD_HEADER,
         handleDelete: handleDelete,
         passwordRef: passwordRef,
+        error: error,
       });
 
       setLoading(false);
     }
   }, [userDetails]);
+
+  useEffect(() => {
+    console.log(" error changed delete  ");
+    setMyProps({
+      userDetails: userDetails,
+      loading: loading,
+      headerText: TEXTDEFINITION.DELETE_CARD_HEADER,
+      handleDelete: handleDelete,
+      passwordRef: passwordRef,
+      error: error,
+    });
+  }, [error]);
 
   function handleDelete(e) {
     console.log("delete hit");
@@ -43,14 +56,18 @@ function DeleteProfile(props) {
         })
         .catch(function (error) {
           // An error happened.
-          setError("Failed to Delete Account");
+          setError(error.code);
           console.log("delete error=>", error);
         })
         .finally(() => {
           setLoading(false);
+          setTimeout(() => setError(""), 3000);
         });
     } else {
       console.log("password fail");
+      setError("Password Empty");
+      setTimeout(() => setError(""), 3000);
+      setLoading(false);
     }
   }
 
@@ -61,7 +78,7 @@ function DeleteProfile(props) {
           loading={loading}
           userDetails={userDetails}
           handleDelete={handleDelete}
-          myprops={myProps}
+          myProps={myProps}
         ></DeleteProfileBody>
       </div>
     </>

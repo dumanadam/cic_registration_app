@@ -28,7 +28,7 @@ const Dashboard = (props) => {
           loading={loading}
           userDetails={userDetails}
           logout={logout}
-          myprops={myProps}
+          myProps={myProps}
         ></DashboardBody>
       </div>
     </>

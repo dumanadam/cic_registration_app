@@ -1,16 +1,20 @@
 import React from "react";
 import { Card, Alert } from "react-bootstrap";
 
-const ErrorHeader = (errorDdetails) => {
+const ErrorHeader = (errorDetails) => {
+  console.log("errorDetails errorheader", errorDetails);
   let result =
-    errorDdetails.errorMessage == "" ? (
+    errorDetails.errorMessage == "" ? (
       <Card.Header className="h3 text-center text-light border-1">
-        {errorDdetails.headerText}
+        <div>{errorDetails.headerText}</div>
       </Card.Header>
     ) : (
-      <Alert variant="danger text-center h6 mb-0 " style={{}}>
-        {errorDdetails.errorMessage}
-      </Alert>
+      <Card.Header className="h5 text-center text-danger border-1">
+        <div bg="warning" style={{ height: "5vh" }}>
+          {" "}
+          {errorDetails.errorMessage}
+        </div>
+      </Card.Header>
     );
 
   return result;

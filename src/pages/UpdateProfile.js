@@ -54,7 +54,7 @@ export default function UpdateProfile() {
         <UpdateProfileBody
           loading={loading}
           userDetails={userDetails}
-          myprops={myProps}
+          myProps={myProps}
         ></UpdateProfileBody>
       </div>
     </>
