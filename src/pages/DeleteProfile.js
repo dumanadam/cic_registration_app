@@ -1,16 +1,35 @@
-import React, { useRef, useState } from "react";
-import { Card, Form, Button, Alert } from "react-bootstrap";
+import React, { useState, useEffect, useRef } from "react";
+import { Card, Form, Button, Alert, Row } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
+import MainShell from "../components/MainShell";
+import DeleteProfileBody from "../components/contents/DeleteProfileBody";
+import TEXTDEFINITION from "../text/TextDefinition.js";
 
-export default function DeleteProfile() {
+function DeleteProfile(props) {
   const passwordRef = useRef();
-  const { currentUser, updatePassword, updateEmail } = useAuth();
+  const { currentUser, userDetails, updateEmail } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const [myProps, setMyProps] = useState({});
 
-  function handleSubmit(e) {
+  useEffect(() => {
+    if (userDetails.firstname) {
+      setMyProps({
+        userDetails: userDetails,
+        loading: loading,
+        headerText: TEXTDEFINITION.DELETE_CARD_HEADER,
+        handleDelete: handleDelete,
+        passwordRef: passwordRef,
+      });
+
+      setLoading(false);
+    }
+  }, [userDetails]);
+
+  function handleDelete(e) {
+    console.log("delete hit");
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -30,50 +49,23 @@ export default function DeleteProfile() {
         .finally(() => {
           setLoading(false);
         });
+    } else {
+      console.log("password fail");
     }
   }
 
   return (
     <>
-      <div className="text-light">
-        <Card className=" border-0" bg="transparent">
-          <Card.Header className="h3 text-center text-light border-1">
-            Delete Profile
-          </Card.Header>
-          <Card.Body className="mt-0 pt-0" style={{ minHeight: "57vh" }}>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <Form onSubmit={handleSubmit}>
-              <Form.Group id="password">
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  ref={passwordRef}
-                  placeholder="Enter password to confirm"
-                />
-              </Form.Group>
-              <Button
-                disabled={loading}
-                className="w-100"
-                variant="danger"
-                type="submit"
-              >
-                Delete Profile
-              </Button>
-            </Form>
-            <Form.Group>
-              <Link className="text-light " to="/">
-                <Button
-                  disabled={loading}
-                  className="w-100 mt-2"
-                  variant="dark"
-                >
-                  Cancel
-                </Button>
-              </Link>
-            </Form.Group>
-          </Card.Body>
-        </Card>
+      <div className="justify-content-center">
+        <DeleteProfileBody
+          loading={loading}
+          userDetails={userDetails}
+          handleDelete={handleDelete}
+          myprops={myProps}
+        ></DeleteProfileBody>
       </div>
     </>
   );
 }
+
+export default DeleteProfile;

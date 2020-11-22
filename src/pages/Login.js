@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { Card, Form, Button, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
-import ErrorHeader from "./ErrorHeader";
+import ErrorHeader from "../components/ErrorHeader";
 
 export default function Login(props) {
   const emailRef = useRef();

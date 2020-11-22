@@ -5,6 +5,8 @@ const TEXTDEFINITION = {
     'Click the "Book Session" button below to book the next available Juma session.',
   DASHBOARD_CARD_HEADER: "Coburg Islamic Centre",
   ADMIN_CARD_HEADER: "Admin",
+  DELETE_CARD_HEADER: "Delete Profile",
+  UPDATEPROFILE_CARD_HEADER: "Update Profile",
   CR_SESSION_CARD_HEADER: "Create Session",
 };
 

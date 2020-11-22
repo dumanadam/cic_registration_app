@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import Signup from "../pages/Signup";
-import Login from "./Login";
+
 import ForgotPassword from "../pages/ForgotPassword";
 import Dashboard from "../pages/Dashboard";
 import { AuthProvider } from "../contexts/AuthContext";
@@ -23,6 +23,7 @@ import GetWindow from "./GetWindow";
 
 import CreateSession from "../pages/CreateSession";
 import AdminDashboard from "../pages/AdminDashboard";
+import Login from "../pages/Login";
 
 function App() {
   const { height, width } = GetWindow();

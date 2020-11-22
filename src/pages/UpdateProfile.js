@@ -3,12 +3,10 @@ import { Card, Form, Button, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 
-import {
-  BsChevronBarRight,
-  BsChevronBarLeft,
-  BsGearFill,
-} from "react-icons/bs";
 import PageTitle from "../components/PageTitle";
+
+import UpdateProfileBody from "../components/contents/UpdateProfileBody";
+import TEXTDEFINITION from "../text/TextDefinition";
 
 export default function UpdateProfile() {
   var emailRef = useRef();
@@ -25,7 +23,8 @@ export default function UpdateProfile() {
     userDetails,
   } = useAuth();
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [myProps, setMyProps] = useState({});
   const [firstName, setFirstName] = useState("");
   const [surName, setSurName] = useState("");
   const [settingsButton, setSettingsButton] = useState(false);
@@ -33,67 +32,34 @@ export default function UpdateProfile() {
   const history = useHistory();
 
   useEffect(() => {
-    console.log("updateprofile userdetails >>", userDetails);
+    if (userDetails.firstname) {
+      setMyProps({
+        userDetails: userDetails,
+        loading: loading,
+        headerText: TEXTDEFINITION.UPDATEPROFILE_CARD_HEADER,
+      });
+      console.log("setting false");
+      setLoading(false);
+    }
+    console.log("userDetails updateprofile updated", userDetails);
   }, [userDetails]);
 
   useEffect(() => {
     setpageTitle(PageTitle("Update Profile"));
   }, []);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      setLoading(false);
-      return setError("Passwords do not match");
-    }
-
-    const promises = [];
-
-    if (emailRef.current.value !== currentUser.email) {
-      promises.push(updateEmail(emailRef.current.value));
-    }
-
-    if (passwordRef.current.value) {
-      promises.push(updatePassword(passwordRef.current.value));
-    }
-
-    if (firstnameRef.current.value !== userDetails.firstname) {
-      promises.push(updateFirstName(firstnameRef.current.value));
-    }
-
-    if (surnameRef.current.value !== userDetails.surname) {
-      promises.push(updateSurname(surnameRef.current.value));
-    }
-
-    Promise.all(promises)
-      .then(() => {
-        history.push("/");
-      })
-      .catch(() => {
-        setError("Failed to Update Account");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }
-
-  function openSettings(props) {
-    setSettingsButton(!settingsButton);
-  }
-
-  function renderDelete() {
-    return (
-      <div className="col-8" variant="light">
-        <Link to="/delete-profile" className="btn btn-danger w-100 ">
-          Delete Profile
-        </Link>
-      </div>
-    );
-  }
-
   return (
+    <>
+      <div className="justify-content-center">
+        <UpdateProfileBody
+          loading={loading}
+          userDetails={userDetails}
+          myprops={myProps}
+        ></UpdateProfileBody>
+      </div>
+    </>
+  );
+  /* return (
     <>
       <Card>
         <Card.Header className="h3 text-center" style={{ color: "#004619" }}>
@@ -179,5 +145,5 @@ export default function UpdateProfile() {
         </Card.Body>
       </Card>
     </>
-  );
+  ); */
 }

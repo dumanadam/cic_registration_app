@@ -2,8 +2,6 @@ import React from "react";
 import { Card } from "react-bootstrap";
 
 const PageTitle = (pageString) => {
-  console.log("pageString", pageString);
-
   return (
     <Card>
       <Card.Body>
