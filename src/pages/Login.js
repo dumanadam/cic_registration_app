@@ -27,7 +27,7 @@ export default function Login(props) {
       setErrorState(!errorState);
       setErrorMessage(e.message);
       //setError(e.message);
-      setTimeout(() => setErrorMessage(""), 5000);
+      setTimeout(() => setErrorMessage(""), 3500);
     }
 
     setLoading(false);

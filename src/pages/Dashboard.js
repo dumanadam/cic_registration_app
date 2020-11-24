@@ -9,6 +9,7 @@ const Dashboard = (props) => {
   const { logout, userDetails } = useAuth();
 
   useEffect(() => {
+    // console.log("userDetails", userDetails);
     if (userDetails.firstname) {
       setMyProps({
         userDetails: userDetails,
@@ -20,6 +21,10 @@ const Dashboard = (props) => {
       setLoading(false);
     }
   }, [userDetails]);
+
+  /*  useEffect(() => {
+    console.log("dbody in parent refresh", userDetails);
+  }, [DashboardBody]); */
 
   return (
     <>

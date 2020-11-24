@@ -24,6 +24,8 @@ import GetWindow from "./GetWindow";
 import CreateSession from "../pages/CreateSession";
 import AdminDashboard from "../pages/AdminDashboard";
 import Login from "../pages/Login";
+import DateProfile from "../pages/DateProfile";
+import BasicForm from "./forms/BasicForm";
 
 function App() {
   const { height, width } = GetWindow();
@@ -83,70 +85,82 @@ function App() {
 
   return (
     <>
-      <div style={bgJSON}></div>
-      <Container className="d-flex justify-content-center ">
-        <div className="w-100 " style={{ maxWidth: "400px" }}>
-          <Header></Header>
-        </div>
-      </Container>
-      <Container
-        className="d-flex align-items-center justify-content-center "
-        style={{ minHeight: "70vh" }}
-      >
-        <div className="w-100 " style={{ maxWidth: "400px" }}>
-          <Router>
-            <AuthProvider>
-              <Switch>
-                <PrivateRoute exact path="/" component={Dashboard} />
-                <PrivateRoute exact path="/admin" component={AdminDashboard} />
-                <PrivateRoute
-                  exact
-                  path="/create-session"
-                  component={CreateSession}
-                />
-                <PrivateRoute
-                  path="/update-profile"
-                  component={UpdateProfile}
-                />
-                <PrivateRoute
-                  path="/delete-profile"
-                  component={DeleteProfile}
-                />
-                <PrivateRoute path="/Sessions" component={Sessions} />
-                <PrivateRoute
-                  path="/session-confirmed"
-                  component={SessionConfirmed}
-                />
-                <Route
-                  path="/signup"
-                  render={(props) => (
-                    <Signup
-                      {...props}
-                      flipErrorState={flipErrorState}
-                      wid={width}
-                      hei={height}
-                    />
-                  )}
-                />
+      <div style={bgJSON}>
+        <Container className="d-flex justify-content-center ">
+          <div className="w-100 " style={{ maxWidth: "400px" }}>
+            <Header></Header>
+          </div>
+        </Container>
+        <Container
+          className="d-flex align-items-center justify-content-center "
+          style={{ minHeight: "70vh" }}
+        >
+          <div className="w-100 " style={{ maxWidth: "400px" }}>
+            <Router>
+              <AuthProvider>
+                <Switch>
+                  <PrivateRoute exact path="/" component={Dashboard} />
+                  <PrivateRoute
+                    exact
+                    path="/admin"
+                    component={AdminDashboard}
+                  />
+                  <PrivateRoute
+                    exact
+                    path="/create-session"
+                    component={CreateSession}
+                  />
+                  <PrivateRoute
+                    path="/update-profile"
+                    component={UpdateProfile}
+                  />
+                  <PrivateRoute
+                    path="/delete-profile"
+                    component={DeleteProfile}
+                  />
+                  <PrivateRoute path="/Sessions" component={Sessions} />
+                  <PrivateRoute
+                    path="/session-confirmed"
+                    component={SessionConfirmed}
+                  />
+                  <Route
+                    path="/signup"
+                    render={(props) => (
+                      <Signup
+                        {...props}
+                        flipErrorState={flipErrorState}
+                        wid={width}
+                        hei={height}
+                      />
+                    )}
+                  />
 
-                <Route
-                  path="/login"
-                  render={(props) => (
-                    <Login
-                      {...props}
-                      flipErrorState={flipErrorState}
-                      wid={width}
-                      hei={height}
-                    />
-                  )}
-                />
-                <Route path="/forgot-password" component={ForgotPassword} />
-                <Route path="/privacy-policy" component={PrivacyPolicy} />
-              </Switch>
-            </AuthProvider>
-          </Router>
-        </div>
-      </Container>
+                  <Route
+                    path="/basic"
+                    render={(props) => (
+                      <BasicForm {...props} wid={width} hei={height} />
+                    )}
+                  />
+
+                  <Route
+                    path="/login"
+                    render={(props) => (
+                      <Login
+                        {...props}
+                        flipErrorState={flipErrorState}
+                        wid={width}
+                        hei={height}
+                      />
+                    )}
+                  />
+                  <Route path="/forgot-password" component={ForgotPassword} />
+                  <Route path="/privacy-policy" component={PrivacyPolicy} />
+                </Switch>
+              </AuthProvider>
+            </Router>
+          </div>
+        </Container>
+      </div>
     </>
   );
 }

@@ -65,7 +65,8 @@ export function AuthProvider({ children }) {
     return auth.signInWithEmailAndPassword(email, password);
   }
 
-  function logout(email, password) {
+  function logout() {
+    console.log("final logout auth");
     return auth.signOut();
   }
 
@@ -74,11 +75,23 @@ export function AuthProvider({ children }) {
   }
 
   function updateEmail(email) {
-    return currentUser.updateEmail(email);
+    let result;
+    try {
+      result = currentUser.updateEmail(email);
+    } catch (e) {
+      return e;
+    }
+    return result;
   }
 
   function updatePassword(password) {
-    return auth.currentUser.updatePassword(password);
+    let result;
+    try {
+      result = auth.currentUser.updatePassword(password);
+    } catch (e) {
+      return e;
+    }
+    return result;
   }
 
   function updateFirstName(firstName) {
@@ -103,6 +116,19 @@ export function AuthProvider({ children }) {
       })
       .catch((e) => {
         console.log("surname auth error>", e);
+      });
+    return upd;
+  }
+
+  function updateMobile(mobile) {
+    console.log("mobile auth updating");
+    let upd = db
+      .ref("users/" + auth.currentUser.uid)
+      .update({
+        mobile: mobile,
+      })
+      .catch((e) => {
+        console.log("mobile auth error>", e);
       });
     return upd;
   }
@@ -134,6 +160,7 @@ export function AuthProvider({ children }) {
     updateFirstName,
     updateSurname,
     bookSession,
+    updateMobile,
     userDetails,
   };
   return (

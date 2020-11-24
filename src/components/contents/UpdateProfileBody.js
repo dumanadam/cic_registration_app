@@ -28,42 +28,50 @@ function UpdateProfileBody(props) {
     updateFirstName,
     updateSurname,
     userDetails,
+    updateMobile,
   } = useAuth();
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [firstName, setFirstName] = useState("");
   const mobileRef = useRef();
   const [surName, setSurName] = useState("");
-  const [settingsButton, setSettingsButton] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [pageTitle, setpageTitle] = useState("");
   const history = useHistory();
   const [dashboardNavButtons, setDashboardNavButtons] = useState("");
 
   useEffect(() => {
     setDashboardNavButtons(NavButtons(1, buttonDetails));
-    console.log("dbody props", props);
+    // console.log("updateProfileBody props nav", props);
   }, [NavButtons]);
+
+  useEffect(() => {
+    /*  console.log("showSettings flipped", showSettings);
+    console.log("buttonD after flip", props); */
+    setDashboardNavButtons(NavButtons(1, buttonDetails));
+  }, [showSettings]);
 
   /*   async function handleLogout() {
     console.log("handle logout");
-    setError("");
+    setErrorMessage("");
 
     try {
       await props.logout();
       history.push("/login");
     } catch (e) {
-      setError("Failed to Logout");
+      setErrorMessage("Failed to Logout");
       console.log("error", e);
     }
   } */
 
   function handleSubmit(e) {
+    console.log("hit update profile function");
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setErrorMessage("");
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
       setLoading(false);
-      return setError("Passwords do not match");
+      return setErrorMessage("Passwords do not match");
     }
 
     const promises = [];
@@ -84,20 +92,27 @@ function UpdateProfileBody(props) {
       promises.push(updateSurname(surnameRef.current.value));
     }
 
+    if (mobileRef.current.value !== userDetails.mobile) {
+      promises.push(updateMobile(mobileRef.current.value));
+    }
+    console.log("promises", promises);
     Promise.all(promises)
       .then(() => {
         history.push("/");
       })
-      .catch(() => {
-        setError("Failed to Update Account");
+      .catch((e) => {
+        console.log("promise erroe", e);
+        setErrorMessage("Failed to Update Account");
       })
       .finally(() => {
         setLoading(false);
       });
+    // setErrorMessage("test error sdfdsf sfsfddsf dsfds");
+    setLoading(false);
   }
 
   function openSettings() {
-    setSettingsButton(!settingsButton);
+    setShowSettings(!showSettings);
   }
 
   function renderDelete() {
@@ -112,32 +127,38 @@ function UpdateProfileBody(props) {
   let buttonDetails = {
     b1: {
       buttonText: "Confirm",
-      link: "/sessions",
-      classnames: "primary",
+      link: "/",
+      variant: "primary w-100",
       loading: loading,
+      onClick: handleSubmit,
     },
     b2: {
       buttonText: "Dashboard",
-      classnames: "outline-light w-100 ",
+      variant: "outline-light w-100 border-0  ",
       link: "/",
       loading: loading,
     },
     b3: {
       icon: "icon",
-      classnames: "outline-light",
+      variant: "outline-light",
       link: "/",
       openSettings: openSettings,
       renderDelete: renderDelete,
-      settingsButton: settingsButton,
+      showSettings: showSettings,
       loading: loading,
     },
   };
+
+  /* const childrenWithProps = props.Children.map(props.children, (child) => {
+    console.log("child", child);
+    React.cloneElement(child, { doSomething: errorMessage });
+  }); */
 
   return (
     <>
       <div style={{ height: "50vh" }}>
         <Row className="pt-1 text-left " style={{ minHeight: "50vh" }}>
-          <Form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit} id="update-profile">
             <Form.Row>
               <Col>
                 <Form.Label>First Name</Form.Label>
@@ -166,7 +187,7 @@ function UpdateProfileBody(props) {
                 <Form.Control
                   type="email"
                   ref={mobileRef}
-                  defaultValue={currentUser.mobile}
+                  defaultValue={userDetails.mobile}
                   className="mb-0 pb-0 pt-0"
                 />
               </Col>
@@ -227,19 +248,23 @@ function UpdateProfileBody(props) {
           >
             {" "}
             <BsGearFill></BsGearFill>
-            {settingsButton ? (
+            {showSettings ? (
               <BsChevronBarRight></BsChevronBarRight>
             ) : (
               <BsChevronBarLeft></BsChevronBarLeft>
             )}
           </Form.Label>
         </div>
-        {settingsButton ? renderDelete() : ""}
+        {showSettings ? renderDelete() : ""}
       </div> */}
-      {/*   {<div id="bottom-navigation"> {dashboardNavButtons}</div>} */}
+      {/* {<div id="bottom-navigation"> {dashboardNavButtons}</div>} */}
       <Row>
         <Link className="text-light col p-0  " to={buttonDetails.b1.link}>
-          <Button disabled={buttonDetails.b1.loading} className=" w-100">
+          <Button
+            disabled={buttonDetails.b1.loading}
+            className=" w-100"
+            onClick={handleSubmit}
+          >
             {buttonDetails.b1.buttonText}
           </Button>
         </Link>
@@ -263,14 +288,14 @@ function UpdateProfileBody(props) {
           >
             {" "}
             <BsGearFill></BsGearFill>
-            {buttonDetails.b3.settingsButton ? (
+            {buttonDetails.b3.showSettings ? (
               <BsChevronBarRight></BsChevronBarRight>
             ) : (
               <BsChevronBarLeft></BsChevronBarLeft>
             )}
           </Form.Label>
         </div>
-        {buttonDetails.b3.settingsButton ? buttonDetails.b3.renderDelete() : ""}
+        {buttonDetails.b3.showSettings ? buttonDetails.b3.renderDelete() : ""}
       </div>
     </>
   );

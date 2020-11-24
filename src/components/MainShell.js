@@ -22,7 +22,7 @@ const MainShell = (WrappedComponent) => {
   }
 
   function mainBody(props) {
-    console.log("sehell props", props);
+    // console.log("sehell props", props);
     return (
       <div className="text-light">
         <Card className=" border-0 " bg="transparent">

@@ -9,13 +9,17 @@ var QRCode = require("qrcode.react");
 
 function DashboardBody(props) {
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [dashboardNavButtons, setDashboardNavButtons] = useState("");
   const history = useHistory();
+  const [myProps, setMyProps] = useState(props);
+  useEffect(() => {
+    // console.log("props", props);
+    setMyProps(props);
+  }, [props]);
 
   useEffect(() => {
     setDashboardNavButtons(NavButtons(3, buttonDetails));
-    console.log("dbody props", props);
+    // console.log("dbody props", props);
   }, [NavButtons]);
 
   async function handleLogout() {
@@ -61,7 +65,7 @@ function DashboardBody(props) {
           <Row className="pb-2">
             <Col
               xl={7}
-              xs={7}
+              xs={4}
               className="text-warning text-left"
               style={{ fontSize: "18px" }}
             >
@@ -78,13 +82,8 @@ function DashboardBody(props) {
     return result;
   }
 
-  function sessionCheck(params) {
-    return props.userDetails.jumaDate ? (
-      <div>
-        <strong>{TEXTDEFINITION.JUMA_BOOKED_CHECK}</strong>
-        {props.userDetails.jumaDate}
-      </div>
-    ) : (
+  function noSessionBooked() {
+    return (
       <div className="text-light text-center ">
         <div className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL1}</div>
         <span className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL2}</span>
@@ -97,36 +96,37 @@ function DashboardBody(props) {
       title: "Salamu Aleykum",
       detail: props.userDetails.firstname,
     },
-    { title: "Confirmed Date:", detail: props.userDetails.jumaDate },
-    { title: "Confirmed Session:", detail: props.userDetails.jumaSession },
+    { title: " Date:", detail: props.userDetails.jumaDate },
+    { title: "Session:", detail: props.userDetails.jumaSession },
   ];
   let buttonDetails = {
     b1: {
       buttonText: props.userDetails.jumaDate ? "Update Session" : "Session",
       link: "/sessions",
-      classnames: "primary",
-      loading: loading,
+      variant: "primary w-100",
+      loading: myProps.loading,
     },
     b2: {
       buttonText: "Update Profile",
-      classnames: "primary w-100",
+      variant: "primary w-100",
       link: "/update-profile",
-      loading: loading,
+      loading: myProps.loading,
     },
     b3: {
-      buttonText: "Update Profile",
-      classnames: "primary w-100",
-      link: "/update-profile",
-      loading: loading,
+      buttonText: "Logut",
+      variant: "outline-light w-100 border-0 mt-2",
+      link: "/",
+      loading: myProps.loading,
+      handleLogout: handleLogout,
     },
   };
 
   return (
     <>
       <div style={{ height: "50vh" }}>
-        {/*     <Row className="pb-2 justify-content-center pt-4" bg="dark">
-          {sessionCheck()}
-        </Row> */}
+        {props.userDetails.jumaDate || (
+          <Row className="p-4 justify-content-center ">{noSessionBooked()}</Row>
+        )}
         {printSessionInfo()}
 
         <Row className="pt-4 text-center " style={{ minHeight: "50vh" }}>
@@ -139,7 +139,7 @@ function DashboardBody(props) {
               height: "45vh",
             }} */
           >
-            {
+            {props.userDetails.jumaDate && (
               <QRCode
                 style={{}}
                 renderAs="SVG"
@@ -147,7 +147,7 @@ function DashboardBody(props) {
                 fgColor="#004619"
                 //bgColor="#faa61a"
               />
-            }
+            )}
           </Col>
         </Row>
       </div>

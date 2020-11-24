@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Card, Form, Button, Alert, Row, Col } from "react-bootstrap";
+import { Card, Button, Alert, Row, Col } from "react-bootstrap";
+
 import {
   BsChevronBarRight,
   BsChevronBarLeft,
@@ -7,17 +8,17 @@ import {
 } from "react-icons/bs";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
-import * as yup from "yup"; // for everything
+import * as Yup from "yup"; // for everything
 import PageTitle from "../components/PageTitle";
 
 import UpdateProfileBody from "../components/contents/UpdateProfileBody";
 import TEXTDEFINITION from "../text/TextDefinition";
-import ErrorHeader from "../components/ErrorHeader";
+
 import NavButtons from "../components/NavButtons";
 import MainShell from "../components/MainShell";
-import { Formik } from "formik";
+import { Formik, FormikProps, Form, Field, ErrorMessage } from "formik";
 
-function UpdateProfile() {
+function DateProfile() {
   const {
     currentUser,
     updatePassword,
@@ -46,6 +47,20 @@ function UpdateProfile() {
   const [dashboardNavButtons, setDashboardNavButtons] = useState("");
   const history = useHistory();
 
+  const validationSchema = Yup.object({
+    firstname: Yup.string("Enter a First Name").required(
+      "First Name is required"
+    ),
+    surname: Yup.string("Enter your Last Name").required(
+      "Last Name is required"
+    ),
+    mobile: Yup.string("Enter a mobile Name").required(
+      "Mobile Name is required"
+    ),
+  });
+
+  console.log("rendering date");
+
   useEffect(() => {
     if (userDetails.firstname) {
       setMyProps({
@@ -59,58 +74,36 @@ function UpdateProfile() {
     console.log("userDetails updateprofile updated", userDetails);
   }, [userDetails]);
 
-  useEffect(() => {
-    setDashboardNavButtons(NavButtons(1, buttonDetails));
-    // console.log("updateProfileBody props nav", props);
-  }, [NavButtons]);
+  function handleSubmit(e, values, { props, setSubmitting }) {
+    console.log("e", e);
+    console.log("values", values);
+    console.log("props", props);
 
-  useEffect(() => {
-    /*  console.log("showSettings flipped", showSettings);
-    console.log("buttonD after flip", props); */
-    setDashboardNavButtons(NavButtons(1, buttonDetails));
-  }, [showSettings]);
-
-  /*   async function handleLogout() {
-    console.log("handle logout");
-    setErrorMessage("");
-
-    try {
-      await props.logout();
-      history.push("/login");
-    } catch (e) {
-      setErrorMessage("Failed to Logout");
-      console.log("error", e);
-    }
-  } */
-
-  function handleSubmit(e) {
-    console.log("hit update profile function");
     e.preventDefault();
-    setLoading(true);
+
     setErrorMessage("");
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      setLoading(false);
-      return setErrorMessage("Passwords do not match");
+      setSubmitting(false);
+      console.log("Passwords do not match");
     }
 
     const promises = [];
 
     if (emailRef.current.value !== currentUser.email) {
-      promises.push(updateEmail(emailRef.current.value));
+      console.log("hit email");
+      //promises.push(updateEmail(emailRef.current.value));
     }
 
     if (passwordRef.current.value) {
-      promises.push(updatePassword(passwordRef.current.value));
+      console.log("hit passwords");
+      // promises.push(updatePassword(passwordRef.current.value));
     }
 
-    if (
-      isAlpha(firstnameRef.current.value) &&
-      firstnameRef.current.value !== userDetails.firstname
-    ) {
-      promises.push(updateFirstName(firstnameRef.current.value));
+    if (firstnameRef.current.value !== userDetails.firstname) {
+      //promises.push(updateFirstName(firstnameRef.current.value));
       console.log("success firstName >  ", firstnameRef.current.value);
-      console.log("firstName.current.value", firstnameRef.current.value);
-      console.log("userDetails.firstname", userDetails.firstname);
+
+      console.log("success userDetails.firstname", userDetails.firstname);
     } else {
       console.log(
         "fail >> firstName.current.value",
@@ -120,11 +113,8 @@ function UpdateProfile() {
       setErrorMessage("Invalid Character in Firstname");
     }
 
-    if (
-      isAlpha(surnameRef.current.value) &&
-      surnameRef.current.value !== userDetails.surname
-    ) {
-      promises.push(updateSurname(surnameRef.current.value));
+    if (surnameRef.current.value !== userDetails.surname) {
+      //  promises.push(updateSurname(surnameRef.current.value));
       console.log("success surname >  ", surnameRef.current.value);
     } else {
       console.log(
@@ -136,7 +126,7 @@ function UpdateProfile() {
     }
 
     if (mobileRef.current.value !== userDetails.mobile) {
-      promises.push(updateMobile(mobileRef.current.value));
+      //   promises.push(updateMobile(mobileRef.current.value));
       console.log("hit mobile>  ", mobileRef.current.value);
     }
     console.log("promises", promises);
@@ -151,23 +141,15 @@ function UpdateProfile() {
         setTimeout(() => setErrorMessage(""), 3500);
       })
       .finally(() => {
-        setLoading(false);
+  setSubmitting(false);
       }); */
     // setErrorMessage("test error sdfdsf sfsfddsf dsfds");
-    setLoading(false);
+    setSubmitting(false);
     setTimeout(() => setErrorMessage(""), 3500);
   }
 
   function openSettings() {
     setShowSettings(!showSettings);
-  }
-
-  function checkNumber(value) {
-    console.log("checknumber >>", value);
-    //  let result = /^04[0-9]{8}+$/.test(value);
-    //  console.log("result", result);
-
-    //  return result;
   }
 
   function renderDelete() {
@@ -203,22 +185,10 @@ function UpdateProfile() {
       loading: loading,
     },
   };
-
-  useEffect(() => {
-    setpageTitle(PageTitle("Update Profile"));
-  }, []);
-
-  function isAlpha(input) {
-    console.log("input", input);
-    let result = /^[a-zA-Z ]+$/.test(input);
-    console.log("result", result);
-    return result;
-  }
-
-  function errorHeader(errorDetails) {
+  const errorHeader = (errorDetails) => {
     console.log("errorDetails errorheader", errorDetails);
     let result =
-      errorDetails.errorMessage === "" ? (
+      errorDetails.errorMessage === undefined ? (
         <Card.Header className="h3 text-center text-light border-1">
           <div>{errorDetails.headerText}</div>
         </Card.Header>
@@ -232,94 +202,73 @@ function UpdateProfile() {
       );
 
     return result;
-  }
-
+  };
   return (
     <>
       <Card className=" border-0 " bg="transparent">
         {errorHeader({
-          headerText: myProps.headerText,
+          headerText: "Date",
           errorMessage: errorMessage,
         })}
         <Card.Body className="mt-0 pt-0 ">
           <div style={{ height: "50vh" }}>
             <Row className="pt-1 text-left " style={{ minHeight: "50vh" }}>
-              <Form onSubmit={handleSubmit} id="update-profile">
-                <Form.Row>
-                  <Col>
-                    <Form.Label>First Name</Form.Label>
-                    <Form.Control
-                      id="firstname"
-                      type="text"
-                      defaultValue={userDetails.firstname}
-                      ref={firstnameRef}
-                      required
-                      className="mb-0 pb-0"
-                      onChange={(value) => isAlpha(value)}
-                    />
-                  </Col>
-                  <Col>
-                    <Form.Label>Surname</Form.Label>
-                    <Form.Control
-                      type="text"
-                      ref={surnameRef}
-                      required
-                      defaultValue={userDetails.surname}
-                      className="mb-0 pb-0"
-                    />
-                  </Col>
-                </Form.Row>
-                <Form.Row>
-                  <Col>
-                    <Form.Label className="mb-0 pb-1 pt-1">Mobile</Form.Label>
-                    <Form.Control
-                      type="tel"
-                      ref={mobileRef}
-                      defaultValue={userDetails.mobile}
-                      className="mb-0 pb-0 pt-0"
-                      onChange={(value) => checkNumber(value.target.value)}
-                      pattern="^\({0,1}((0|\+61)(2|4|3|7|8)){0,1}\){0,1}( |-){0,1}[0-9]{2}( |-){0,1}[0-9]{2}( |-){0,1}[0-9]{1}( |-){0,1}[0-9]{3}$"
-                    />
-                  </Col>
-                </Form.Row>
-
-                <Form.Row>
-                  <Col>
-                    <Form.Label className="mb-0 pb-1 pt-1">Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      ref={emailRef}
-                      defaultValue={currentUser.email}
-                      className="mb-0 pb-0 pt-0"
-                    />
-                  </Col>
-                </Form.Row>
-                <Form.Row>
-                  <Col>
-                    <Form.Label className="mb-0 pb-1 pt-1">Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      ref={passwordRef}
-                      placeholder="Leave blank to keep the same"
-                      className="mb-0 pb-0 pt-0"
-                    />
-                  </Col>
-                  <Col>
-                    <Form.Label className="mb-0 pb-1 pt-1">
-                      Confirmation
-                    </Form.Label>
-                    <Form.Control
-                      type="password"
-                      ref={passwordConfirmRef}
-                      placeholder="Leave blank to keep the same"
-                      className="mb-0 pb-0 pt-0"
-                    />
-                  </Col>
-                </Form.Row>
-              </Form>
+              <Formik
+                initialValues={{
+                  firstname: "",
+                  surname: "",
+                  mobile: "",
+                  email: "",
+                  password: "",
+                }}
+                validationSchema={validationSchema}
+                validate={(values) => {
+                  let errors = {};
+                  if (!values.firstname)
+                    errors.firstname = "first name Required";
+                  if (!values.surname) errors.surname = "Last name Required";
+                  //check if my values have errors
+                  return errors;
+                }}
+                onSubmit={handleSubmit}
+                render={(formProps) => {
+                  return (
+                    <Form>
+                      <Form.Control
+                        type="text"
+                        name="firstname"
+                        placeholder="First Name"
+                      />
+                      <ErrorMessage name="firstname" />
+                      <Field
+                        type="text"
+                        name="surname"
+                        placeholder="Last Name"
+                      />
+                      <ErrorMessage name="surname" />
+                      <Field type="text" name="mobile" placeholder="Mobile" />
+                      <ErrorMessage name="mobile" />
+                      <Field type="text" name="email" placeholder="email" />
+                      <ErrorMessage name="email" />
+                      <Field
+                        type="text"
+                        name="password"
+                        placeholder="Password"
+                      />
+                      <ErrorMessage name="password" />
+                      <Field type="text" name="confirm" placeholder="Confirm" />
+                      <ErrorMessage name="confirm" />
+                      <button type="submit" disabled={formProps.isSubmitting}>
+                        Submit Form
+                      </button>
+                    </Form>
+                  );
+                }}
+              />
+              );
             </Row>
           </div>
-          <Row>
+          {/*        <Row>
             <Link className="text-light col p-0  " to={buttonDetails.b1.link}>
               <Button
                 disabled={buttonDetails.b1.loading}
@@ -362,11 +311,11 @@ function UpdateProfile() {
             {buttonDetails.b3.showSettings
               ? buttonDetails.b3.renderDelete()
               : ""}
-          </div>
+          </div> */}
         </Card.Body>
       </Card>
     </>
   );
 }
 
-export default UpdateProfile;
+export default DateProfile;

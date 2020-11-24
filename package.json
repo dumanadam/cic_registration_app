@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^12.2.0",
     "bootstrap": "^4.5.3",
     "firebase": "^8.0.1",
+    "formik": "^2.2.5",
     "md5": "^2.3.0",
     "moment": "^2.29.1",
     "qrcode.react": "^1.0.0",
@@ -21,7 +22,9 @@
     "react-router-bootstrap": "^0.25.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
-    "web-vitals": "^0.2.4"
+    "styled-components": "^5.2.1",
+    "web-vitals": "^0.2.4",
+    "yup": "^0.30.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -46,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/yup": "^0.29.9"
   }
 }
