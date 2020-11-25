@@ -14,66 +14,66 @@ import TEXTDEFINITION from "../../text/TextDefinition";
 import NavButtons from "../NavButtons";
 import ShowModal from "../../components/ShowModal";
 
-const CONTAINER = styled.div`
-background: #f7f9fa;
-height: auto;
-width: 90%;
-margin: 5em auto;
-zIndex: : 555555;
-color: snow;
--webkit-box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
--moz-box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
-box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
-
-@media (min-width: 786px) {
+const CARD = styled(Card)`
+  background: #f7f9fa;
+  height: auto;
   width: 100%;
-  height: 50vh
 
-}
+  color: snow;
+  -webkit-box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
+  box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
 
-label {
-  color: #24b9b6;
-  font-size: 1.2em;
-  font-weight: 400;
-}
+  @media (min-width: 786px) {
+    width: 100%;
+    height: 50vh;
+  }
 
-h1 {
-  color: #24b9b6;
-  padding-top: 0.5em;
-}
+  /*   label {
+    color: #24b9b6;
+    font-size: 1.2em;
+    font-weight: 400;
+  } */
 
-.form-group {
-  margin-bottom: 2.5em;
-}
+  /*   h1 {
+    color: #24b9b6;
+    padding-top: 0.5em;
+  } */
 
-.error {
-  border: 2px solid #ff6565;
-}
+  .form-group {
+    margin-bottom: 0;
+    padding-bottom: 1.2em;
+  }
 
-.error-message {
-  color: #ff6565;
-  padding: 0.5em 0.2em;
-  height: 1em;
-  position: absolute;
-  font-size: 0.8em;
-}
+  .form-label {
+    margin-bottom: 0;
+  }
+
+  .error {
+    border: 2px solid #ff6565;
+  }
+
+  .error-message {
+    color: #ff6565;
+    padding-left: 0.2em;
+    height: 1em;
+    position: absolute;
+    font-size: 0.8em;
+    padding-top: 0.2em;
+  }
 `;
 
 const MYFORM = styled(Form)`
   width: 90%;
   text-align: left;
-  padding-top: 2em;
-  padding-bottom: 2em;
-  backgroundcolor: white;
 
   @media (min-width: 786px) {
   }
 `;
 
 const BUTTON = styled(Button)`
-  background: #1863ab;
   border: none;
-  font-size: 1.2em;
+
   font-weight: 400;
 
   &:hover {
@@ -271,242 +271,269 @@ const BasicForm = () => {
 
   // Schema for yup
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .min(2, "*Names must have at least 2 characters")
-      .max(100, "*Names can't be longer than 100 characters")
-      .required("*Name is required"),
     email: Yup.string()
       .email("*Must be a valid email address")
       .max(100, "*Email must be less than 100 characters")
+
       .required("*Email is required"),
     mobile: Yup.string()
       .matches(phoneRegExp, "*Phone number is not valid")
+
       .required("*Phone number required"),
-    blog: Yup.string()
-      .url("*Must enter URL in http://www.example.com format")
-      .required("*URL required"),
-    fullname: Yup.string()
+    firstname: Yup.string()
+      .min(2, "Min 2 characters")
+      .max(20, "*Names can't be longer than 20 characters")
+      .required("First name is required"),
+    surname: Yup.string()
       .min(2, "*Names must have at least 2 characters")
       .max(20, "*Names can't be longer than 20 characters")
-      .required("*Name is required"),
+      .required("*Surname is required"),
+    password: Yup.string()
+      .min(6, "*Password must have at least 6 characters")
+      .max(128, "*Passwords can't be longer than 128 characters")
+      .required("*Password is required"),
+    confirm: Yup.string()
+      .oneOf([Yup.ref("password"), null], "Passwords must match")
+      .required("*Password is required"),
   });
   return (
     <>
       {loading == true ? (
-        <div>
-          <ShowModal loading={loading} modalDetails={modelDetails} />{" "}
-        </div>
-      ) : null}
-      <Card
-        className=" border-0 "
-        bg="transparent"
-        style={{
-          WebkitBoxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-          MozBoxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-          boxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-        }}
-      >
-        <Card.Header className="h3 text-center text-light border-1">
-          <div>Update Degtails</div>
-          {console.log("userDetails", userDetails)}
-        </Card.Header>
-        <Card.Body className="mt-0 pt-0 text-light">
-          <Row className="pt-1 text-left " style={{ minHeight: "50vh" }}>
-            <Formik
-              initialValues={{
-                firstname: userDetails.firstname,
-                surname: userDetails.surname,
-                email: currentUser.email,
-                mobile: userDetails.mobile,
-                password: "Leave blank to keep same",
-                confirm: "Leave blank to keep same",
-              }}
-              validationSchema={validationSchema}
-              onSubmit={(values, { setSubmitting, resetForm }) => {
-                // When button submits form and form is in the process of submitting, submit button is disabled
-                setSubmitting(true);
+        <ShowModal loading={loading} modalDetails={modelDetails} />
+      ) : (
+        <CARD
+          className=" border-0 "
+          bg="transparent"
+          style={{
+            WebkitBoxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
+            MozBoxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
+            boxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
+          }}
+        >
+          <CARD.Header className="h3 text-center text-light border-1">
+            <div>Update Degtails</div>
+            {console.log("userDetails", userDetails)}
+          </CARD.Header>
+          <CARD.Body className="mt-0 pt-0 ">
+            <Row className="pt-1 text-left " style={{ minHeight: "50vh" }}>
+              <Formik
+                initialValues={{
+                  firstname: "",
+                  surname: "",
+                  email: "",
+                  mobile: "",
+                  password: "",
+                  confirm: "",
+                }}
+                validationSchema={validationSchema}
+                onSubmit={(values, { setSubmitting, resetForm }) => {
+                  // When button submits form and form is in the process of submitting, submit button is disabled
+                  setSubmitting(true);
 
-                // Simulate submitting to database, shows us values submitted, resets form
-                setTimeout(() => {
-                  alert(JSON.stringify(values, null, 2));
-                  resetForm();
-                  setSubmitting(false);
-                }, 500);
-              }}
-            >
-              {/* Callback function containing Formik state and helpers that handle common form actions */}
-              {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                isSubmitting,
-              }) => (
-                <MYFORM onSubmit={handleSubmit} className="mx-auto">
-                  {console.log(values)}
-                  <Form.Row>
-                    <Col>
-                      <Form.Group controlId="formFName">
-                        <Form.Label>First Name :</Form.Label>
-                        <Form.Control
-                          type="text" /* This name property is used to access the value of the form element via values.nameOfElement */
-                          name="firstname"
-                          placeholder={userDetails.firstname}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          className={
-                            touched.name && errors.name ? "error" : null
-                          }
-                          value={values.firstname}
-                        />
-                        {touched.name && errors.name ? (
-                          <div className="error-message">{errors.name}</div>
-                        ) : null}
-                      </Form.Group>
-                    </Col>
-                    <Col>
-                      <Form.Group controlId="formSName">
-                        <Form.Label>Surname</Form.Label>
-                        <Form.Control
-                          name="surname"
-                          type="text"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          value={values.surname}
-                          placeholder={userDetails.surname}
-                          className={
-                            touched.surname && errors.surname ? "error" : null
-                          }
-                        />
-                      </Form.Group>
-                    </Col>
-                  </Form.Row>
+                  // Simulate submitting to database, shows us values submitted, resets form
+                  setTimeout(() => {
+                    alert(JSON.stringify(values, null, 2));
+                    resetForm();
+                    setSubmitting(false);
+                  }, 500);
+                }}
+              >
+                {({
+                  values,
+                  errors,
+                  touched,
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  isSubmitting,
+                }) => (
+                  <MYFORM
+                    onSubmit={handleSubmit}
+                    className="mx-auto"
+                    id="update-profile-form"
+                  >
+                    {console.log(values)}
+                    <Form.Row>
+                      <Col>
+                        <Form.Group controlId="formFName">
+                          <Form.Label>First Name :</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="firstname"
+                            placeholder={userDetails.firstname}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            value={values.firstname}
+                            className={
+                              touched.firstname && errors.firstname
+                                ? "error"
+                                : null
+                            }
+                          />
+                          {touched.firstname && errors.firstname ? (
+                            <div className="error-message">
+                              {errors.firstname}
+                            </div>
+                          ) : null}
+                        </Form.Group>
+                      </Col>
+                      <Col>
+                        <Form.Group controlId="formSName">
+                          <Form.Label>Surname</Form.Label>
+                          <Form.Control
+                            name="surname"
+                            type="text"
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            value={values.surname}
+                            placeholder={userDetails.surname}
+                            className={
+                              touched.surname && errors.surname ? "error" : null
+                            }
+                          />
+                          {touched.surname && errors.surname ? (
+                            <div className="error-message">
+                              {errors.surname}
+                            </div>
+                          ) : null}
+                        </Form.Group>
+                      </Col>
+                    </Form.Row>
 
-                  <Form.Row>
-                    <Col>
-                      <Form.Group controlId="formmobile">
-                        <Form.Label>Mobile :</Form.Label>
-                        <Form.Control
-                          type="tel"
-                          name="mobile"
-                          placeholder={userDetails.mobile}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          value={values.mobile}
-                          className={
-                            touched.mobile && errors.mobile ? "error" : null
-                          }
-                        />
-                        {touched.mobile && errors.mobile ? (
-                          <div className="error-message">{errors.mobile}</div>
-                        ) : null}
-                      </Form.Group>
-                    </Col>
-                  </Form.Row>
-
-                  <Form.Label>Email :</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="email"
-                    placeholder="Email"
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.email}
-                    className={touched.email && errors.email ? "error" : null}
-                  />
-                  {touched.email && errors.email ? (
-                    <div className="error-message">{errors.email}</div>
-                  ) : null}
-
-                  <Form.Row>
-                    <Col>
-                      <Form.Label className="mb-0 pb-1 pt-1">
-                        Password
-                      </Form.Label>
-                      <Form.Control
-                        type="password"
-                        placeholder="Leave to keep pass"
-                        className={
-                          touched.password && errors.password ? "error" : null
-                        }
-                        //className={touched.password && errors.password ? "error" : null}
-                      />
-                      {touched.password && errors.password ? (
-                        <div className="error-message">{errors.password}</div>
-                      ) : null}
-                    </Col>
-                    <Col>
-                      <Form.Label className="mb-0 pb-1 pt-1">
-                        Confirmation
-                      </Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="confirm"
-                        placeholder="confirm"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.confirm}
-                        className={
-                          touched.confirm && errors.confirm ? "error" : null
-                        }
-                      />
-                      {touched.confirm && errors.confirm ? (
-                        <div className="error-message">{errors.confirm}</div>
-                      ) : null}
-                    </Col>
-                  </Form.Row>
-
-                  <Row>
-                    <BUTTON
-                      variant="primary"
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="text-light col mt-2  w-100  "
-                    >
-                      {buttonDetails.b1.buttonText}
-                    </BUTTON>
-                  </Row>
-                  <Row>
-                    <Link
-                      className="text-light col p-0 pt-2  "
-                      to={buttonDetails.b2.link}
-                    >
-                      <Button
-                        disabled={buttonDetails.b2.loading}
-                        variant="outline-light border-0 w-100"
-                      >
-                        {buttonDetails.b2.buttonText}
-                      </Button>
-                    </Link>
-                  </Row>
-                  <div className="row ">
-                    <div className="col text-center pt-2">
-                      <Form.Label
-                        variant="light"
-                        onClick={() => buttonDetails.b3.openSettings()}
-                        className="text-light"
-                      >
-                        {" "}
-                        <BsGearFill></BsGearFill>
-                        {buttonDetails.b3.showSettings ? (
-                          <BsChevronBarRight></BsChevronBarRight>
-                        ) : (
-                          <BsChevronBarLeft></BsChevronBarLeft>
-                        )}
-                      </Form.Label>
-                    </div>
-                    {buttonDetails.b3.showSettings
-                      ? buttonDetails.b3.renderDelete()
-                      : ""}
-                  </div>
-                </MYFORM>
-              )}
-            </Formik>
-          </Row>
-        </Card.Body>
-      </Card>
+                    <Form.Row>
+                      <Col>
+                        <Form.Group controlId="formmobile">
+                          <Form.Label>Mobile :</Form.Label>
+                          <Form.Control
+                            type="tel"
+                            name="mobile"
+                            placeholder={userDetails.mobile}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            value={values.mobile}
+                            className={
+                              touched.mobile && errors.mobile ? "error" : null
+                            }
+                          />
+                          {touched.mobile && errors.mobile ? (
+                            <div className="error-message">{errors.mobile}</div>
+                          ) : null}
+                        </Form.Group>
+                      </Col>
+                    </Form.Row>
+                    <Form.Row>
+                      <Col>
+                        <Form.Group controlId="formemail">
+                          <Form.Label>Email :</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="email"
+                            placeholder={currentUser.email}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            value={values.email}
+                            className={
+                              touched.email && errors.email ? "error" : null
+                            }
+                          />
+                          {touched.email && errors.email ? (
+                            <div className="error-message">{errors.email}</div>
+                          ) : null}
+                        </Form.Group>
+                      </Col>
+                    </Form.Row>
+                    <Form.Row>
+                      <Col>
+                        <Form.Group controlId="forpassword">
+                          <Form.Label className="">Password</Form.Label>
+                          <Form.Control
+                            type="password"
+                            name="password"
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            value={values.password}
+                            placeholder="Unchanged"
+                          />
+                          {touched.password && errors.password ? (
+                            <div className="error-message">
+                              {errors.password}
+                            </div>
+                          ) : null}
+                        </Form.Group>
+                      </Col>
+                      <Col>
+                        <Form.Group controlId="forconfirm">
+                          <Form.Label className="">Confirmation</Form.Label>
+                          <Form.Control
+                            type="password"
+                            name="confirm"
+                            placeholder="Unchanged"
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            value={values.confirm}
+                            className={
+                              touched.confirm && errors.confirm ? "error" : null
+                            }
+                          />
+                          {touched.confirm && errors.confirm ? (
+                            <div className="error-message">
+                              {errors.confirm}
+                            </div>
+                          ) : null}
+                        </Form.Group>
+                      </Col>
+                    </Form.Row>
+                  </MYFORM>
+                )}
+              </Formik>
+            </Row>
+            <Form.Row>
+              <BUTTON
+                variant="primary"
+                type="submit"
+                //disabled={isSubmitting}
+                form="update-profile-form"
+                className=" w-100 "
+              >
+                {buttonDetails.b1.buttonText}
+              </BUTTON>
+            </Form.Row>
+            <Row>
+              <Link
+                className="text-light col p-0 pt-2  "
+                to={buttonDetails.b2.link}
+              >
+                <Button
+                  disabled={buttonDetails.b2.loading}
+                  variant="outline-light border-0 w-100"
+                >
+                  {buttonDetails.b2.buttonText}
+                </Button>
+              </Link>
+            </Row>
+            <div className="row ">
+              <div className="col text-center pt-2">
+                <Form.Label
+                  variant="light"
+                  onClick={() => buttonDetails.b3.openSettings()}
+                  className="text-light"
+                >
+                  {" "}
+                  <BsGearFill></BsGearFill>
+                  {buttonDetails.b3.showSettings ? (
+                    <BsChevronBarRight></BsChevronBarRight>
+                  ) : (
+                    <BsChevronBarLeft></BsChevronBarLeft>
+                  )}
+                </Form.Label>
+              </div>
+              {buttonDetails.b3.showSettings
+                ? buttonDetails.b3.renderDelete()
+                : ""}
+            </div>
+          </CARD.Body>
+        </CARD>
+      )}
     </>
   );
 };
