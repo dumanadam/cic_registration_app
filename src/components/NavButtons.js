@@ -117,7 +117,10 @@ const NavButtons = (buttonCount, buttonDetails) => {
         <>
           <Row>
             <Link className="text-light col p-0 pb-2 " to={b1.link}>
-              <Button disabled={b1.loading} variant=" w-100">
+              <Button
+                disabled={b1.loading}
+                variant={b1.variant ? b1.variant : "danger w-100"}
+              >
                 {b1.buttonText}
               </Button>
             </Link>

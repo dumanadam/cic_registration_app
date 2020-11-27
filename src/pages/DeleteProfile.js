@@ -8,11 +8,14 @@ import TEXTDEFINITION from "../text/TextDefinition.js";
 
 function DeleteProfile(props) {
   const passwordRef = useRef();
-  const { currentUser, userDetails, updateEmail } = useAuth();
+  const { currentUser, userDetails, updateEmail, bookSession } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const [myProps, setMyProps] = useState({});
+  const [modalDetails, setModalDetails] = useState({
+    bodyText: TEXTDEFINITION.LOADING_DEFAULT,
+  });
 
   useEffect(() => {
     if (userDetails.firstname) {
@@ -46,13 +49,33 @@ function DeleteProfile(props) {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+    const promises = [];
+    const session = {
+      deleted: true,
+    };
+    promises.push(bookSession(session));
     if (passwordRef.current.value) {
       currentUser
         .delete()
         .then(function () {
           // User deleted.
-          history.push("/");
+          Promise.all(promises)
+            .then(() => {
+              history.push("/");
+              console.log("after push after db update");
+            })
+            .catch((e) => {
+              console.log("delete error=>", error);
+              console.log("delete error=>", e);
+              setModalDetails({ bodyText: e.message });
+              setTimeout(() => {
+                setLoading(false);
+                setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
+              }, 1000);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
         })
         .catch(function (error) {
           // An error happened.

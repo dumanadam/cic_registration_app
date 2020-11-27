@@ -28,14 +28,12 @@ const Dashboard = (props) => {
 
   return (
     <>
-      <div className="justify-content-center">
-        <DashboardBody
-          loading={loading}
-          userDetails={userDetails}
-          logout={logout}
-          myProps={myProps}
-        ></DashboardBody>
-      </div>
+      <DashboardBody
+        loading={loading}
+        userDetails={userDetails}
+        logout={logout}
+        myProps={myProps}
+      ></DashboardBody>
     </>
   );
 };

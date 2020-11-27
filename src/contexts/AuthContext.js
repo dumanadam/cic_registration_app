@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { auth, db } from "../firebase";
+import moment from "moment";
 
 const AuthContext = React.createContext();
 
@@ -11,6 +12,7 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
   const [userDetails, setUserDetails] = useState({});
+  const now = moment().toString();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -37,11 +39,12 @@ export function AuthProvider({ children }) {
     mobileNum,
     agreeNewsletter
   ) {
+    const now = moment().toString();
     return auth
       .createUserWithEmailAndPassword(email, password)
       .then((newUser) => {
         console.log("newuser is > ", newUser);
-        console.log("newuser is > ", auth);
+        console.log("moment now is > ", auth);
         db.ref("users/" + auth.currentUser.uid)
           .set({
             firstname: firstName,
@@ -54,6 +57,9 @@ export function AuthProvider({ children }) {
             banned: 0,
             newsletter: agreeNewsletter,
             admin: 0,
+            deleted: false,
+            deleteDate: "",
+            lastupdate: now,
           })
           .catch((e) => {
             console.log("auth context error>", e);
@@ -76,6 +82,7 @@ export function AuthProvider({ children }) {
 
   function updateEmail(email) {
     let result;
+
     try {
       result = currentUser.updateEmail(email);
     } catch (e) {
@@ -96,10 +103,28 @@ export function AuthProvider({ children }) {
 
   function updateFirstName(firstName) {
     console.log("firstname auth");
+
     let upd = db
       .ref("users/" + auth.currentUser.uid)
       .update({
         firstname: firstName,
+        lastupdate: now,
+      })
+      .catch((e) => {
+        console.log("firstname auth error>", e);
+      });
+    return upd;
+  }
+
+  function accountDeleted(date) {
+    console.log("delete account auth");
+
+    let upd = db
+      .ref("users/" + auth.currentUser.uid)
+      .update({
+        deleted: true,
+        deleteDate: now,
+        lastupdate: now,
       })
       .catch((e) => {
         console.log("firstname auth error>", e);
@@ -113,6 +138,7 @@ export function AuthProvider({ children }) {
       .ref("users/" + auth.currentUser.uid)
       .update({
         surname: surName,
+        lastupdate: now,
       })
       .catch((e) => {
         console.log("surname auth error>", e);
@@ -126,6 +152,7 @@ export function AuthProvider({ children }) {
       .ref("users/" + auth.currentUser.uid)
       .update({
         mobile: mobile,
+        lastupdate: now,
       })
       .catch((e) => {
         console.log("mobile auth error>", e);
@@ -135,6 +162,10 @@ export function AuthProvider({ children }) {
 
   function bookSession(sessiondetails) {
     console.log("booksession auth");
+    sessiondetails = {
+      ...sessiondetails,
+      lastupdate: now,
+    };
     let upd = db
       .ref("users/" + auth.currentUser.uid)
       .update(sessiondetails)

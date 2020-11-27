@@ -13,6 +13,7 @@ import { Link, useHistory } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
 import PageTitle from "../components/PageTitle";
 import NavButtons from "../components/NavButtons";
+import ShowModal from "../components/ShowModal";
 var QRCode = require("qrcode.react");
 
 export default function SessionConfirmed(confirmedSession) {
@@ -21,43 +22,23 @@ export default function SessionConfirmed(confirmedSession) {
   const [session, setSession] = useState({});
 
   const [pageTitle, setpageTitle] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const history = useHistory();
+  const [modalDetails, setModalDetails] = useState({});
   const sessionOptions = [{ label: "Send QR Code email" }];
 
   useEffect(() => {
-    setError({
-      text: "Address :31 Nicholson St, Coburg 3058",
-      subtext: "Confirmation has been sent to your email.",
-      variant: "success",
-    });
-  }, []);
-
-  useEffect(() => {
-    setpageTitle(PageTitle("Dashboard"));
-    console.log(confirmedSession);
-  }, []);
-
-  useEffect(() => {
-    console.log("userdetails", userDetails);
+    console.log("userDetails", userDetails);
+    if (userDetails.firstname) {
+      setLoading(false);
+    }
   }, [userDetails]);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    setError("");
-    const promises = [];
-    promises.push(bookSession(session));
-    Promise.all(promises)
-      .then(() => {
-        history.push("/");
-      })
-      .catch(() => {
-        setError("Failed to Update Account");
-        console.log("delete error=>", error);
-      })
-      .finally(() => {});
-  }
+  useEffect(() => {
+    setModalDetails({
+      bodyText: "Connecting to CIC",
+    });
+  }, []);
 
   function sessionSettings() {
     return sessionOptions.map((option) => (
@@ -99,50 +80,70 @@ export default function SessionConfirmed(confirmedSession) {
       buttonText: "Update Session",
       link: "/sessions",
       loading: loading,
+      variant: "primary w-100",
+      // onclick: handleCancel,
     },
     b2: {
-      buttonText: "Cancel Booking",
+      buttonText: "Return To Dashboard",
       link: "/",
-      loading: loading,
+      dashboard: true,
+      variant: "primary-outline w-100 mt-2",
     },
     b3: {
       buttonText: "Return To Dashboard",
       link: "/",
       dashboard: true,
+      variant: "primary-outline w-100 mt-2",
     },
   };
   return (
     <>
-      <Card>
-        <Card.Header className="h3 text-center" style={{ color: "#004619" }}>
-          Booking Confirmed
-        </Card.Header>
-        <Card.Body style={{ minHeight: "57vh" }}>
-          <div style={{ height: "50vh" }}>
-            <div className="pt-4 text-center w-100">
-              <QRCode
-                style={{}}
-                renderAs="SVG"
-                value={userDetails.sessionHash}
-                fgColor="#004619"
-                //bgColor="#faa61a"
-              />
+      {loading === true ? (
+        <ShowModal loading={loading} modalDetails={modalDetails} />
+      ) : (
+        <Card>
+          <Card.Header className="h3 text-center" style={{ color: "#004619" }}>
+            Booking Confirmed
+          </Card.Header>
+          <Card.Body className="mt-0 pt-0 ">
+            <div style={{ height: "50vh" }}>
+              <div className="pt-4 text-center w-100">
+                <QRCode
+                  style={{}}
+                  renderAs="SVG"
+                  value={userDetails.sessionHash}
+                  fgColor="#004619"
+                  //bgColor="#faa61a"
+                />
+              </div>
+              <Card.Title className="pt-4 text-left">
+                {userDetails.jumaSession}
+              </Card.Title>
+              <Card.Subtitle className="text-muted text-left">
+                {userDetails.jumaDate}
+              </Card.Subtitle>
+              <Card.Title className="pt-4 text-left">Please Note : </Card.Title>
+              <Card.Subtitle className=" text-muted text-left">
+                Screenshot or take a photo with your phone. Please show CIC
+                staff on arrival.
+              </Card.Subtitle>
             </div>
-            <Card.Title className="pt-4 text-left">
-              {userDetails.jumaSession}
-            </Card.Title>
-            <Card.Subtitle className="text-muted text-left">
-              {userDetails.jumaDate}
-            </Card.Subtitle>
-            <Card.Title className="pt-4 text-left">Please Note : </Card.Title>
-            <Card.Subtitle className=" text-muted text-left">
-              Screenshot or take a photo with your phone. Please show CIC staff
-              on arrival.
-            </Card.Subtitle>
-          </div>
-          {NavButtons(3, buttonDetails)}
-        </Card.Body>
-      </Card>
+            <Link className="" to="/sessions">
+              <Button disabled={loading} variant="primary w-100 ">
+                {buttonDetails.b1.buttonText}
+              </Button>
+            </Link>
+            <Link className="" to="/">
+              <Button
+                //onClick={handleShow}
+                variant="outline-primary-* text-primary col shadow-none"
+              >
+                {buttonDetails.b2.buttonText}
+              </Button>
+            </Link>
+          </Card.Body>
+        </Card>
+      )}
     </>
   );
 }

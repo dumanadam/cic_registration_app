@@ -11,6 +11,7 @@ function SessionList(listDetails) {
           href={"#" + sessionDetails.time}
           className="d-flex justify-content-between align-items-center"
           onClick={() => listDetails.handleClick(sessionDetails.time)}
+          key={sessionDetails.time}
         >
           {sessionDetails.time}
           <Badge variant="warning" pill>
@@ -25,7 +26,7 @@ function SessionList(listDetails) {
 
   return (
     <ListGroup
-      className="mt-3 mb-5 d-flex justify-content-between align-items-center w-100"
+      className="pt-3 pb-3 d-flex justify-content-between align-items-center w-100"
       defaultActiveKey={listDetails.checkKey()}
     >
       {loopSessions()}

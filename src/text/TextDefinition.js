@@ -8,6 +8,10 @@ const TEXTDEFINITION = {
   DELETE_CARD_HEADER: "Delete Profile",
   UPDATEPROFILE_CARD_HEADER: "Update Profile",
   CR_SESSION_CARD_HEADER: "Create Session",
+  BOOKINGS_SESSION_CARD_HEADER: "Book Session",
+  LOADING_DEFAULT: "Connecting to CIC",
+  SESSIONS_NEXT_JUMA: "Next Juma Date :",
+  SESSIONS_CONFIRMED_JUMA: "Confirmed Juma :",
 };
 
 export default TEXTDEFINITION;

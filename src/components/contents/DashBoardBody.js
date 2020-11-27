@@ -101,7 +101,9 @@ function DashboardBody(props) {
   ];
   let buttonDetails = {
     b1: {
-      buttonText: props.userDetails.jumaDate ? "Update Session" : "Session",
+      buttonText: props.userDetails.jumaDate
+        ? "Update Session"
+        : "Book Session",
       link: "/sessions",
       variant: "primary w-100",
       loading: myProps.loading,
@@ -113,7 +115,7 @@ function DashboardBody(props) {
       loading: myProps.loading,
     },
     b3: {
-      buttonText: "Logut",
+      buttonText: "Logout",
       variant: "outline-light w-100 border-0 mt-2",
       link: "/",
       loading: myProps.loading,
@@ -124,7 +126,9 @@ function DashboardBody(props) {
   return (
     <>
       <div style={{ height: "50vh" }}>
-        {props.userDetails.jumaDate || (
+        {props.userDetails.jumaDate ? (
+          <div className="pt-4"></div>
+        ) : (
           <Row className="p-4 justify-content-center ">{noSessionBooked()}</Row>
         )}
         {printSessionInfo()}

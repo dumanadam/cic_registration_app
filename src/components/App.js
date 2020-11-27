@@ -25,7 +25,6 @@ import CreateSession from "../pages/CreateSession";
 import AdminDashboard from "../pages/AdminDashboard";
 import Login from "../pages/Login";
 import DateProfile from "../pages/DateProfile";
-import BasicForm from "./forms/BasicForm";
 
 function App() {
   const { height, width } = GetWindow();
@@ -132,13 +131,6 @@ function App() {
                         wid={width}
                         hei={height}
                       />
-                    )}
-                  />
-
-                  <Route
-                    path="/basic"
-                    render={(props) => (
-                      <BasicForm {...props} wid={width} hei={height} />
                     )}
                   />
 
