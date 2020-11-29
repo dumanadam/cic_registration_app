@@ -16,32 +16,37 @@ function AdminDashboard() {
   const [pageTitle, setpageTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [adminNavButtons, setAdminNavButtons] = useState("");
+  const history = useHistory();
+  const sessionOptions = [{ label: "Send QR Code email" }];
+
+  const bookingsText = [
+    {
+      title: "Salamu Aleykum",
+      detail: userDetails.firstname,
+    },
+    { title: " Date:", detail: userDetails.jumaDate },
+    { title: "Session:", detail: userDetails.jumaSession },
+  ];
   let buttonDetails = {
     b1: {
-      buttonText: "Create Session",
+      buttonText: userDetails.jumaDate ? "Update Session" : "Create Session",
       link: "/create-session",
-      classnames: "info",
+      variant: "primary w-100",
       loading: loading,
     },
     b2: {
-      buttonText: "Add User",
-      classnames: "success w-100",
-      link: "/",
+      buttonText: "Update Profile",
+      variant: "primary w-100",
+      link: "/update-profile",
       loading: loading,
     },
     b3: {
-      buttonText: "Dashboard",
-      classnames: "outline-light",
+      buttonText: "Logout",
+      variant: "outline-light w-100 border-0 mt-2",
       link: "/",
+      loading: loading,
     },
   };
-  const history = useHistory();
-  const bookingsText = [
-    { title: "As SalamuAleykum", detail: userDetails.firstname },
-    { title: "Booked Date :", detail: userDetails.jumaDate },
-    { title: "Booked Session :", detail: userDetails.jumaSession },
-  ];
-  const sessionOptions = [{ label: "Send QR Code email" }];
 
   useEffect(() => {
     setpageTitle(PageTitle("Dashboard"));
@@ -120,7 +125,13 @@ function AdminDashboard() {
       </div>
     );
   }
-
+  function printSessionDates() {
+    return (
+      <div className="mt-4 text-center ">
+        {TEXTDEFINITION.EMPTY_ADMIN_SESSIONS}
+      </div>
+    );
+  }
   return (
     <div className="text-light">
       <Card
@@ -133,12 +144,7 @@ function AdminDashboard() {
         </Card.Header>
         <Card.Body className="mt-0 pt-0 ">
           <div style={{ height: "50vh" }}>
-            {/*       <Row className="mt-4  justify-content-center">
-            You currently have no sessions open
-          </Row> */}
-            <div className="mt-4 text-center ">
-              To open a new Juma sessiom click Create Session button.
-            </div>
+            <Row>{printSessionDates()}</Row>
           </div>
           <Row variant="d-flex align-items-stretch h-100">
             {adminNavButtons}

@@ -11,6 +11,7 @@ const Dashboard = (props) => {
   useEffect(() => {
     // console.log("userDetails", userDetails);
     if (userDetails.firstname) {
+      console.log("userDetails", userDetails);
       setMyProps({
         userDetails: userDetails,
         loading: loading,

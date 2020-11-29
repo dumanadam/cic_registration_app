@@ -31,6 +31,15 @@ export function AuthProvider({ children }) {
     });
   }
 
+  function getCurrentAdminSessions(adminCompany) {
+    db.ref(
+      "sessions/" + adminCompany.toLowerCase() + "/" + auth.currentUser.uid
+    ).on("value", (snapshot) => {
+      console.log("*Google DB*getting latest userdetails");
+      setUserDetails(snapshot.val());
+    });
+  }
+
   function signup(
     email,
     password,
@@ -174,6 +183,17 @@ export function AuthProvider({ children }) {
       });
     return upd;
   }
+  function createSessions(sessiondetails, company) {
+    console.log("booksession auth", sessiondetails);
+    sessiondetails = {
+      ...sessiondetails,
+      lastupdate: now,
+    };
+    let sessionOwner = "sessions/" + company.toLowerCase() + "/";
+
+    let upd = db.ref(sessionOwner).set(sessiondetails);
+    return upd;
+  }
 
   function deleteProfile(password) {
     return auth.currentUser.updatePassword(password);
@@ -192,6 +212,7 @@ export function AuthProvider({ children }) {
     updateSurname,
     bookSession,
     updateMobile,
+    createSessions,
     userDetails,
   };
   return (

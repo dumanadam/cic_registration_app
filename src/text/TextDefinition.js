@@ -12,6 +12,8 @@ const TEXTDEFINITION = {
   LOADING_DEFAULT: "Connecting to CIC",
   SESSIONS_NEXT_JUMA: "Next Juma Date :",
   SESSIONS_CONFIRMED_JUMA: "Confirmed Juma :",
+  EMPTY_ADMIN_SESSIONS:
+    "To open a new Juma sessiom click Create Session button.",
 };
 
 export default TEXTDEFINITION;
