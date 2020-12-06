@@ -13,6 +13,7 @@ import { Link, useHistory } from "react-router-dom";
 import TEXTDEFINITION from "../text/TextDefinition";
 import NavButtons from "../components/NavButtons";
 import ShowModal from "../components/ShowModal";
+import PushPromises from "../components/contents/PushPromises";
 
 const CARD = styled(Card)`
   background: #f7f9fa;
@@ -197,38 +198,7 @@ const UpdateProfile = () => {
       bodyText: "Updating",
     });
     console.log("promises", promises);
-    Promise.all(promises)
-      .then((fbreturn) => {
-        console.log("fbreturn", fbreturn);
-        setModalDetails({
-          bodyText: "Success",
-        });
-        setLoading(true);
-
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
-        // history.push("/");
-      })
-      .catch((e) => {
-        console.log("promise erroe", e);
-        console.log(e.message);
-        if (e.code == "auth/requires-recent-login") {
-          setModalDetails({
-            bodyText:
-              "Password & email change requires recent authentication. Log in again before retrying this request.",
-          });
-          setLoading(true);
-
-          setTimeout(() => {
-            setLoading(false);
-          }, 3500);
-        }
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
-
+    PushPromises(promises, setModalDetails, setLoading, setIsSubmitting);
     setIsSubmitting(false);
   }
 

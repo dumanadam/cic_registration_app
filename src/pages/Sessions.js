@@ -79,12 +79,19 @@ const BUTTON = styled(Button)`
 `;
 
 export default function Sessions() {
-  const { openSessions, userDetails, bookSession, globalFriday } = useAuth();
+  const {
+    openSessions,
+    userDetails,
+    bookSession,
+    globalFriday,
+    globalFridayFb,
+  } = useAuth();
   const [error, setError] = useState("");
   const [session, setSession] = useState({});
   const [latestSessionTimes, setLatestSessionTimes] = useState({});
   const [loading, setLoading] = useState(true);
   const [listKey, setListKey] = useState("");
+  const [bookingAvailability, setBookingAvailability] = useState(0);
   const history = useHistory();
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
@@ -101,6 +108,7 @@ export default function Sessions() {
   useEffect(() => {
     if (userDetails.firstname && openSessions) {
       console.log("userDetails + openSessions", openSessions);
+
       getSessionTimes();
       setListKey(checkKey());
       setLoading(false);
@@ -137,15 +145,22 @@ export default function Sessions() {
   useEffect(() => {
     let friday = FindFriday();
     console.log("friday eff", friday);
-    setSession(friday);
   }, []);
 
   function handleSubmit(e) {
-    console.log("hit submit");
     e.preventDefault();
     setLoading(true);
-
+    console.log("e", e);
     const promises = [];
+    if (!session.jumaSession) {
+      setModalDetails({ bodyText: "Selected Session time hasnt changed" });
+      setTimeout(() => {
+        setLoading(false);
+        setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
+      }, 2000);
+      return;
+    }
+
     promises.push(bookSession(session));
     Promise.all(promises)
       .then(() => {
@@ -196,18 +211,20 @@ export default function Sessions() {
   }
 
   function handleClick(time) {
+    console.log("time", time);
+    console.log("jumadate", globalFridayFb.substring(7));
     let toMD5 = {
       firstname: userDetails.firstname,
       surname: userDetails.surname,
-      jumaDate: session.jumaDate,
+      jumaDate: globalFridayFb.substring(7),
       jumaSession: time,
     };
 
     console.log(md5Qr(JSON.stringify(toMD5)));
 
     setSession({
-      ...session,
       jumaSession: time,
+      jumaDate: globalFridayFb,
       sessionHash: md5Qr(JSON.stringify(toMD5)),
     });
   }
@@ -287,7 +304,9 @@ export default function Sessions() {
                     listKey,
                     latestSessionTimes,
                     handleClick,
-                    checkKey
+                    openSessions,
+                    userDetails,
+                    globalFridayFb
                   )}
             </ListGroup>
             <div className="text-center pb-4">

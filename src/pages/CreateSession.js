@@ -27,6 +27,7 @@ import myStyle from "../components/styling/CardStyling";
 import ShowModal from "../components/ShowModal";
 import SessionList from "../components/SessionList";
 import FindFriday from "../components/FindFriday";
+import FormatTimeFirebase from "../components/FormatTimeFirebase";
 
 function CreateSession() {
   const [error, setError] = useState("");
@@ -143,32 +144,6 @@ function CreateSession() {
     ));
   }
 
-  function printSessionInfo() {
-    let result = bookingsText.map((rowDetails) => {
-      let sessionCheck =
-        rowDetails.detail === "" ? "No Booking" : rowDetails.detail;
-
-      return (
-        <Row className="mt-4 mb-4">
-          <Col
-            xl={6}
-            xs={6}
-            className="text-warning text-right"
-            style={{ fontSize: "18px" }}
-          >
-            {rowDetails.title}
-          </Col>
-          <Col className="text-light text-left" style={{ fontSize: "18px" }}>
-            {sessionCheck}
-          </Col>
-        </Row>
-      );
-    });
-    console.log("result", result);
-
-    return result;
-  }
-
   function sessionCheck(params) {
     return (
       <div className="text-light  ">
@@ -202,9 +177,8 @@ function CreateSession() {
         };
         console.log("sessionDateString", sessionDateString);
         for (let index = 0; index < sessionQty; index++) {
-          let time = moment(selectedSessiontime, "HH:mm")
-            .add(index, "hours")
-            .format("h:mm A");
+          let time = FormatTimeFirebase(selectedSessiontime, index);
+
           console.log("time", time);
           sessionUploadObject.openSessions[sessionDateString] = {
             ...sessionUploadObject.openSessions[sessionDateString],
@@ -213,7 +187,7 @@ function CreateSession() {
               maxPerSession: parseInt(maxPerSession),
               full: false,
               currentBooked: 0,
-              attendees: {},
+              confirmed: "",
             },
           };
         }

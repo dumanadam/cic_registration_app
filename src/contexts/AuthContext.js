@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import moment from "moment";
 import FindFriday from "../components/FindFriday";
+import FbAddress from "../components/contents/FbAddress";
 
 const AuthContext = React.createContext();
 
@@ -14,6 +15,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [userDetails, setUserDetails] = useState({});
   const [globalFriday, setGlobalFriday] = useState({});
+  const [globalFridayFb, setGlobalFridayFb] = useState({});
   const [openSessions, setOpenSessions] = useState("");
 
   const now = moment().toString();
@@ -28,12 +30,16 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    console.log("globalFridayFb", globalFridayFb);
+  }, [globalFridayFb]);
+
   function getCurrentUserDetails() {
     try {
       db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
         console.log("*Google DB*getting latest userdetails");
         setUserDetails(snapshot.val());
-
+        setGlobalFridayFb(FindFriday(1, true));
         setGlobalFriday(FindFriday());
       });
     } catch (error) {
@@ -194,19 +200,115 @@ export function AuthProvider({ children }) {
     return upd;
   }
 
-  function bookSession(sessiondetails) {
-    console.log("booksession auth");
-    sessiondetails = {
-      ...sessiondetails,
+  function updateDB(address, updateObject) {
+    console.log("address", address);
+    console.log("updateObject", updateObject);
+
+    return db
+      .ref(address)
+      .update(updateObject)
+      .catch((e) => {
+        console.log("db upd promise error>", e);
+      });
+  }
+
+  function updateSession(
+    removeSession = false,
+    oldDBAddress,
+    newDBAdress,
+    companyBookingSessionDetails,
+    newSessionDetails
+  ) {
+    const oldCompanyCountDBAddress =
+      "sessions/" +
+      userDetails.company.melbourne.cic +
+      "/openSessions/" +
+      userDetails.jumaDate +
+      "/" +
+      userDetails.jumaSession;
+
+    const newCompanyCountDBAddress =
+      "sessions/" +
+      userDetails.company.melbourne.cic +
+      "/openSessions/" +
+      newSessionDetails.jumaDate +
+      "/" +
+      newSessionDetails.jumaSession;
+
+    /* let newIncrementBookingDB =
+      openSessions[newSessionDetails.jumaDate][newSessionDetails.jumaSession]; */
+    console.log("newSessionDetails xxx", newSessionDetails);
+    let newBookingCount =
+      openSessions[newSessionDetails.jumaDate][newSessionDetails.jumaSession]
+        .currentBooked + 1;
+
+    if (removeSession) {
+      let oldIncrementBookingDB =
+        openSessions[globalFridayFb][userDetails.jumaSession];
+
+      let oldBookingCount =
+        openSessions[globalFridayFb][userDetails.jumaSession].currentBooked - 1;
+      console.log("oldIncrementBookingDB", oldIncrementBookingDB.currentBooked);
+      db.ref(oldDBAddress)
+        .remove()
+        .catch((e) => {
+          console.log("db remove promise error>", e);
+        });
+      updateDB(oldCompanyCountDBAddress, { currentBooked: oldBookingCount });
+    }
+
+    updateDB(newDBAdress, companyBookingSessionDetails);
+    updateDB(newCompanyCountDBAddress, { currentBooked: newBookingCount });
+    console.log("newSessionDetails", newSessionDetails);
+  }
+
+  function bookSession(newSessionDetails) {
+    newSessionDetails = {
+      ...newSessionDetails,
       lastupdate: now,
     };
-    let upd = db
-      .ref("users/" + auth.currentUser.uid)
-      .update(sessiondetails)
-      .catch((e) => {
-        console.log("session auth error>", e);
-      });
-    return upd;
+    console.log("newSessionDetails", newSessionDetails);
+    const userDBAddress = "users/" + auth.currentUser.uid;
+
+    const newCompanyBookingDBAddress = FbAddress(
+      "newCompanyBookingDBAddress",
+      userDetails,
+      newSessionDetails,
+      auth
+    );
+
+    const oldCompanyBookingDBADdress = FbAddress(
+      "oldCompanyBookingDBADdress",
+      userDetails,
+      newSessionDetails,
+      auth
+    );
+
+    console.log("booksession auth old", oldCompanyBookingDBADdress);
+
+    let companyBookingSessionDetails = {
+      firstname: userDetails.firstname,
+      surname: userDetails.surname,
+      mobile: userDetails.mobile,
+    };
+    if (userDetails.jumaDate) {
+      updateSession(
+        true,
+        oldCompanyBookingDBADdress,
+        newCompanyBookingDBAddress,
+        companyBookingSessionDetails,
+        newSessionDetails
+      );
+    } else {
+      updateSession(
+        false,
+        oldCompanyBookingDBADdress,
+        newCompanyBookingDBAddress,
+        companyBookingSessionDetails,
+        newSessionDetails
+      );
+    }
+    updateDB(userDBAddress, newSessionDetails);
   }
   function createSessions(sessiondetails, company) {
     console.log("booksession auth", sessiondetails);
@@ -241,6 +343,7 @@ export function AuthProvider({ children }) {
     userDetails,
     openSessions,
     globalFriday,
+    globalFridayFb,
   };
   return (
     <AuthContext.Provider value={value}>
