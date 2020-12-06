@@ -1,21 +1,13 @@
-import React, { useRef, useState, useEffect } from "react";
-import {
-  Card,
-  Form,
-  Button,
-  Alert,
-  ListGroup,
-  Badge,
-  Row,
-  Col,
-} from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Card, Form, Button, ListGroup, Row, Col } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
-import moment from "moment";
+
 import SessionList from "../components/SessionList";
 import ShowModal from "../components/ShowModal";
 import TEXTDEFINITION from "../text/TextDefinition";
 import styled from "styled-components";
+import FindFriday from "../components/FindFriday";
 var QRCode = require("qrcode.react");
 var md5Qr = require("md5");
 
@@ -87,28 +79,50 @@ const BUTTON = styled(Button)`
 `;
 
 export default function Sessions() {
-  const { currentUser, userDetails, bookSession } = useAuth();
+  const { openSessions, userDetails, bookSession, globalFriday } = useAuth();
   const [error, setError] = useState("");
   const [session, setSession] = useState({});
-  const [latestQr, setLatestQr] = useState("");
+  const [latestSessionTimes, setLatestSessionTimes] = useState({});
   const [loading, setLoading] = useState(true);
+  const [listKey, setListKey] = useState("");
   const history = useHistory();
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
 
   useEffect(() => {
-    console.log("userDetails", userDetails);
-    if (userDetails.firstname) {
-      setLoading(false);
-    }
+    console.log("sessiosn userDetails", userDetails);
   }, [userDetails]);
 
-  const sessionTimes = [
-    { time: "1:30 pm" },
-    { time: "2:30 pm" },
-    { time: "3:30 pm" },
-  ];
+  useEffect(() => {
+    console.log("sessiosn listkey", listKey);
+  }, [listKey]);
+
+  useEffect(() => {
+    if (userDetails.firstname && openSessions) {
+      console.log("userDetails + openSessions", openSessions);
+      getSessionTimes();
+      setListKey(checkKey());
+      setLoading(false);
+    }
+  }, [openSessions]);
+
+  function getSessionTimes() {
+    let sessionTimes = Object.keys(openSessions);
+    console.log("sessionTimes", sessionTimes);
+    console.log("Object.keys(openSessions)[0]", Object.keys(openSessions)[0]);
+    let friday = FindFriday(1, true);
+    console.log("friday", friday);
+    let sessionTimes2 = Object.keys(
+      openSessions[Object.keys(openSessions)[0]]
+    ).map((key) => {
+      //console.log("mapkey", key);
+      return { time: key };
+    });
+    //let sessionTimes2 = Object.keys(openSessions[friday]);
+    console.log("sessionTimes2", sessionTimes2);
+    setLatestSessionTimes(sessionTimes2);
+  }
 
   /*   useEffect(() => {
     //  console.log("session", session);
@@ -117,10 +131,13 @@ export default function Sessions() {
   useEffect(() => {
     console.log("userDetails", userDetails);
     console.log("session", session);
+    console.log("session jmadat", session.jumaDate);
   }, [session]);
 
   useEffect(() => {
-    setSession(findFriday());
+    let friday = FindFriday();
+    console.log("friday eff", friday);
+    setSession(friday);
   }, []);
 
   function handleSubmit(e) {
@@ -178,28 +195,6 @@ export default function Sessions() {
       });
   }
 
-  function findFriday() {
-    const dayINeed = 5;
-    const today = moment().isoWeekday();
-    let nextFriday;
-
-    if (today <= dayINeed) {
-      // then just give me this week's instance of that day
-      nextFriday = moment().isoWeekday(dayINeed).format("dddd DD/MM/YYYY");
-    } else {
-      // otherwise, give me *next week's* instance of that same day
-      nextFriday = moment()
-        .add(1, "weeks")
-        .isoWeekday(dayINeed)
-        .format("dddd DD/MM/YYYY");
-    }
-
-    return {
-      jumaDate: nextFriday,
-      jumaSession: sessionTimes[2].time,
-    };
-  }
-
   function handleClick(time) {
     let toMD5 = {
       firstname: userDetails.firstname,
@@ -224,14 +219,6 @@ export default function Sessions() {
       return "#" + userDetails.jumaSession;
     }
   }
-  let listDetails = {
-    defaultActiveKey: checkKey,
-    sessionTimes: sessionTimes,
-    handleClick: handleClick,
-    session: session,
-
-    checkKey: checkKey,
-  };
 
   function checkJuma() {
     if (userDetails.jumaDate) {
@@ -262,7 +249,7 @@ export default function Sessions() {
           <div className=" text-center w-100">
             {TEXTDEFINITION.SESSIONS_NEXT_JUMA}
           </div>
-          <div className=" text-center w-100"> {session.jumaDate}</div>
+          <div className=" text-center w-100"> {globalFriday}</div>
         </>
       );
     }
@@ -281,7 +268,6 @@ export default function Sessions() {
       >
         <CARD.Header className="h3 text-center text-light border-1">
           <div>{TEXTDEFINITION.BOOKINGS_SESSION_CARD_HEADER}</div>
-          {console.log("userDetails", userDetails)}
         </CARD.Header>
         <CARD.Body className="mt-0 pt-0 ">
           <div style={{ height: "50vh" }}>
@@ -293,9 +279,16 @@ export default function Sessions() {
             </div>{" "}
             <ListGroup
               className="d-flex justify-content-between align-items-center w-100 "
-              defaultActiveKey={checkKey()}
+              defaultActiveKey={listKey}
             >
-              {SessionList(listDetails)}
+              {loading
+                ? null
+                : SessionList(
+                    listKey,
+                    latestSessionTimes,
+                    handleClick,
+                    checkKey
+                  )}
             </ListGroup>
             <div className="text-center pb-4">
               <strong className=" mr-2">Selected Session :</strong>
@@ -330,7 +323,7 @@ export default function Sessions() {
   }
   return (
     <>
-      {loading === true ? (
+      {loading ? (
         <ShowModal loading={loading} modalDetails={modalDetails} />
       ) : (
         showBody()

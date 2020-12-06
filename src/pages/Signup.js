@@ -26,7 +26,7 @@ export default function Signup(props) {
   const [agreeNewsletter, setAgreeNewsletter] = useState(true);
   const [errorState, setErrorState] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [firstRun, setfirstRun] = useState(true);
+  const [firstRun, setfirstRun] = useState(false);
 
   const [agreeColour, setAgreeColour] = useState(
     "outline-primary-* text-primary shadow-none"

@@ -2,7 +2,7 @@ import React from "react";
 import { Card, Alert } from "react-bootstrap";
 
 const ErrorHeader = (errorDetails) => {
-  console.log("errorDetails errorheader", errorDetails);
+  // console.log("errorDetails errorheader", errorDetails);
   let result =
     errorDetails.errorMessage === undefined ? (
       <Card.Header className="h3 text-center text-light border-1">

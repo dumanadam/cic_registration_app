@@ -6,12 +6,13 @@ import DashboardBody from "../components/contents/DashBoardBody";
 const Dashboard = (props) => {
   const [loading, setLoading] = useState(true);
   const [myProps, setMyProps] = useState({});
-  const { logout, userDetails } = useAuth();
+  const { logout, userDetails, openSessions } = useAuth();
 
   useEffect(() => {
     // console.log("userDetails", userDetails);
     if (userDetails.firstname) {
       console.log("userDetails", userDetails);
+
       setMyProps({
         userDetails: userDetails,
         loading: loading,
@@ -22,6 +23,9 @@ const Dashboard = (props) => {
       setLoading(false);
     }
   }, [userDetails]);
+  useEffect(() => {
+    console.log("opensessions", openSessions);
+  }, [openSessions]);
 
   /*  useEffect(() => {
     console.log("dbody in parent refresh", userDetails);

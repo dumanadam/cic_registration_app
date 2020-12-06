@@ -3,21 +3,37 @@ import React, { useRef, useState, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import CustomLink from "../components/CustomLink";
 
-import { Button, Card, Alert, Row, Col, Form } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Alert,
+  Row,
+  Col,
+  Form,
+  ListGroup,
+  Badge,
+  Container,
+} from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 
 import PageTitle from "../components/PageTitle";
 import TEXTDEFINITION from "../text/TextDefinition.js";
 import NavButtons from "../components/NavButtons";
+import Attendees from "../components/Attendees";
+import ShowModal from "../components/ShowModal";
 
-function AdminDashboard() {
+function AdminDashboard(props) {
   const [error, setError] = useState("");
-  const { currentUser, logout, userDetails } = useAuth();
+  const { currentUser, logout, userDetails, openSessions } = useAuth();
   const [pageTitle, setpageTitle] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [adminNavButtons, setAdminNavButtons] = useState("");
   const history = useHistory();
   const sessionOptions = [{ label: "Send QR Code email" }];
+  const [showAttendees, setShowAttendees] = useState("");
+  const [session, setSession] = useState({});
+  const [showSessions, setShowSessions] = useState(false);
+  const [clickedDate, setClickedDate] = useState("");
 
   const bookingsText = [
     {
@@ -50,9 +66,27 @@ function AdminDashboard() {
 
   useEffect(() => {
     setpageTitle(PageTitle("Dashboard"));
-    console.log("Dashboard userDetails", userDetails);
     setAdminNavButtons(NavButtons(3, buttonDetails));
   }, []);
+
+  useEffect(() => {
+    if (openSessions !== "") {
+      setLoading(false);
+    }
+  }, [openSessions]);
+
+  useEffect(() => {
+    setAdminNavButtons(NavButtons(3, buttonDetails));
+  }, [loading]);
+
+  useEffect(() => {
+    console.log("user details", userDetails);
+  }, [userDetails]);
+
+  useEffect(() => {
+    console.log("showAttendees", showAttendees);
+    //  setShowAttendees(Attendees);
+  }, [Attendees]);
 
   useEffect(() => {
     setAdminNavButtons(NavButtons(3, buttonDetails));
@@ -126,32 +160,179 @@ function AdminDashboard() {
     );
   }
   function printSessionDates() {
-    return (
-      <div className="mt-4 text-center ">
+    //  if (openSessions) {
+    let sessionDates = Object.keys(openSessions).map(function (key, index) {
+      /*  console.log("key", key);
+      console.log("admin key", openSessions[key]);
+      let l = openSessions[key]; */
+      return (
+        <>
+          <Col>
+            <Button variant="warning m-1 " onClick={(e) => handleSelectDate(e)}>
+              {key}
+            </Button>
+          </Col>
+        </>
+      );
+    });
+    console.log("sessionDates", sessionDates);
+    return sessionDates;
+    //  return sessionDates;
+    //}
+    /* return (
+      <div className="mt-4 text-center "> 
         {TEXTDEFINITION.EMPTY_ADMIN_SESSIONS}
+      </div>
+    ); */
+  }
+
+  function handleSelectDate(e) {
+    e.preventDefault();
+    console.log("e.target.textContent", e.target.textContent);
+    setSession(e.target.textContent);
+    setClickedDate(e.target.textContent);
+    setShowSessions(true);
+  }
+
+  function handleSelectSessionTime(e) {
+    console.log("e.target.textContent", e);
+    history.push({
+      pathname: "/attendees",
+      search: e.target.textContent,
+      state: e.target.textContent,
+    });
+  }
+
+  function checkKey() {
+    if (userDetails.jumaSession === "") {
+      return "#";
+    } else {
+      return Object.keys(openSessions)[2];
+    }
+  }
+
+  function handleClick(clicked) {
+    console.log("clicked", clicked);
+  }
+  function SessionList() {
+    function loopSessions() {
+      let sessionDates = Object.keys(openSessions).map(function (key, index) {
+        /*   console.log(" handle key is", key);
+        console.log("index is", index); */
+        return (
+          <>
+            <ListGroup.Item
+              // disabled={showSessions}
+              action
+              className="d-flex justify-content-between align-items-center"
+              onClick={(clicked) => handleSelectDate(clicked)}
+              key={key}
+              id={key}
+              href={key}
+            >
+              <Row className="w-100">
+                <Col xl={10}>{key}</Col>
+                <Col xl={2}>
+                  <Badge variant="warning" pill>
+                    14
+                  </Badge>
+                </Col>
+              </Row>
+            </ListGroup.Item>
+          </>
+        );
+      });
+      console.log(("sessionDates", sessionDates));
+      return sessionDates;
+    }
+
+    return (
+      <ListGroup
+        defaultActiveKey={clickedDate}
+        className="pt-3 pb-3 d-flex justify-content-between align-items-center w-100"
+      >
+        {loopSessions()}
+      </ListGroup>
+    );
+  }
+
+  function listSessionTimes() {
+    console.log("session", session);
+    console.log("openSessions[session]", openSessions[session]);
+    let sessionTimes = Object.keys(openSessions[session]).map(function (
+      key,
+      index
+    ) {
+      /*   console.log("listsession key is", key);
+      console.log("index is", index); */
+      return (
+        <>
+          <Col>
+            <Button
+              className=""
+              variant="warning "
+              onClick={(clicked) => handleSelectSessionTime(clicked)}
+              key={key}
+              id={key}
+              style={{}}
+            >
+              {key}
+            </Button>
+          </Col>
+        </>
+      );
+    });
+
+    return (
+      <Row style={{}} className="justify-content-center ">
+        {sessionTimes}
+      </Row>
+    );
+  }
+
+  function showBody() {
+    return (
+      <div className="text-light">
+        <Card
+          className=" border-0 h-100"
+          bg="transparent"
+          style={{ minHeight: "57vh" }}
+        >
+          <Card.Header className="h3 text-center text-light border-1">
+            {TEXTDEFINITION.ADMIN_CARD_HEADER}
+          </Card.Header>
+          <Card.Body className="mt-0 pt-0 ">
+            <div style={{ height: "50vh" }}>
+              {/*  <ListGroup
+              className="d-flex justify-content-between align-items-center w-100 "
+              defaultActiveKey={checkKey()}
+            >
+              {SessionList(listDetails)}
+            </ListGroup> */}
+              {SessionList()}
+              {/* <Row>Select Date : {printSessionDates()}</Row> */}
+              {showSessions ? listSessionTimes() : null}
+            </div>
+            <Row variant="d-flex align-items-stretch h-100">
+              {adminNavButtons}
+            </Row>
+          </Card.Body>
+        </Card>
       </div>
     );
   }
+
   return (
-    <div className="text-light">
-      <Card
-        className=" border-0 h-100"
-        bg="transparent"
-        style={{ minHeight: "57vh" }}
-      >
-        <Card.Header className="h3 text-center text-light border-1">
-          {TEXTDEFINITION.ADMIN_CARD_HEADER}
-        </Card.Header>
-        <Card.Body className="mt-0 pt-0 ">
-          <div style={{ height: "50vh" }}>
-            <Row>{printSessionDates()}</Row>
-          </div>
-          <Row variant="d-flex align-items-stretch h-100">
-            {adminNavButtons}
-          </Row>
-        </Card.Body>
-      </Card>
-    </div>
+    <>
+      {loading === true ? (
+        <ShowModal
+          loading={loading}
+          modalDetails={{ bodyText: "Connecting to CIC" }}
+        />
+      ) : (
+        showBody()
+      )}
+    </>
   );
 }
 

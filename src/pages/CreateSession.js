@@ -26,15 +26,16 @@ import PrivacyPolicy from "../components/PrivacyPolicy";
 import myStyle from "../components/styling/CardStyling";
 import ShowModal from "../components/ShowModal";
 import SessionList from "../components/SessionList";
+import FindFriday from "../components/FindFriday";
 
 function CreateSession() {
   const [error, setError] = useState("");
-  const { createSessions, logout, userDetails } = useAuth();
+  const { createSessions, logout, userDetails, globalFriday } = useAuth();
   const [checkState, setcheckState] = useState(false);
   const [formPage, setFormPage] = useState(1);
   const [pageTitle, setpageTitle] = useState("");
   const [loading, setLoading] = useState(true);
-  const [nextFriday, setNextFriday] = useState(findFriday(1, true));
+
   const [adminNavButtons, setAdminNavButtons] = useState("");
   const [maxPerSession, setMaxPerSession] = useState(50);
 
@@ -180,31 +181,6 @@ function CreateSession() {
     );
   }
 
-  function findFriday(weeks = 1, unformatted = false) {
-    const dayINeed = 5;
-    const today = moment().isoWeekday();
-    let nextFriday;
-    console.log("unformatted", unformatted);
-    console.log("weeks", weeks);
-
-    if (today <= dayINeed) {
-      // then just give me this week's instance of that day
-      if (unformatted)
-        return moment().isoWeekday(dayINeed).format("DD-MM-YYYY");
-      return moment().isoWeekday(dayINeed).format("dddd DD/MM/YYYY");
-    } else {
-      // otherwise, give me *next week's* instance of that same day
-      if (unformatted)
-        return moment()
-          .add(weeks, "weeks")
-          .isoWeekday(dayINeed)
-          .format("DD-MM-YYYY");
-      return moment()
-        .add(weeks, "weeks")
-        .isoWeekday(dayINeed)
-        .format("dddd DD/MM/YYYY");
-    }
-  }
   function showBody(params) {
     function checkBackButton() {
       if (formPage == 1) {
@@ -217,14 +193,14 @@ function CreateSession() {
     function createUploadObject() {
       let sessionUploadObject = {};
 
-      for (let index = 0; index <= weeksQty; index++) {
-        let sessionDateString = findFriday(index, true);
+      for (let index = 1; index <= weeksQty; index++) {
+        let sessionDateString = FindFriday(index, true);
         sessionUploadObject.openSessions = {
           ...sessionUploadObject.openSessions,
 
           [sessionDateString]: {},
         };
-
+        console.log("sessionDateString", sessionDateString);
         for (let index = 0; index < sessionQty; index++) {
           let time = moment(selectedSessiontime, "HH:mm")
             .add(index, "hours")
@@ -242,6 +218,7 @@ function CreateSession() {
           };
         }
       }
+
       return sessionUploadObject;
     }
 
@@ -251,11 +228,12 @@ function CreateSession() {
         setLoading(true);
 
         let formattedSessions = createUploadObject();
+
         const promises = [];
         promises.push(
-          createSessions(formattedSessions, userDetails.adminCompany)
+          createSessions(formattedSessions, userDetails.company.melbourne.cic)
         );
-        Promise.all(promises)
+        /*   Promise.all(promises)
           .then(() => {
             history.push("/admin");
           })
@@ -270,7 +248,7 @@ function CreateSession() {
           .finally(() => {
             setLoading(false);
             setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
-          });
+          }); */
       } else {
         setFormPage(formPage + 1);
       }
@@ -354,7 +332,7 @@ function CreateSession() {
             className="text-light text-center"
             style={{ fontSize: "18px", padding: 0 }}
           >
-            {nextFriday}
+            {globalFriday}
           </Col>
         </Row>
         <Row className="mt-4 mb-4">
@@ -491,7 +469,7 @@ function CreateSession() {
   }
   function tab3() {
     const confirmSessionCreation = [
-      { title: "Starting Juma :", detail: nextFriday.substring(6) },
+      { title: "Starting Juma :", detail: globalFriday.substring(6) },
       { title: "Repeating weeks :", detail: weeksQty },
       { title: "Sessions per Juma :", detail: sessionQty },
       { title: "First Session starts :", detail: selectedSessiontime },

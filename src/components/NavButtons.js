@@ -50,7 +50,7 @@ const NavButtons = (buttonCount, buttonDetails) => {
         </div>
       );
     } else {
-      console.log("buttonDetails FAAAALSSSEEEE", buttonDetails);
+      // console.log("buttonDetails FAAAALSSSEEEE", buttonDetails);
 
       return (
         <Link className="text-light col p-0" to={b3.link}>

@@ -25,6 +25,7 @@ import CreateSession from "../pages/CreateSession";
 import AdminDashboard from "../pages/AdminDashboard";
 import Login from "../pages/Login";
 import DateProfile from "../pages/DateProfile";
+import Attendees from "./Attendees";
 
 function App() {
   const { height, width } = GetWindow();
@@ -104,6 +105,7 @@ function App() {
                     path="/admin"
                     component={AdminDashboard}
                   />
+                  <PrivateRoute path="/attendees" component={Attendees} />
                   <PrivateRoute
                     exact
                     path="/create-session"

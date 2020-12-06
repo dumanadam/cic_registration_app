@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import moment from "moment";
+import FindFriday from "../components/FindFriday";
 
 const AuthContext = React.createContext();
 
@@ -12,6 +13,9 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
   const [userDetails, setUserDetails] = useState({});
+  const [globalFriday, setGlobalFriday] = useState({});
+  const [openSessions, setOpenSessions] = useState("");
+
   const now = moment().toString();
 
   useEffect(() => {
@@ -25,19 +29,35 @@ export function AuthProvider({ children }) {
   }, []);
 
   function getCurrentUserDetails() {
-    db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
-      console.log("*Google DB*getting latest userdetails");
-      setUserDetails(snapshot.val());
-    });
+    try {
+      db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
+        console.log("*Google DB*getting latest userdetails");
+        setUserDetails(snapshot.val());
+
+        setGlobalFriday(FindFriday());
+      });
+    } catch (error) {
+      console.log("getcurrentuserdetails error", error);
+    }
   }
 
-  function getCurrentAdminSessions(adminCompany) {
-    db.ref(
-      "sessions/" + adminCompany.toLowerCase() + "/" + auth.currentUser.uid
-    ).on("value", (snapshot) => {
-      console.log("*Google DB*getting latest userdetails");
-      setUserDetails(snapshot.val());
-    });
+  useEffect(() => {
+    if (userDetails.firstname) {
+      getOpenSessions(userDetails.company.melbourne.cic);
+    }
+  }, [userDetails]);
+
+  function getOpenSessions(adminCompany) {
+    try {
+      db.ref("sessions/" + adminCompany.toLowerCase() + "/openSessions").on(
+        "value",
+        (snapshot) => {
+          setOpenSessions(snapshot.val());
+        }
+      );
+    } catch (e) {
+      console.log("getopensessions error", e);
+    }
   }
 
   function signup(
@@ -69,6 +89,11 @@ export function AuthProvider({ children }) {
             deleted: false,
             deleteDate: "",
             lastupdate: now,
+            company: {
+              melbourne: {
+                cic: "cic",
+              },
+            },
           })
           .catch((e) => {
             console.log("auth context error>", e);
@@ -214,6 +239,8 @@ export function AuthProvider({ children }) {
     updateMobile,
     createSessions,
     userDetails,
+    openSessions,
+    globalFriday,
   };
   return (
     <AuthContext.Provider value={value}>
