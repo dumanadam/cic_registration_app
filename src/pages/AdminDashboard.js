@@ -24,7 +24,7 @@ import ShowModal from "../components/ShowModal";
 
 function AdminDashboard(props) {
   const [error, setError] = useState("");
-  const { currentUser, logout, userDetails, openSessions } = useAuth();
+  const { globalFridayFb, logout, userDetails, openSessions } = useAuth();
   const [pageTitle, setpageTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [adminNavButtons, setAdminNavButtons] = useState("");
@@ -199,7 +199,10 @@ function AdminDashboard(props) {
     history.push({
       pathname: "/attendees",
       search: e.target.textContent,
-      state: e.target.textContent,
+      state: {
+        selectedDate: clickedDate,
+        selectedTime: e.target.textContent,
+      },
     });
   }
 
@@ -230,13 +233,8 @@ function AdminDashboard(props) {
               id={key}
               href={key}
             >
-              <Row className="w-100">
-                <Col xl={10}>{key}</Col>
-                <Col xl={2}>
-                  <Badge variant="warning" pill>
-                    14
-                  </Badge>
-                </Col>
+              <Row className="w-100 text-center">
+                <Col>{key}</Col>
               </Row>
             </ListGroup.Item>
           </>

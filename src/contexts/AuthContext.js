@@ -310,6 +310,7 @@ export function AuthProvider({ children }) {
     }
     updateDB(userDBAddress, newSessionDetails);
   }
+
   function createSessions(sessiondetails, company) {
     console.log("booksession auth", sessiondetails);
     sessiondetails = {

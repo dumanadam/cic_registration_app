@@ -31,6 +31,11 @@ function Attendees(props) {
   ];
   useEffect(() => {
     console.log("attendee openSessions", openSessions);
+    console.log(
+      "attendees",
+      openSessions[location.state.selectedDate][location.state.selectedTime]
+        .confirmed
+    );
   }, [openSessions]);
 
   useEffect(() => {
@@ -51,14 +56,19 @@ function Attendees(props) {
     setSession(location.search.substring(1));
   }, [location]);
 
-  function SessionList() {
+  function listAttendees() {
     function loopSessions() {
-      /*     let sessionDates = Object.keys(openSessions[session]).map(function (
-        key,
-        index
-      ) {
+      let sessionDates = Object.keys(
+        openSessions[location.state.selectedDate][location.state.selectedTime]
+          .confirmed
+      ).map(function (key, index) {
         console.log("key is", key);
         console.log("index is", index);
+        console.log(
+          "name  is",
+          openSessions[location.state.selectedDate][location.state.selectedTime]
+            .confirmed[key].firstname
+        );
         return (
           <>
             <ListGroup.Item
@@ -69,7 +79,19 @@ function Attendees(props) {
               id={key}
             >
               <Row className="w-100">
-                <Col xl={10}>{key}</Col>
+                <Col xl={10}>
+                  {openSessions[location.state.selectedDate][
+                    location.state.selectedTime
+                  ].confirmed[key].firstname +
+                    " " +
+                    openSessions[location.state.selectedDate][
+                      location.state.selectedTime
+                    ].confirmed[key].surname +
+                    " - " +
+                    openSessions[location.state.selectedDate][
+                      location.state.selectedTime
+                    ].confirmed[key].mobile}
+                </Col>
                 <Col xl={2}>{index}</Col>
               </Row>
             </ListGroup.Item>
@@ -77,7 +99,7 @@ function Attendees(props) {
         );
       });
       console.log("sessionDates", sessionDates);
-      return sessionDates; */
+      return sessionDates;
     }
 
     return (
@@ -89,13 +111,13 @@ function Attendees(props) {
 
   return (
     <div className="text-light">
-      {session == "" ? (
+      {openSessions == "" ? (
         <ShowModal
           loading={loading}
           modalDetails={{ bodyText: "Connecting to CIC" }}
         ></ShowModal>
       ) : (
-        SessionList()
+        listAttendees()
       )}
     </div>
   );
