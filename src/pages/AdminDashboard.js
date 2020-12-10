@@ -197,7 +197,7 @@ function AdminDashboard(props) {
   function handleSelectSessionTime(e) {
     console.log("e.target.textContent", e);
     history.push({
-      pathname: "/attendees",
+      pathname: "/scanner",
       search: e.target.textContent,
       state: {
         selectedDate: clickedDate,

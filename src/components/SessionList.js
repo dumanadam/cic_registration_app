@@ -24,20 +24,20 @@ function SessionList(
 
   function loopSessions() {
     let result = latestSessionTimes.map((sessionDetails) => {
-      console.log("globalFridayFb subs", globalFridayFb.substring(7));
+      // console.log("globalFridayFb subs", globalFridayFb.substring(7));
       let sub = globalFridayFb.substring(7);
-      console.log("userDetails jumadate", userDetails.jumaDate);
+      /*       console.log("userDetails jumadate", userDetails.jumaDate);
       console.log("openSessions[max.", openSessions);
       console.log(
         "openSessions[max.",
         openSessions[globalFridayFb][sessionDetails.time].maxPerSession -
           openSessions[globalFridayFb][sessionDetails.time].currentBooked
-      );
-      console.log(
+      ); */
+      /*   console.log(
         "openSessions[booked.",
         openSessions[globalFridayFb][sessionDetails.time].currentBooked
       );
-      console.log("subs = > ", openSessions[sub]);
+      console.log("subs = > ", openSessions[sub]); */
       return (
         <ListGroup.Item
           action

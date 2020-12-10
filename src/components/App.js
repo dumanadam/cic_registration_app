@@ -26,6 +26,8 @@ import AdminDashboard from "../pages/AdminDashboard";
 import Login from "../pages/Login";
 import DateProfile from "../pages/DateProfile";
 import Attendees from "./Attendees";
+import TestQr from "../pages/TestQr";
+import AttendeeScanner from "../pages/AttendeeScanner";
 
 function App() {
   const { height, width } = GetWindow();
@@ -124,6 +126,8 @@ function App() {
                     path="/session-confirmed"
                     component={SessionConfirmed}
                   />
+                  <PrivateRoute path="/test" component={TestQr} />
+                  <PrivateRoute path="/scanner" component={AttendeeScanner} />
                   <Route
                     path="/signup"
                     render={(props) => (

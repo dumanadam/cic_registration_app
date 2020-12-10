@@ -13,10 +13,11 @@ function FbAddress(addressRequest, userDetails, newSessionDetails, auth) {
         "/" +
         newSessionDetails.jumaSession +
         "/confirmed/" +
-        auth.currentUser.uid;
+        newSessionDetails.sessionHash;
       return addressnew;
-      break;
+
     case "oldCompanyBookingDBADdress":
+      console.log("hit old");
       let addressold =
         "sessions/" +
         userDetails.company.melbourne.cic +
@@ -25,9 +26,9 @@ function FbAddress(addressRequest, userDetails, newSessionDetails, auth) {
         "/" +
         userDetails.jumaSession +
         "/confirmed/" +
-        auth.currentUser.uid;
+        userDetails.sessionHash;
       return addressold;
-      break;
+
     default:
       console.log("hit default");
       break;

@@ -135,20 +135,22 @@ function DashboardBody(props) {
 
         <Row className="pt-4 text-center " style={{ minHeight: "50vh" }}>
           <Col
-          /*  style={{
-              padding: 0,
-              margin: "auto",
-              display: "block",
-              width: "400px",
-              height: "45vh",
-            }} */
+            bg="light"
+            style={{
+              padding: "2vh",
+              margin: "5vw",
+
+              alignSelf: "flex-start",
+
+              backgroundColor: "white",
+            }}
           >
             {props.userDetails.jumaDate && (
               <QRCode
                 style={{}}
                 renderAs="SVG"
                 value={props.userDetails.sessionHash}
-                fgColor="#004619"
+                fgColor="#000"
                 //bgColor="#faa61a"
               />
             )}

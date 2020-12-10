@@ -204,12 +204,57 @@ export function AuthProvider({ children }) {
     console.log("address", address);
     console.log("updateObject", updateObject);
 
-    return db
-      .ref(address)
-      .update(updateObject)
-      .catch((e) => {
-        console.log("db upd promise error>", e);
-      });
+    try {
+      db.ref(address)
+        .update(updateObject)
+        .catch((e) => {
+          console.log("db upd promise error>", e);
+        });
+    } catch (error) {
+      console.log(" try ctach db upd promise error>", error);
+    }
+  }
+
+  function updateAttendance(attendeeDetails, status) {
+    const attendeeSessionAddress =
+      openSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
+        .confirmed[attendeeDetails.sessionHash];
+
+    console.log("attendeeDetails", attendeeDetails);
+    console.log("status", status);
+    const testadd =
+      "sessions/" +
+      userDetails.company.melbourne.cic +
+      "/openSessions/" +
+      attendeeDetails.jumaDate +
+      "/" +
+      attendeeDetails.jumaSession +
+      "/confirmed/" +
+      "/" +
+      attendeeDetails.sessionHash +
+      "/";
+    const sessionDBAddress =
+      openSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
+        .confirmed[attendeeDetails.sessionHash];
+    console.log("attendeeSessionAddress", attendeeSessionAddress);
+    console.log("attendeeDetails.sessionHash", attendeeDetails.sessionHash);
+    console.log("sessionDBAddress", sessionDBAddress);
+    console.log("opensess ", openSessions);
+    console.log(
+      "opensess sessionDBAddress",
+      openSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
+        .confirmed[attendeeDetails.sessionHash]
+    );
+    attendeeDetails = {
+      entrytime: now,
+    };
+    console.log("attendeeDetails", attendeeDetails);
+    if (attendeeSessionAddress !== undefined) {
+      updateDB(testadd, attendeeDetails);
+
+      return attendeeSessionAddress;
+    }
+    return false;
   }
 
   function updateSession(
@@ -238,6 +283,9 @@ export function AuthProvider({ children }) {
     /* let newIncrementBookingDB =
       openSessions[newSessionDetails.jumaDate][newSessionDetails.jumaSession]; */
     console.log("newSessionDetails xxx", newSessionDetails);
+    console.log("olddb address xxx", oldDBAddress);
+    console.log("userdetrals xxx", userDetails);
+    console.log("removeSession xxx", removeSession);
     let newBookingCount =
       openSessions[newSessionDetails.jumaDate][newSessionDetails.jumaSession]
         .currentBooked + 1;
@@ -255,11 +303,12 @@ export function AuthProvider({ children }) {
           console.log("db remove promise error>", e);
         });
       updateDB(oldCompanyCountDBAddress, { currentBooked: oldBookingCount });
+      console.log("AFTER userdetrals xxx", userDetails);
     }
 
     updateDB(newDBAdress, companyBookingSessionDetails);
     updateDB(newCompanyCountDBAddress, { currentBooked: newBookingCount });
-    console.log("newSessionDetails", newSessionDetails);
+    console.log("userDetails xxx2", userDetails);
   }
 
   function bookSession(newSessionDetails) {
@@ -284,12 +333,14 @@ export function AuthProvider({ children }) {
       auth
     );
 
-    console.log("booksession auth old", oldCompanyBookingDBADdress);
+    console.log("oldCompanyBookingDBADdress", oldCompanyBookingDBADdress);
+    console.log("newCompanyBookingDBAddress", newCompanyBookingDBAddress);
 
     let companyBookingSessionDetails = {
       firstname: userDetails.firstname,
       surname: userDetails.surname,
       mobile: userDetails.mobile,
+      id: auth.currentUser.uid,
     };
     if (userDetails.jumaDate) {
       updateSession(
@@ -345,6 +396,7 @@ export function AuthProvider({ children }) {
     openSessions,
     globalFriday,
     globalFridayFb,
+    updateAttendance,
   };
   return (
     <AuthContext.Provider value={value}>

@@ -139,7 +139,6 @@ export default function Sessions() {
   useEffect(() => {
     console.log("userDetails", userDetails);
     console.log("session", session);
-    console.log("session jmadat", session.jumaDate);
   }, [session]);
 
   useEffect(() => {
@@ -219,8 +218,6 @@ export default function Sessions() {
       jumaDate: globalFridayFb.substring(7),
       jumaSession: time,
     };
-
-    console.log(md5Qr(JSON.stringify(toMD5)));
 
     setSession({
       jumaSession: time,
