@@ -3,6 +3,10 @@ const TEXTDEFINITION = {
   JUMA_BOOKED_CHECK_FAIL1: "You currently have no Juma sessions booked",
   JUMA_BOOKED_CHECK_FAIL2:
     'Click the "Book Session" button below to book the next available Juma session.',
+  NO_SESSIONS_AVAILABLE_USER:
+    "The venue has not made any sessions available at this time, please try again later",
+  NO_SESSIONS_AVAILABLE_ADMIN:
+    "Please create sessions with the Create Session button",
   DASHBOARD_CARD_HEADER: "Coburg Islamic Centre",
   ADMIN_CARD_HEADER: "Admin",
   DELETE_CARD_HEADER: "Delete Profile",
@@ -14,6 +18,7 @@ const TEXTDEFINITION = {
   SESSIONS_CONFIRMED_JUMA: "Confirmed Juma :",
   EMPTY_ADMIN_SESSIONS:
     "To open a new Juma sessiom click Create Session button.",
+  ADMIN_DASHBOARD_LINE1: "Please select a session date and time below",
 };
 
 export default TEXTDEFINITION;

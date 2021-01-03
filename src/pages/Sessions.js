@@ -186,10 +186,13 @@ export default function Sessions() {
 
     const promises = [];
     promises.push(
-      bookSession({
-        jumaDate: "",
-        jumaSession: "",
-      })
+      bookSession(
+        {
+          jumaDate: "",
+          jumaSession: "",
+        },
+        true
+      )
     );
     Promise.all(promises)
       .then(() => {

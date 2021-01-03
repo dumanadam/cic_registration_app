@@ -31,11 +31,11 @@ function Attendees(props) {
   ];
   useEffect(() => {
     console.log("attendee openSessions", openSessions);
-    console.log(
+    /*   console.log(
       "attendees",
       openSessions[location.state.selectedDate][location.state.selectedTime]
         .confirmed
-    );
+    ); */
   }, [openSessions]);
 
   useEffect(() => {

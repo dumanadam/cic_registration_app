@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import TEXTDEFINITION from "../text/TextDefinition.js";
 import DashboardBody from "../components/contents/DashBoardBody";
+import ShowModal from "../components/ShowModal";
 
 const Dashboard = (props) => {
   const [loading, setLoading] = useState(true);
   const [myProps, setMyProps] = useState({});
-  const { logout, userDetails, openSessions } = useAuth();
+  const { logout, userDetails, openSessions, clearUserJumaSession } = useAuth();
 
   useEffect(() => {
     // console.log("userDetails", userDetails);
@@ -16,6 +17,7 @@ const Dashboard = (props) => {
       setMyProps({
         userDetails: userDetails,
         loading: loading,
+        setLoading: setLoading,
         logout: logout,
         headerText: TEXTDEFINITION.DASHBOARD_CARD_HEADER,
       });
@@ -23,8 +25,9 @@ const Dashboard = (props) => {
       setLoading(false);
     }
   }, [userDetails]);
+
   useEffect(() => {
-    console.log("opensessions", openSessions);
+    console.log("opensessions dash", openSessions);
   }, [openSessions]);
 
   /*  useEffect(() => {
@@ -33,12 +36,17 @@ const Dashboard = (props) => {
 
   return (
     <>
-      <DashboardBody
-        loading={loading}
-        userDetails={userDetails}
-        logout={logout}
-        myProps={myProps}
-      ></DashboardBody>
+      {loading ? //<ShowModal loading={loading} modalDetails={modalDetails} />
+      null : (
+        <DashboardBody
+          loading={loading}
+          userDetails={userDetails}
+          logout={logout}
+          myProps={myProps}
+          openSessions={openSessions}
+          clearUserJumaSession={clearUserJumaSession}
+        ></DashboardBody>
+      )}
     </>
   );
 };

@@ -12,8 +12,46 @@ function DashboardBody(props) {
   const [dashboardNavButtons, setDashboardNavButtons] = useState("");
   const history = useHistory();
   const [myProps, setMyProps] = useState(props);
+  const [noSessions, setNoSessions] = useState(true);
+
   useEffect(() => {
-    // console.log("props", props);
+    console.log("props", props);
+    if (props.openSessions !== "" && props.userDetails.jumaDate !== "") {
+      console.log(
+        "user has jumadate",
+        props.openSessions[props.userDetails.jumaDate][
+          props.userDetails.jumaSession
+        ]
+      );
+      if (
+        typeof props.openSessions[props.userDetails.jumaDate][
+          props.userDetails.jumaSession
+        ].confirmed === "undefined"
+      ) {
+        console.log("userdetails jumassession FAILED match");
+        removeUserSession();
+      } else {
+        if (
+          typeof props.openSessions[props.userDetails.jumaDate][
+            props.userDetails.jumaSession
+          ].confirmed[props.userDetails.sessionHash] == "undefined"
+        ) {
+          console.log("session hash in confirmed failed");
+          removeUserSession();
+        } else {
+          console.log(
+            "everything ok in user to db match",
+            props.openSessions[props.userDetails.jumaDate][
+              props.userDetails.jumaSession
+            ].confirmed[props.userDetails.sessionHash]
+          );
+        }
+      }
+    }
+
+    props.openSessions === "" || props.openSessions === null
+      ? setNoSessions(true)
+      : setNoSessions(false);
     setMyProps(props);
   }, [props]);
 
@@ -21,6 +59,35 @@ function DashboardBody(props) {
     setDashboardNavButtons(NavButtons(3, buttonDetails));
     // console.log("dbody props", props);
   }, [NavButtons]);
+
+  useEffect(() => {
+    console.log("dbody nosess", noSessions);
+    !noSessions && setDashboardNavButtons(NavButtons(3, buttonDetails));
+  }, [noSessions]);
+
+  function removeUserSession() {
+    console.log("hit remove session");
+    props.myProps.setLoading(true);
+
+    const promises = [];
+    promises.push(props.clearUserJumaSession());
+    Promise.all(promises)
+      .then((res) => {
+        console.log("res", res);
+      })
+      .catch((e) => {
+        console.log("delete error=>", error);
+        console.log("delete error=>", e);
+        // setModalDetails({ bodyText: e.message });
+        setTimeout(() => {
+          props.myProps.setLoading(false);
+          //setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
+        }, 1000);
+      })
+      .finally(() => {
+        props.myProps.setLoading(false);
+      });
+  }
 
   async function handleLogout() {
     console.log("handle logout");
@@ -85,8 +152,14 @@ function DashboardBody(props) {
   function noSessionBooked() {
     return (
       <div className="text-light text-center ">
-        <div className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL1}</div>
-        <span className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL2}</span>
+        {props.openSessions ? (
+          <>
+            <div className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL1}</div>
+            <span className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL2}</span>
+          </>
+        ) : (
+          <span className="">{TEXTDEFINITION.NO_SESSIONS_AVAILABLE_USER}</span>
+        )}
       </div>
     );
   }
@@ -99,6 +172,7 @@ function DashboardBody(props) {
     { title: " Date:", detail: props.userDetails.jumaDate },
     { title: "Session:", detail: props.userDetails.jumaSession },
   ];
+
   let buttonDetails = {
     b1: {
       buttonText: props.userDetails.jumaDate
@@ -107,6 +181,7 @@ function DashboardBody(props) {
       link: "/sessions",
       variant: "primary w-100",
       loading: myProps.loading,
+      disabled: noSessions,
     },
     b2: {
       buttonText: "Update Profile",
@@ -142,7 +217,9 @@ function DashboardBody(props) {
 
               alignSelf: "flex-start",
 
-              backgroundColor: "white",
+              backgroundColor: props.userDetails.jumaDate
+                ? "white"
+                : "transparent",
             }}
           >
             {props.userDetails.jumaDate && (

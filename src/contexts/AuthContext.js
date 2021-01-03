@@ -45,6 +45,13 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.log("getcurrentuserdetails error", error);
     }
+    try {
+      db.ref("/sessions/cic/openSessions").on("value", (snapshot) => {
+        console.log("sessions printout", snapshot.val());
+      });
+    } catch (error) {
+      console.log("print error", error);
+    }
   }
 
   useEffect(() => {
@@ -262,7 +269,8 @@ export function AuthProvider({ children }) {
     oldDBAddress,
     newDBAdress,
     companyBookingSessionDetails,
-    newSessionDetails
+    newSessionDetails,
+    userCancelBooking = false
   ) {
     const oldCompanyCountDBAddress =
       "sessions/" +
@@ -286,9 +294,8 @@ export function AuthProvider({ children }) {
     console.log("olddb address xxx", oldDBAddress);
     console.log("userdetrals xxx", userDetails);
     console.log("removeSession xxx", removeSession);
-    let newBookingCount =
-      openSessions[newSessionDetails.jumaDate][newSessionDetails.jumaSession]
-        .currentBooked + 1;
+    console.log("opensessions updatesessions", openSessions);
+    console.log("userCancelBooking", userCancelBooking);
 
     if (removeSession) {
       let oldIncrementBookingDB =
@@ -297,6 +304,7 @@ export function AuthProvider({ children }) {
       let oldBookingCount =
         openSessions[globalFridayFb][userDetails.jumaSession].currentBooked - 1;
       console.log("oldIncrementBookingDB", oldIncrementBookingDB.currentBooked);
+      console.log("hit remove oldDBAddress", oldDBAddress);
       db.ref(oldDBAddress)
         .remove()
         .catch((e) => {
@@ -306,12 +314,21 @@ export function AuthProvider({ children }) {
       console.log("AFTER userdetrals xxx", userDetails);
     }
 
-    updateDB(newDBAdress, companyBookingSessionDetails);
-    updateDB(newCompanyCountDBAddress, { currentBooked: newBookingCount });
+    if (userCancelBooking === false) {
+      console.log("Qqqqqqqqq hit !usercancelbooking", userCancelBooking);
+      let newBookingCount =
+        openSessions[newSessionDetails.jumaDate][newSessionDetails.jumaSession]
+          .currentBooked + 1;
+      updateDB(newCompanyCountDBAddress, { currentBooked: newBookingCount });
+      console.log("newDBAdress", newDBAdress);
+      console.log("companyBookingSessionDetails", companyBookingSessionDetails);
+      updateDB(newDBAdress, companyBookingSessionDetails);
+    }
+
     console.log("userDetails xxx2", userDetails);
   }
 
-  function bookSession(newSessionDetails) {
+  function bookSession(newSessionDetails, userCancelBooking = false) {
     newSessionDetails = {
       ...newSessionDetails,
       lastupdate: now,
@@ -348,7 +365,8 @@ export function AuthProvider({ children }) {
         oldCompanyBookingDBADdress,
         newCompanyBookingDBAddress,
         companyBookingSessionDetails,
-        newSessionDetails
+        newSessionDetails,
+        userCancelBooking
       );
     } else {
       updateSession(
@@ -362,8 +380,30 @@ export function AuthProvider({ children }) {
     updateDB(userDBAddress, newSessionDetails);
   }
 
+  function clearUserJumaSession(params) {
+    const userDBAddress = "users/" + auth.currentUser.uid;
+    let blankSessionDetails = {
+      jumaDate: "",
+      jumaSession: "",
+      lastupdate: now,
+    };
+    console.log("blankSessionDetails", blankSessionDetails);
+    updateDB(userDBAddress, blankSessionDetails);
+  }
+
   function createSessions(sessiondetails, company) {
     console.log("booksession auth", sessiondetails);
+    for (const date in openSessions) {
+      console.log("key", date);
+      console.log("key2", openSessions[date]);
+      for (const time in openSessions[date]) {
+        if (time.booked >= 1) {
+          console.log("time.booked >1", time.booked);
+        } else {
+          console.log("time.booked 0", time.booked);
+        }
+      }
+    }
     sessiondetails = {
       ...sessiondetails,
       lastupdate: now,
@@ -397,6 +437,7 @@ export function AuthProvider({ children }) {
     globalFriday,
     globalFridayFb,
     updateAttendance,
+    clearUserJumaSession,
   };
   return (
     <AuthContext.Provider value={value}>

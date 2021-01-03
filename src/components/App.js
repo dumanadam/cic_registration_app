@@ -107,6 +107,7 @@ function App() {
                     path="/admin"
                     component={AdminDashboard}
                   />
+                  <PrivateRoute exact path="/ate" component={AdminDashboard} />
                   <PrivateRoute path="/attendees" component={Attendees} />
                   <PrivateRoute
                     exact

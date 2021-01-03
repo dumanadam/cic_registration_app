@@ -14,6 +14,7 @@ function FbAddress(addressRequest, userDetails, newSessionDetails, auth) {
         newSessionDetails.jumaSession +
         "/confirmed/" +
         newSessionDetails.sessionHash;
+
       return addressnew;
 
     case "oldCompanyBookingDBADdress":
@@ -27,6 +28,7 @@ function FbAddress(addressRequest, userDetails, newSessionDetails, auth) {
         userDetails.jumaSession +
         "/confirmed/" +
         userDetails.sessionHash;
+      console.log("addressold", addressold);
       return addressold;
 
     default:

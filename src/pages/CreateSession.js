@@ -159,7 +159,7 @@ function CreateSession() {
   function showBody(params) {
     function checkBackButton() {
       if (formPage == 1) {
-        history.push("/");
+        history.push("/admin");
       } else {
         setFormPage(formPage - 1);
       }
@@ -207,7 +207,7 @@ function CreateSession() {
         promises.push(
           createSessions(formattedSessions, userDetails.company.melbourne.cic)
         );
-        /*   Promise.all(promises)
+        Promise.all(promises)
           .then(() => {
             history.push("/admin");
           })
@@ -222,7 +222,7 @@ function CreateSession() {
           .finally(() => {
             setLoading(false);
             setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
-          }); */
+          });
       } else {
         setFormPage(formPage + 1);
       }
@@ -288,12 +288,12 @@ function CreateSession() {
   const [weeksQty, setWeeksQty] = useState(1);
   const handleWeeks = (weeks) => {
     setWeeksQty(weeks);
-    console.log(weeksQty);
+    console.log("weeksQty", weeksQty);
   };
   const [sessionQty, setSessionQty] = useState(1);
   const handleSessionQty = (weeks) => {
     setSessionQty(weeks);
-    console.log(sessionQty);
+    console.log("sessionQty", sessionQty);
   };
   function tab1() {
     return (
@@ -363,7 +363,7 @@ function CreateSession() {
       return requestedList.map((sessionTime) => (
         <Dropdown.Item
           onSelect={(eventKey, event) => {
-            console.log(eventKey, event);
+            console.log("tab2", eventKey, event);
             requestedList == firstJumaSession
               ? setSelectedSessiontime(eventKey)
               : setSelectedSessionInterval(eventKey);

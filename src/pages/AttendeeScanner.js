@@ -10,6 +10,9 @@ import styled from "styled-components";
 import FindFriday from "../components/FindFriday";
 import correct from "../assets/audio/correct.mp3";
 import incorrect from "../assets/audio/incorrect.mp3";
+import { BsChevronBarRight, BsX, BsCheck } from "react-icons/bs";
+import { IconContext } from "react-icons";
+
 var QRCode = require("qrcode.react");
 var md5Qr = require("md5");
 
@@ -98,6 +101,7 @@ function AttendeeScanner() {
   const [bookingAvailability, setBookingAvailability] = useState(0);
   const [attendeeDetails, setAttendeeDetails] = useState({});
   const history = useHistory();
+  const [attendeeList, setAttendeeList] = useState([]);
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
@@ -111,12 +115,44 @@ function AttendeeScanner() {
   }, [userDetails]);
 
   useEffect(() => {
+    console.log("sessiosn attendeeList", attendeeList);
+  }, [attendeeList]);
+
+  useEffect(() => {
     console.log("attendee openSessions", openSessions);
-    console.log(
-      "attendees",
-      openSessions[location.state.selectedDate][location.state.selectedTime]
-        .confirmed
-    );
+    console.log("attendee location", location);
+    let spreadArr = [];
+    if (openSessions == "") {
+      history.push("/admin");
+    } else {
+      console.log(
+        "attendees",
+        openSessions[location.state.selectedDate][location.state.selectedTime]
+          .confirmed
+      );
+      for (const key in openSessions[location.state.selectedDate][
+        location.state.selectedTime
+      ].confirmed) {
+        if (
+          Object.hasOwnProperty.call(
+            openSessions[location.state.selectedDate][
+              location.state.selectedTime
+            ].confirmed,
+            key
+          )
+        ) {
+          const element =
+            openSessions[location.state.selectedDate][
+              location.state.selectedTime
+            ].confirmed[key];
+          console.log("element", element);
+          spreadArr.push(element);
+        }
+      }
+
+      console.log("spreafarr", spreadArr);
+      setAttendeeList(spreadArr);
+    }
   }, [openSessions]);
 
   function playSuccessAudio() {
@@ -164,6 +200,7 @@ function AttendeeScanner() {
         if (scanResult) {
           playSuccessAudio();
           setResult(scanResult.firstname + " " + scanResult.surname);
+          confirmAttendance(scanResult);
         } else {
           setResult("No user in this session");
           playFailAudio();
@@ -175,8 +212,68 @@ function AttendeeScanner() {
     }
   }
 
+  function confirmAttendance(user) {}
+
   function handleError(err) {
     console.error(err);
+  }
+
+  const buttonDetails = {
+    b1: {
+      buttonText: "Attendees",
+      link: "/attendees",
+      loading: loading,
+      variant: "primary w-100",
+      // onclick: handleCancel,
+    },
+    b2: {
+      buttonText: "Return To Dashboard",
+      link: "/admin",
+      dashboard: true,
+      variant: "primary-outline w-100 mt-2",
+    },
+  };
+  function arrivedAttendeeList() {
+    let arrivedList = [];
+    attendeeList.forEach((item, index) => {
+      console.log(" handle key is", index);
+      console.log("item is", item);
+      arrivedList.push(
+        <>
+          <ListGroup.Item
+            // disabled={showSessions}
+            action
+            className="d-flex justify-content-between align-items-center"
+            //  onClick={(clicked) => handleSelectDate(clicked)}
+            key={index}
+            id={index}
+            href={index}
+          >
+            <Row className="w-100 text-center">
+              <Col xl={5}>
+                <div>Name:</div> {item.firstname} {item.surname}
+              </Col>
+
+              <Col xl={5}>Mobile: {item.mobile}</Col>
+              <Col xl={2}>
+                {item.entrytime ? (
+                  <IconContext.Provider value={{ color: "green" }}>
+                    <BsCheck></BsCheck>
+                  </IconContext.Provider>
+                ) : (
+                  <IconContext.Provider value={{ color: "red" }}>
+                    <BsX></BsX>
+                  </IconContext.Provider>
+                )}
+              </Col>
+            </Row>
+          </ListGroup.Item>
+        </>
+      );
+    });
+
+    console.log("arrivedList", arrivedList);
+    return arrivedList;
   }
 
   function showBody() {
@@ -205,6 +302,16 @@ function AttendeeScanner() {
               <p>{result}</p>
             </div>
           </div>
+          {arrivedAttendeeList()}
+
+          <Link className="" to="/admin">
+            <Button
+              //onClick={handleShow}
+              variant="outline-primary-* text-primary col shadow-none"
+            >
+              {buttonDetails.b2.buttonText}
+            </Button>
+          </Link>
         </CARD.Body>
       </CARD>
     );

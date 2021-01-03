@@ -45,7 +45,10 @@ function AdminDashboard(props) {
   ];
   let buttonDetails = {
     b1: {
-      buttonText: userDetails.jumaDate ? "Update Session" : "Create Session",
+      buttonText:
+        Object.keys(openSessions).length === 0
+          ? "Create Session"
+          : "Update Session",
       link: "/create-session",
       variant: "primary w-100",
       loading: loading,
@@ -219,29 +222,39 @@ function AdminDashboard(props) {
   }
   function SessionList() {
     function loopSessions() {
-      let sessionDates = Object.keys(openSessions).map(function (key, index) {
-        /*   console.log(" handle key is", key);
-        console.log("index is", index); */
+      if (openSessions) {
+        let sessionDates = Object.keys(openSessions).map(function (key, index) {
+          /*   console.log(" handle key is", key);
+          console.log("index is", index); */
+          return (
+            <>
+              <ListGroup.Item
+                // disabled={showSessions}
+                action
+                className="d-flex justify-content-between align-items-center"
+                onClick={(clicked) => handleSelectDate(clicked)}
+                key={key}
+                id={key}
+                href={key}
+              >
+                <Row className="w-100 text-center">
+                  <Col>{key}</Col>
+                </Row>
+              </ListGroup.Item>
+            </>
+          );
+        });
+
+        return sessionDates;
+      } else {
         return (
           <>
-            <ListGroup.Item
-              // disabled={showSessions}
-              action
-              className="d-flex justify-content-between align-items-center"
-              onClick={(clicked) => handleSelectDate(clicked)}
-              key={key}
-              id={key}
-              href={key}
-            >
-              <Row className="w-100 text-center">
-                <Col>{key}</Col>
-              </Row>
-            </ListGroup.Item>
+            <div className="text-light text-center ">
+              {TEXTDEFINITION.NO_SESSIONS_AVAILABLE_ADMIN}
+            </div>
           </>
         );
-      });
-      console.log(("sessionDates", sessionDates));
-      return sessionDates;
+      }
     }
 
     return (
@@ -307,6 +320,12 @@ function AdminDashboard(props) {
             >
               {SessionList(listDetails)}
             </ListGroup> */}
+              <Row className="p-4 justify-content-center ">
+                <div className="text-light text-center ">
+                  <div className="">{TEXTDEFINITION.ADMIN_DASHBOARD_LINE1}</div>
+                </div>
+              </Row>
+
               {SessionList()}
               {/* <Row>Select Date : {printSessionDates()}</Row> */}
               {showSessions ? listSessionTimes() : null}

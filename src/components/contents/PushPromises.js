@@ -16,7 +16,7 @@ function PushPromises(promises, setModalDetails, setLoading, setIsSubmitting) {
     })
     .catch((e) => {
       console.log("promise erroe", e);
-      console.log(e.message);
+      console.log("promise erroe message", e.message);
       if (e.code == "auth/requires-recent-login") {
         setModalDetails({
           bodyText:
