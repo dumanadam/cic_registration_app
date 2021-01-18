@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../cic.png";
+import logo from "../assets/images/icon-demo.png";
 import covidlogo from "../assets/images/covidsafe.png";
 import { Card, Container } from "react-bootstrap";
 

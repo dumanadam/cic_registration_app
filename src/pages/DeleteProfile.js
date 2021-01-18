@@ -53,7 +53,7 @@ function DeleteProfile(props) {
     const session = {
       deleted: true,
     };
-    promises.push(bookSession(session));
+    //  promises.push(bookSession(session));
     if (passwordRef.current.value) {
       currentUser
         .delete()

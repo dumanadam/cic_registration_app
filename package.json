@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^12.2.0",
     "bootstrap": "^4.5.3",
     "firebase": "^8.0.1",
+    "firebase-admin": "^9.4.2",
     "formik": "^2.2.5",
     "md5": "^2.3.0",
     "moment": "^2.29.1",

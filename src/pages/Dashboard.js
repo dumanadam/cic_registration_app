@@ -36,8 +36,7 @@ const Dashboard = (props) => {
 
   return (
     <>
-      {loading ? //<ShowModal loading={loading} modalDetails={modalDetails} />
-      null : (
+      {loading ? null : ( //<ShowModal loading={loading} modalDetails={modalDetails} />
         <DashboardBody
           loading={loading}
           userDetails={userDetails}

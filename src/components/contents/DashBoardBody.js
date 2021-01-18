@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import NavButtons from "../NavButtons";
 import TEXTDEFINITION from "../../text/TextDefinition";
 import MainShell from "../MainShell";
+import { fbfunc, functions } from "../../firebase";
 
 var QRCode = require("qrcode.react");
 
@@ -166,7 +167,7 @@ function DashboardBody(props) {
 
   const bookingsText = [
     {
-      title: "Salamu Aleykum",
+      title: TEXTDEFINITION.DASHBOARD_GREETING,
       detail: props.userDetails.firstname,
     },
     { title: " Date:", detail: props.userDetails.jumaDate },
@@ -197,7 +198,13 @@ function DashboardBody(props) {
       handleLogout: handleLogout,
     },
   };
-
+  function fbclick(params) {
+    console.log("params", params);
+    const sayHello = fbfunc.httpsCallable("sayHello");
+    sayHello({ name: "asd" }).then((result) => {
+      console.log("res from func  - ", result.data);
+    });
+  }
   return (
     <>
       <div style={{ height: "50vh" }}>
@@ -235,6 +242,7 @@ function DashboardBody(props) {
         </Row>
       </div>
       <div id="bottom-navigation"> {dashboardNavButtons}</div>
+      <button onClick={fbclick}>asdasd</button>
     </>
   );
 }

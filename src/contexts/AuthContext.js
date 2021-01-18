@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { auth, db } from "../firebase";
+import { auth, db, fbfunc } from "../firebase";
 import moment from "moment";
 import FindFriday from "../components/FindFriday";
 import FbAddress from "../components/contents/FbAddress";
@@ -404,13 +404,30 @@ export function AuthProvider({ children }) {
         }
       }
     }
-    sessiondetails = {
+    let sessionDetails = {
       ...sessiondetails,
       lastupdate: now,
     };
+
     let sessionOwner = "sessions/" + company.toLowerCase() + "/";
 
-    let upd = db.ref(sessionOwner).set(sessiondetails);
+    let upd = db.ref(sessionOwner).set(sessionDetails);
+    let fbObj = {
+      sessionDetails: sessionDetails,
+      sessionOwner: sessionOwner,
+      company: company,
+    };
+    console.log("fbObj", fbObj);
+
+    let createAdminSess = fbfunc.httpsCallable("createSessions");
+    createAdminSess(fbObj)
+      .then((result) => {
+        console.log("res from createAdminSess func  ->>> ", result.data);
+      })
+      .catch((e) => {
+        console.log("FBfunc createsessions error returned >>>", e);
+      });
+
     return upd;
   }
 

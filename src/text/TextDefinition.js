@@ -7,7 +7,7 @@ const TEXTDEFINITION = {
     "The venue has not made any sessions available at this time, please try again later",
   NO_SESSIONS_AVAILABLE_ADMIN:
     "Please create sessions with the Create Session button",
-  DASHBOARD_CARD_HEADER: "Coburg Islamic Centre",
+  DASHBOARD_CARD_HEADER: "Test Venue",
   ADMIN_CARD_HEADER: "Admin",
   DELETE_CARD_HEADER: "Delete Profile",
   UPDATEPROFILE_CARD_HEADER: "Update Profile",
@@ -19,6 +19,7 @@ const TEXTDEFINITION = {
   EMPTY_ADMIN_SESSIONS:
     "To open a new Juma sessiom click Create Session button.",
   ADMIN_DASHBOARD_LINE1: "Please select a session date and time below",
+  DASHBOARD_GREETING: "GREETING TEXT",
 };
 
 export default TEXTDEFINITION;
