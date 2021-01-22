@@ -3,71 +3,39 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
-var db = admin.database();
+let db = admin.database();
 
-/* function signup(
-    email,
-    password,
-    firstName,
-    surName,
-    mobileNum,
-    agreeNewsletter
-  ) {
-    const now = moment().toString();
-    return auth
-      .createUserWithEmailAndPassword(email, password)
-      .then((newUser) => {
-        console.log("newuser is > ", newUser);
-        console.log("moment now is > ", auth);
-        db.ref("users/" + auth.currentUser.uid)
-          .set({
-            firstname: firstName,
-            surname: surName,
-            mobile: mobileNum,
-            jumaDate: "",
-            jumaSession: "",
-            cancelCount: 0,
-            warningCount: 0,
-            banned: 0,
-            newsletter: agreeNewsletter,
-            admin: 0,
-            deleted: false,
-            deleteDate: "",
-            lastupdate: now,
-            company: {
-              melbourne: {
-                cic: "cic",
-              },
-            },
-          })
-          .catch((e) => {
-            console.log("auth context error>", e);
-          });
-      });
-  } */
+exports.testFunc = functions.https.onCall((data, context) => {
+  let ref = admin
+    .database()
+    .ref("users/K01mUx3JHBM1wTtRvNGaS4avrPm0")
+    .once("value", (snapshot) => {})
+    .then((val) => {
+      return val.val();
+    });
+  console.log("ref", ref);
+  return ref;
+});
 
 exports.createSessions = functions.https.onCall((data, context) => {
-  let sessionOwner = "openSessions/" + data.company.toLowerCase() + "/" || null;
-  admin
-    .database()
-    .ref("adminSessions/cic/")
-    .set(data.sessionDetails)
-    .then(() => {
-      // Returning the sanitized message to the client.
-      return true;
-    })
-    .catch((e) => {
-      console.log("adminsessions write error");
-    });
+  if (!context.auth) {
+    // Throwing an HttpsError so that the client gets the error details.
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "The function must be called " + "while authenticated."
+    );
+  }
 
-  return admin
-    .database()
-    .ref("sessionsPub/cic/")
-    .set(data.sessionDetails)
-    .then(() => {
-      // Returning the sanitized message to the client.
-      return true;
-    });
+  let promises = [];
+  let sessionOwner = "openSessions/" + data.company.toLowerCase() + "/" || null;
+  promises.push(
+    admin.database().ref("adminSessions/cic/").set(data.sessionDetails)
+  );
+  promises.push(
+    admin.database().ref("pubSessions/cic/").set(data.sessionDetails)
+  );
+
+  return Promise.all(promises);
 });
 
 // Saves a message to the Firebase Realtime Database but sanitizes the text by removing swearwords.
@@ -100,37 +68,54 @@ exports.addMessage = functions.https.onCall((data, context) => {
 });
 
 // auth trigger (new user signup)
-exports.newUserSignUp = functions.auth.user().onCreate((user) => {
-  console.log("user created: ", user.email, user.uid);
-
-  return admin
-    .database()
-    .ref("/adminUsers/" + user.uid + "/adminDetails")
-    .update({
-      firstname: user.firstName,
-      surname: user.surName,
-      mobile: user.mobileNum,
+exports.newUserSignUp = functions.https.onCall((data, context) => {
+  let promises = [];
+  console.log("data new user", data);
+  console.log("context new user", context.auth.uid);
+  promises.push(
+    db.ref("users/" + context.auth.uid).set({
+      firstname: data.firstName,
+      surname: data.surName,
+      mobile: data.mobileNum,
       jumaDate: "",
       jumaSession: "",
-      cancelCount: 0,
-      warningCount: 0,
-      banned: 0,
-      newsletter: user.agreeNewsletter,
-      admin: 0,
-      deleted: false,
-      deleteDate: "",
-      lastupdate: now,
+      newsletter: data.agreeNewsletter,
+      lastupdate: admin.firestore.FieldValue.serverTimestamp(),
       company: {
         melbourne: {
           cic: "cic",
         },
       },
     })
-    .then(() => {
-      console.log("private degtails written");
-      // Returning the sanitized message to the client.
-      return true;
-    });
+  );
+
+  /*   promises.push(
+    admin
+      .database()
+      .ref("/adminUsers/" + context.auth.uid + "/adminDetails")
+      .set({
+        firstname: data.firstName,
+        surname: data.surName,
+        mobile: data.mobileNum,
+        jumaDate: "",
+        jumaSession: "",
+        cancelCount: 0,
+        warningCount: 0,
+        banned: 0,
+        newsletter: data.agreeNewsletter,
+        admin: 0,
+        deleted: false,
+        deleteDate: "",
+        lastupdate: admin.firestore.FieldValue.serverTimestamp(),
+        company: {
+          melbourne: {
+            cic: "cic",
+          },
+        },
+      })
+  ); */
+
+  return Promise.all(promises);
 });
 
 // auth trigger (user deleted)
@@ -147,24 +132,141 @@ exports.userDeleted = functions.auth.user().onDelete((user) => {
     });
 });
 
-exports.makeUppercase = functions.database
+exports.bookSession = functions.https.onCall((data, context) => {
+  console.log("contextauth", context.auth.uid);
+
+  console.log("data2", JSON.stringify(data));
+
+  //if (!(context.auth && context.auth.token && context.auth.token.admin)) {
+  if (!(context.auth && context.auth.token)) {
+    throw new functions.https.HttpsError(
+      "permission-denied",
+      "Must be an administrative user to initiate delete."
+    );
+  }
+
+  let promises = [];
+  let prepPromises = [];
+  let userBookingDate = data.newSessionDetails.jumaDate;
+  let userBookingSession = data.newSessionDetails.jumaSession;
+  let userBookingHash = data.newSessionDetails.sessionHash;
+  let uid = context.auth.uid;
+  console.log(
+    "data.newSessionDetails.userCancelBooking",
+    data.newSessionDetails.userCancelBooking
+  );
+  console.log("qqqqq", uid);
+  let newBookingDate = data.newSessionDetails.jumaDate;
+  let newBookingSession = data.newSessionDetails.jumaSession;
+  let oldBookingDate = data.currentUserSession.jumaDate;
+  let oldBookingSession = data.currentUserSession.jumaSession;
+
+  console.log("oldBookingSession", oldBookingSession);
+
+  if (newBookingDate !== "") {
+    console.log("hit true adm2 ", data);
+    promises.push(
+      admin
+        .database()
+        .ref(
+          "adminSessions/cic/openSessions/" +
+            newBookingDate +
+            "/" +
+            newBookingSession +
+            "/confirmed/" +
+            uid
+        )
+        .update(data.newSessionDetails)
+    );
+    if (oldBookingDate !== "") {
+      promises.push(
+        admin
+          .database()
+          .ref(
+            "adminSessions/cic/openSessions/" +
+              oldBookingDate +
+              "/" +
+              oldBookingSession +
+              "/confirmed/" +
+              uid
+          )
+          .remove()
+      );
+    }
+  }
+
+  if (data.newSessionDetails.userCancelBooking) {
+    console.log("hit cancel -------");
+    promises.push(
+      admin
+        .database()
+        .ref(
+          "adminSessions/cic/openSessions/" +
+            oldBookingDate +
+            "/" +
+            oldBookingSession +
+            "/confirmed/" +
+            uid
+        )
+        .update({ userCancelBooking: true })
+    );
+  }
+
+  return Promise.all(promises);
+});
+
+/* exports.jumaDate = functions.database
+  .ref("/users/{userId}/jumaDate")
+  .onWrite((change, context) => {
+    let promises = [];
+    console.log("context params is", context.params.jumaDate);
+    const after = change.after.val();
+    const before = change.before.val();
+    console.log("context params after ", after);
+    console.log("context params before", before);
+    let updatedKey = context.params.jumaDate;
+
+    if (updatedKey === "jumaDate" && after === "") {
+      promises.push(
+        admin
+          .database()
+          .ref(
+            "adminSessions/cic/openSessions/" +
+              userBookingDate +
+              "/" +
+              userBookingSession +
+              "/confirmed/" +
+              before
+          )
+          .remove()
+      );
+    }
+    return Promise.all([]);
+  });
+ */
+exports.copyPrivUserDetails = functions.database
   .ref("/users/{userId}")
   .onWrite((change, context) => {
-    console.log("context is", context);
-    console.log("context params is", context.params);
-    console.log("context change is", change);
-    // Grab the current value of what was written to the Realtime Database.
-    const original = change.after.val();
-    console.log("context original is", original);
+    let promises = [];
+    const after = change.after.val();
+    //console.log("exists after log", after);
+
     // Only edit data when it is first created.
     if (change.before.exists()) {
-      console.log("context change before exists");
-      /*       admin
+      /*   console.log(
+        "context change before exists",
+        JSON.stringify(change.before.val())
+      ); */
+    }
+    if (after.jumaDate === "") {
+      //  console.log("change context after exists", JSON.stringify(after));
+    }
+    promises.push(
+      admin
         .database()
-        .ref("/privUserDetails/" + user.uid)
+        .ref("/privUserDetails/" + context.params.userId)
         .update({
-          ...original,
-
+          ...after,
           cancelCount: 0,
           warningCount: 0,
           banned: 0,
@@ -179,53 +281,16 @@ exports.makeUppercase = functions.database
             },
           },
         })
-        .then(() => {
-          console.log("private degtails written");
-          // Returning the sanitized message to the client.
-          return true;
-        })
-        .catch((e) => {
-          console.log("copy error ", e);
-        }); */
-    }
-    // Exit when the data is deleted.
-    if (!change.after.exists()) {
-      console.log("change context after exists");
-      return null;
-    }
+    );
 
-    // You must return a Promise when performing asynchronous tasks inside a Functions such as
-    // writing to the Firebase Realtime Database.
-    // Setting an "uppercase" sibling in the Realtime Database returns a Promise.
-    return admin
-      .database()
-      .ref("/privUserDetails/" + context.params.userId)
-      .update({
-        ...original,
-        cancelCount: 0,
-        warningCount: 0,
-        banned: 0,
-
-        admin: 0,
-        deleted: false,
-        deleteDate: "",
-
-        company: {
-          melbourne: {
-            cic: "cic",
-          },
-        },
-      })
-      .then(() => {
-        console.log("private degtails written");
-        // Returning the sanitized message to the client.
-        return true;
-      })
-      .catch((e) => {
-        console.log("copy error ", e);
-      });
+    return Promise.all(promises);
   });
 
+function calculateBooked(before, after, context) {
+  /*   console.log("before", before);
+  console.log("after", after);
+  console.log("context", context); */
+}
 /* let addMessage = fbfunc.httpsCallable("addMessage");
 addMessage({ text: "teh test text" }).then((result) => {
   // Read result of the Cloud Function.

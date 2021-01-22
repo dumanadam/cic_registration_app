@@ -105,6 +105,10 @@ export default function Sessions() {
     console.log("sessiosn listkey", listKey);
   }, [listKey]);
 
+  /*   useEffect(() => {
+    console.log("session obj", session);
+  }, [session]); */
+
   useEffect(() => {
     if (userDetails.firstname && openSessions) {
       console.log("userDetails + openSessions", openSessions);
@@ -147,10 +151,16 @@ export default function Sessions() {
   }, []);
 
   function handleSubmit(e) {
+    const promises = [];
+    let currentUserSession = {
+      jumaDate: userDetails.jumaDate,
+      jumaSession: userDetails.jumaSession,
+      sessionHash: userDetails.sessionHash,
+    };
     e.preventDefault();
     setLoading(true);
     console.log("e", e);
-    const promises = [];
+
     if (!session.jumaSession) {
       setModalDetails({ bodyText: "Selected Session time hasnt changed" });
       setTimeout(() => {
@@ -160,7 +170,7 @@ export default function Sessions() {
       return;
     }
 
-    promises.push(bookSession(session));
+    promises.push(bookSession(session, currentUserSession));
     Promise.all(promises)
       .then(() => {
         history.push("/session-confirmed");
@@ -181,6 +191,11 @@ export default function Sessions() {
 
   function handleCancel(e) {
     console.log("hit submit");
+    let currentUserSession = {
+      jumaDate: userDetails.jumaDate,
+      jumaSession: userDetails.jumaSession,
+      sessionHash: userDetails.sessionHash,
+    };
     e.preventDefault();
     setLoading(true);
 
@@ -191,6 +206,7 @@ export default function Sessions() {
           jumaDate: "",
           jumaSession: "",
         },
+        currentUserSession,
         true
       )
     );

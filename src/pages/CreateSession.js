@@ -170,12 +170,16 @@ function CreateSession() {
 
       for (let index = 1; index <= weeksQty; index++) {
         let sessionDateString = FindFriday(index, true);
+        console.log("sessionDateString", sessionDateString);
         sessionUploadObject.openSessions = {
           ...sessionUploadObject.openSessions,
 
           [sessionDateString]: {},
         };
-        console.log("sessionDateString", sessionDateString);
+        console.log(
+          "sessionUploadObject.openSessions",
+          sessionUploadObject.openSessions
+        );
         for (let index = 0; index < sessionQty; index++) {
           let time = FormatTimeFirebase(selectedSessiontime, index);
 
@@ -192,7 +196,10 @@ function CreateSession() {
           };
         }
       }
-
+      console.log(
+        "sessionUploadObject.openSessions last",
+        sessionUploadObject.openSessions
+      );
       return sessionUploadObject;
     }
 
@@ -202,7 +209,7 @@ function CreateSession() {
         setLoading(true);
 
         let formattedSessions = createUploadObject();
-
+        console.log("formattedSessions last", formattedSessions);
         const promises = [];
         promises.push(
           createSessions(formattedSessions, userDetails.company.melbourne.cic)

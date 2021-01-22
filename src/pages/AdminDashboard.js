@@ -46,9 +46,9 @@ function AdminDashboard(props) {
   let buttonDetails = {
     b1: {
       buttonText:
-        Object.keys(openSessions).length === 0
+        /*  Object.keys(openSessions).length === 0
           ? "Create Session"
-          : "Update Session",
+          :  */ "Update Session",
       link: "/create-session",
       variant: "primary w-100",
       loading: loading,
@@ -76,6 +76,7 @@ function AdminDashboard(props) {
     if (openSessions !== "") {
       setLoading(false);
     }
+    console.log("admindashboard opensessions", openSessions);
   }, [openSessions]);
 
   useEffect(() => {

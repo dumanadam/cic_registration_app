@@ -31,13 +31,13 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    console.log("globalFridayFb", globalFridayFb);
+    console.log("globalFridayFb", globalFriday);
   }, [globalFridayFb]);
 
   function getCurrentUserDetails() {
     try {
       db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
-        console.log("*Google DB*getting latest userdetails");
+        console.log("*Google DB*getting latest userdetails", snapshot.val());
         setUserDetails(snapshot.val());
         setGlobalFridayFb(FindFriday(1, true));
         setGlobalFriday(FindFriday());
@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
       console.log("getcurrentuserdetails error", error);
     }
     try {
-      db.ref("/sessions/cic/openSessions").on("value", (snapshot) => {
+      db.ref("/pubSessions/cic/openSessions").on("value", (snapshot) => {
         console.log("sessions printout", snapshot.val());
       });
     } catch (error) {
@@ -55,14 +55,20 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    if (userDetails.firstname) {
-      getOpenSessions(userDetails.company.melbourne.cic);
+    if (userDetails !== null) {
+      if (
+        typeof userDetails.firstname !== "undefined" &&
+        userDetails !== null
+      ) {
+        console.log("userDetails.firstname", userDetails.firstname);
+        getOpenSessions(userDetails.company.melbourne.cic);
+      }
     }
   }, [userDetails]);
 
   function getOpenSessions(adminCompany) {
     try {
-      db.ref("sessions/" + adminCompany.toLowerCase() + "/openSessions").on(
+      db.ref("pubSessions/" + adminCompany.toLowerCase() + "/openSessions").on(
         "value",
         (snapshot) => {
           setOpenSessions(snapshot.val());
@@ -81,35 +87,28 @@ export function AuthProvider({ children }) {
     mobileNum,
     agreeNewsletter
   ) {
-    const now = moment().toString();
+    let registrationDetails = {
+      email,
+      password,
+      firstName,
+      surName,
+      mobileNum,
+      agreeNewsletter,
+    };
+    let newUserSignUp = fbfunc.httpsCallable("newUserSignUp");
+
     return auth
       .createUserWithEmailAndPassword(email, password)
       .then((newUser) => {
         console.log("newuser is > ", newUser);
-        console.log("moment now is > ", auth);
-        db.ref("users/" + auth.currentUser.uid)
-          .set({
-            firstname: firstName,
-            surname: surName,
-            mobile: mobileNum,
-            jumaDate: "",
-            jumaSession: "",
-            cancelCount: 0,
-            warningCount: 0,
-            banned: 0,
-            newsletter: agreeNewsletter,
-            admin: 0,
-            deleted: false,
-            deleteDate: "",
-            lastupdate: now,
-            company: {
-              melbourne: {
-                cic: "cic",
-              },
-            },
+      })
+      .then((seconduser) => {
+        newUserSignUp(registrationDetails)
+          .then((result) => {
+            console.log("res from new user auth func  ->>> ", result);
           })
           .catch((e) => {
-            console.log("auth context error>", e);
+            console.log("FBfunc from new user auth error returned >>>", e);
           });
       });
   }
@@ -328,55 +327,27 @@ export function AuthProvider({ children }) {
     console.log("userDetails xxx2", userDetails);
   }
 
-  function bookSession(newSessionDetails, userCancelBooking = false) {
+  function bookSession(
+    newSessionDetails,
+    currentUserSession,
+    userCancelBooking = false
+  ) {
     newSessionDetails = {
       ...newSessionDetails,
-      lastupdate: now,
+      userCancelBooking,
     };
     console.log("newSessionDetails", newSessionDetails);
+    console.log("currentUserSession", currentUserSession);
+    let bookSessionFunc = fbfunc.httpsCallable("bookSession");
+    bookSessionFunc({ newSessionDetails, currentUserSession })
+      .then((result) => {
+        console.log("res from createAdminSess func  ->>> ", result.data);
+      })
+      .catch((e) => {
+        console.log("FBfunc createsessions error returned >>>", e);
+      });
+
     const userDBAddress = "users/" + auth.currentUser.uid;
-
-    const newCompanyBookingDBAddress = FbAddress(
-      "newCompanyBookingDBAddress",
-      userDetails,
-      newSessionDetails,
-      auth
-    );
-
-    const oldCompanyBookingDBADdress = FbAddress(
-      "oldCompanyBookingDBADdress",
-      userDetails,
-      newSessionDetails,
-      auth
-    );
-
-    console.log("oldCompanyBookingDBADdress", oldCompanyBookingDBADdress);
-    console.log("newCompanyBookingDBAddress", newCompanyBookingDBAddress);
-
-    let companyBookingSessionDetails = {
-      firstname: userDetails.firstname,
-      surname: userDetails.surname,
-      mobile: userDetails.mobile,
-      id: auth.currentUser.uid,
-    };
-    if (userDetails.jumaDate) {
-      updateSession(
-        true,
-        oldCompanyBookingDBADdress,
-        newCompanyBookingDBAddress,
-        companyBookingSessionDetails,
-        newSessionDetails,
-        userCancelBooking
-      );
-    } else {
-      updateSession(
-        false,
-        oldCompanyBookingDBADdress,
-        newCompanyBookingDBAddress,
-        companyBookingSessionDetails,
-        newSessionDetails
-      );
-    }
     updateDB(userDBAddress, newSessionDetails);
   }
 
@@ -388,12 +359,13 @@ export function AuthProvider({ children }) {
       lastupdate: now,
     };
     console.log("blankSessionDetails", blankSessionDetails);
+
     updateDB(userDBAddress, blankSessionDetails);
   }
 
   function createSessions(sessiondetails, company) {
     console.log("booksession auth", sessiondetails);
-    for (const date in openSessions) {
+    /*     for (const date in openSessions) {
       console.log("key", date);
       console.log("key2", openSessions[date]);
       for (const time in openSessions[date]) {
@@ -403,15 +375,14 @@ export function AuthProvider({ children }) {
           console.log("time.booked 0", time.booked);
         }
       }
-    }
+    } */
     let sessionDetails = {
       ...sessiondetails,
-      lastupdate: now,
     };
 
     let sessionOwner = "sessions/" + company.toLowerCase() + "/";
 
-    let upd = db.ref(sessionOwner).set(sessionDetails);
+    // let upd = db.ref(sessionOwner).update(sessionDetails);
     let fbObj = {
       sessionDetails: sessionDetails,
       sessionOwner: sessionOwner,
@@ -428,7 +399,7 @@ export function AuthProvider({ children }) {
         console.log("FBfunc createsessions error returned >>>", e);
       });
 
-    return upd;
+    return true;
   }
 
   function deleteProfile(password) {

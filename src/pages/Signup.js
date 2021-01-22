@@ -64,6 +64,7 @@ export default function Signup(props) {
     }
 
     try {
+      console.log("--------after push");
       setError("");
       setLoading(true);
       await signup(
@@ -75,8 +76,9 @@ export default function Signup(props) {
         agreeNewsletter
       );
       history.push("/");
+      console.log("--------after push", e);
     } catch (e) {
-      console.log("e", e);
+      console.log("******signup error", e);
       setErrorState(!errorState);
       setErrorMessage(e.message);
       //setError(e.message);

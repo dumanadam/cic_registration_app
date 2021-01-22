@@ -21,3 +21,12 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+database-debug.log
+firebase-debug.log
+firebase.json
+firebase.json
+firestore-debug.log
+ui-debug.log
+functions/del.js
+functions/index.js
+functions/index.js

@@ -12,9 +12,13 @@ const app = firebase.initializeApp({
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 });
+firebase.functions().useEmulator("localhost", 5001);
+firebase.auth().useEmulator("http://localhost:9099/");
 
 export const auth = app.auth();
 export const db = app.database();
+db.useEmulator("localhost", 9000);
+
 export const fbfunc = firebase.functions();
 
 export default app;

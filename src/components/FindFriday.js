@@ -7,7 +7,17 @@ function FindFriday(weeks = 1, unformatted = false) {
 
   if (today <= dayINeed) {
     // then just give me this week's instance of that day
-    if (unformatted) return moment().isoWeekday(dayINeed).format("DD-MM-YYYY");
+    if (unformatted) {
+      console.log(
+        "right date>>",
+        moment().add(weeks, "weeks").isoWeekday(dayINeed).format("DD-MM-YYYY")
+      );
+
+      return moment()
+        .add(weeks, "weeks")
+        .isoWeekday(dayINeed)
+        .format("DD-MM-YYYY");
+    }
     return moment().isoWeekday(dayINeed).format("dddd DD/MM/YYYY");
   } else {
     // otherwise, give me *next week's* instance of that same day

@@ -10,19 +10,26 @@ const Dashboard = (props) => {
   const { logout, userDetails, openSessions, clearUserJumaSession } = useAuth();
 
   useEffect(() => {
-    // console.log("userDetails", userDetails);
-    if (userDetails.firstname) {
-      console.log("userDetails", userDetails);
+    console.log("userDetails dashboard", userDetails);
+    if (userDetails !== null) {
+      if (
+        Object.keys(userDetails).length === 0 &&
+        userDetails.constructor === Object
+      ) {
+        console.log("userDetails true", userDetails);
+      } else {
+        console.log("userDetails false", userDetails);
 
-      setMyProps({
-        userDetails: userDetails,
-        loading: loading,
-        setLoading: setLoading,
-        logout: logout,
-        headerText: TEXTDEFINITION.DASHBOARD_CARD_HEADER,
-      });
+        setMyProps({
+          userDetails: userDetails,
+          loading: loading,
+          setLoading: setLoading,
+          logout: logout,
+          headerText: TEXTDEFINITION.DASHBOARD_CARD_HEADER,
+        });
 
-      setLoading(false);
+        setLoading(false);
+      }
     }
   }, [userDetails]);
 

@@ -30,15 +30,20 @@ function DashboardBody(props) {
         ].confirmed === "undefined"
       ) {
         console.log("userdetails jumassession FAILED match");
-        removeUserSession();
+        // removeUserSession();
       } else {
         if (
           typeof props.openSessions[props.userDetails.jumaDate][
             props.userDetails.jumaSession
           ].confirmed[props.userDetails.sessionHash] == "undefined"
         ) {
-          console.log("session hash in confirmed failed");
-          removeUserSession();
+          console.log(
+            "session hash in confirmed failed",
+            props.openSessions[props.userDetails.jumaDate][
+              props.userDetails.jumaSession
+            ].confirmed[props.userDetails.sessionHash]
+          );
+          // removeUserSession();
         } else {
           console.log(
             "everything ok in user to db match",
@@ -200,7 +205,7 @@ function DashboardBody(props) {
   };
   function fbclick(params) {
     console.log("params", params);
-    const sayHello = fbfunc.httpsCallable("sayHello");
+    const sayHello = fbfunc.httpsCallable("testFunc");
     sayHello({ name: "asd" }).then((result) => {
       console.log("res from func  - ", result.data);
     });
