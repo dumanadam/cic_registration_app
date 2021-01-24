@@ -24,7 +24,14 @@ import ShowModal from "../components/ShowModal";
 
 function AdminDashboard(props) {
   const [error, setError] = useState("");
-  const { globalFridayFb, logout, userDetails, openSessions } = useAuth();
+  const {
+    globalFridayFb,
+    logout,
+    userDetails,
+    openSessions,
+    superSessions,
+    getSessionAttendees,
+  } = useAuth();
   const [pageTitle, setpageTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [adminNavButtons, setAdminNavButtons] = useState("");
@@ -34,6 +41,8 @@ function AdminDashboard(props) {
   const [session, setSession] = useState({});
   const [showSessions, setShowSessions] = useState(false);
   const [clickedDate, setClickedDate] = useState("");
+  const [sessionAttendees, setSessionAttendees] = useState([]);
+  const [superSessionsx, setSuperSessionsx] = useState(null);
 
   const bookingsText = [
     {
@@ -70,17 +79,41 @@ function AdminDashboard(props) {
   useEffect(() => {
     setpageTitle(PageTitle("Dashboard"));
     setAdminNavButtons(NavButtons(3, buttonDetails));
+    console.log("attendee getusersess", getSessionAttendees());
+    setSessionAttendees(getSessionAttendees());
   }, []);
 
-  useEffect(() => {
-    if (openSessions !== "") {
+  /*   useEffect(() => {
+    if (openSessions === "unauthenticated") {
+      history.push({
+        pathname: "/",
+      });
+    } else {
       setLoading(false);
     }
     console.log("admindashboard opensessions", openSessions);
-  }, [openSessions]);
+  }, [openSessions]); */
+
+  useEffect(() => {
+    console.log("super", superSessions);
+    if (superSessions !== null) {
+      console.log("supersessions not null", superSessions);
+      if (superSessions.code === "unauthenticated") {
+        history.push({
+          pathname: "/",
+        });
+      }
+      if (superSessions === "no-sessions") {
+        console.log("admindashboard supersessions", superSessions);
+        setSuperSessionsx(superSessions);
+        setLoading(false);
+      }
+    }
+  }, [superSessions]);
 
   useEffect(() => {
     setAdminNavButtons(NavButtons(3, buttonDetails));
+    console.log("loading admindash", loading);
   }, [loading]);
 
   useEffect(() => {
@@ -95,100 +128,6 @@ function AdminDashboard(props) {
   useEffect(() => {
     setAdminNavButtons(NavButtons(3, buttonDetails));
   }, [NavButtons]);
-
-  function sessionButton() {
-    if (userDetails.jumaDate === "") {
-      return (
-        <Link to="/sessions" className="btn btn-primary  mt-3 mr-1">
-          Book Session
-        </Link>
-      );
-    } else {
-      return (
-        <Link to="/sessionConfirmed" className="btn btn-primary  mt-3 mr-1">
-          View QrCode
-        </Link>
-      );
-    }
-  }
-
-  function sessionSettings() {
-    return sessionOptions.map((option) => (
-      <div key={`default-radio`} className="mt-1 text-center">
-        <Form.Check type={"radio"} id={option.label} label={option.label} />
-      </div>
-    ));
-  }
-
-  function printSessionInfo() {
-    let result = bookingsText.map((rowDetails) => {
-      let sessionCheck =
-        rowDetails.detail === "" ? "No Booking" : rowDetails.detail;
-
-      return (
-        <Row className="mt-4 mb-4">
-          <Col
-            xl={7}
-            xs={7}
-            className="text-warning text-right"
-            style={{ fontSize: "18px" }}
-          >
-            {rowDetails.title}
-          </Col>
-          <Col className="text-light text-left" style={{ fontSize: "18px" }}>
-            {sessionCheck}
-          </Col>
-        </Row>
-      );
-    });
-    console.log("result", result);
-
-    return result;
-  }
-
-  function sessionCheck(params) {
-    return userDetails.jumaDate ? (
-      <div className="text-light text-center ">
-        <div className="text-center w-100">
-          {TEXTDEFINITION.JUMA_BOOKED_CHECK}
-
-          {userDetails.jumaDate}
-        </div>
-      </div>
-    ) : (
-      <div className="text-light text-center ">
-        <div className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL1}</div>
-
-        <span className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL2}</span>
-      </div>
-    );
-  }
-  function printSessionDates() {
-    //  if (openSessions) {
-    let sessionDates = Object.keys(openSessions).map(function (key, index) {
-      /*  console.log("key", key);
-      console.log("admin key", openSessions[key]);
-      let l = openSessions[key]; */
-      return (
-        <>
-          <Col>
-            <Button variant="warning m-1 " onClick={(e) => handleSelectDate(e)}>
-              {key}
-            </Button>
-          </Col>
-        </>
-      );
-    });
-    console.log("sessionDates", sessionDates);
-    return sessionDates;
-    //  return sessionDates;
-    //}
-    /* return (
-      <div className="mt-4 text-center "> 
-        {TEXTDEFINITION.EMPTY_ADMIN_SESSIONS}
-      </div>
-    ); */
-  }
 
   function handleSelectDate(e) {
     e.preventDefault();
@@ -206,25 +145,19 @@ function AdminDashboard(props) {
       state: {
         selectedDate: clickedDate,
         selectedTime: e.target.textContent,
+        superSessionsx: superSessionsx,
       },
     });
   }
 
-  function checkKey() {
-    if (userDetails.jumaSession === "") {
-      return "#";
-    } else {
-      return Object.keys(openSessions)[2];
-    }
-  }
-
-  function handleClick(clicked) {
-    console.log("clicked", clicked);
-  }
   function SessionList() {
+    console.log("loop superSessionsx", superSessionsx);
     function loopSessions() {
-      if (openSessions) {
-        let sessionDates = Object.keys(openSessions).map(function (key, index) {
+      if (superSessionsx !== "no-sessions") {
+        let sessionDates = Object.keys(superSessionsx).map(function (
+          key,
+          index
+        ) {
           /*   console.log(" handle key is", key);
           console.log("index is", index); */
           return (
@@ -269,9 +202,9 @@ function AdminDashboard(props) {
   }
 
   function listSessionTimes() {
-    console.log("session", session);
-    console.log("openSessions[session]", openSessions[session]);
-    let sessionTimes = Object.keys(openSessions[session]).map(function (
+    console.log("session superSessionsx", session);
+    console.log("superSessionsx[session]", superSessionsx[session]);
+    let sessionTimes = Object.keys(superSessionsx[session]).map(function (
       key,
       index
     ) {

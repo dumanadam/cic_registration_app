@@ -91,6 +91,8 @@ function AttendeeScanner() {
     globalFriday,
     globalFridayFb,
     updateAttendance,
+    getSessionAttendees,
+    superSessions,
   } = useAuth();
   const [error, setError] = useState("");
   const [session, setSession] = useState({});
@@ -99,6 +101,7 @@ function AttendeeScanner() {
   const [result, setResult] = useState("Nada");
   const [listKey, setListKey] = useState("");
   const [bookingAvailability, setBookingAvailability] = useState(0);
+  const [sessionAttendees, setSessionAttendees] = useState([]);
   const [attendeeDetails, setAttendeeDetails] = useState({});
   const history = useHistory();
   const [attendeeList, setAttendeeList] = useState([]);
@@ -119,32 +122,40 @@ function AttendeeScanner() {
   }, [attendeeList]);
 
   useEffect(() => {
+    console.log("sessionAttendees", sessionAttendees);
+  }, [sessionAttendees]);
+
+  useEffect(() => {
+    console.log("attendee getusersess", getSessionAttendees());
+    setSessionAttendees(getSessionAttendees());
+    console.log("location");
+  }, []);
+
+  useEffect(() => {
+    if (superSessions) {
+      let sessionAttendeeList =
+        location.state.superSessionsx[location.state.selectedDate][
+          location.state.selectedTime
+        ].confirmed;
+      setAttendeeDetails(sessionAttendeeList);
+      console.log("attendee supersessions", sessionAttendeeList);
+    }
+  }, [superSessions]);
+
+  useEffect(() => {
+    // let sessionAttendeeList = superSessions.cic.openSessions;
     console.log("attendee openSessions", openSessions);
     console.log("attendee location", location);
+    //  console.log("attendee supersessions", sessionAttendeeList);
+
     let spreadArr = [];
     if (openSessions == "") {
       history.push("/admin");
     } else {
-      console.log(
-        "attendees",
-        openSessions[location.state.selectedDate][location.state.selectedTime]
-          .confirmed
-      );
-      for (const key in openSessions[location.state.selectedDate][
-        location.state.selectedTime
-      ].confirmed) {
-        if (
-          Object.hasOwnProperty.call(
-            openSessions[location.state.selectedDate][
-              location.state.selectedTime
-            ].confirmed,
-            key
-          )
-        ) {
-          const element =
-            openSessions[location.state.selectedDate][
-              location.state.selectedTime
-            ].confirmed[key];
+      console.log("attendees supersessionssupersessions", attendeeDetails);
+      for (const key in attendeeDetails) {
+        if (Object.hasOwnProperty.call(attendeeDetails, key)) {
+          const element = attendeeDetails[key];
           console.log("element", element);
           spreadArr.push(element);
         }
@@ -153,7 +164,7 @@ function AttendeeScanner() {
       console.log("spreafarr", spreadArr);
       setAttendeeList(spreadArr);
     }
-  }, [openSessions]);
+  }, [attendeeDetails]);
 
   function playSuccessAudio() {
     console.log("hit audio play");
@@ -171,21 +182,11 @@ function AttendeeScanner() {
       // setResult({ result: data });
       console.log("scan is ", data);
       console.log("location is ", location.state);
-      let sessionConfirmedCheck =
-        openSessions[location.state.selectedDate][location.state.selectedTime]
-          .confirmed;
+      let sessionConfirmedCheck = attendeeDetails;
       if (sessionConfirmedCheck) {
-        console.log(
-          "Opensession match is  ",
-          openSessions[location.state.selectedDate][location.state.selectedTime]
-            .confirmed
-        );
+        console.log("attendeeDetails match is  ", attendeeDetails);
         filteredByKey = Object.fromEntries(
-          Object.entries(
-            openSessions[location.state.selectedDate][
-              location.state.selectedTime
-            ].confirmed
-          ).filter(([key, value]) => key === data)
+          Object.entries(attendeeDetails).filter(([key, value]) => key === data)
         );
         console.log("filteredByKey", filteredByKey);
 

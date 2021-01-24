@@ -14,9 +14,10 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
   const [userDetails, setUserDetails] = useState({});
-  const [globalFriday, setGlobalFriday] = useState({});
+
   const [globalFridayFb, setGlobalFridayFb] = useState({});
   const [openSessions, setOpenSessions] = useState("");
+  const [superSessions, setSuperSessions] = useState(null);
 
   const now = moment().toString();
 
@@ -30,9 +31,9 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    console.log("globalFridayFb", globalFriday);
-  }, [globalFridayFb]);
+  /*   useEffect(() => {
+    console.log("globalFridayFb", globalFridayFb);
+  }, [globalFridayFb]); */
 
   function getCurrentUserDetails() {
     try {
@@ -40,7 +41,6 @@ export function AuthProvider({ children }) {
         console.log("*Google DB*getting latest userdetails", snapshot.val());
         setUserDetails(snapshot.val());
         setGlobalFridayFb(FindFriday(1, true));
-        setGlobalFriday(FindFriday());
       });
     } catch (error) {
       console.log("getcurrentuserdetails error", error);
@@ -339,7 +339,7 @@ export function AuthProvider({ children }) {
     console.log("newSessionDetails", newSessionDetails);
     console.log("currentUserSession", currentUserSession);
     let bookSessionFunc = fbfunc.httpsCallable("bookSession");
-    bookSessionFunc({ newSessionDetails, currentUserSession })
+    bookSessionFunc({ newSessionDetails, currentUserSession, userDetails })
       .then((result) => {
         console.log("res from createAdminSess func  ->>> ", result.data);
       })
@@ -405,6 +405,33 @@ export function AuthProvider({ children }) {
   function deleteProfile(password) {
     return auth.currentUser.updatePassword(password);
   }
+  useEffect(() => {
+    if (superSessions == null) {
+      console.log("createAdminSess superSessions null");
+    } else {
+      console.log("createAdminSess superSessions ", superSessions);
+    }
+  }, [superSessions]);
+
+  async function getSessionAttendees() {
+    let qqq;
+
+    let getSessionAttendeesa = fbfunc.httpsCallable("getSessionAttendees");
+    try {
+      qqq = await getSessionAttendeesa().then((result) => {
+        console.log(
+          "res from getSessionAttendees func  superSessions ->>> ",
+          result
+        );
+        setSuperSessions(result.data);
+        return result.data;
+      });
+    } catch (error) {
+      console.log("getSessionAttendees err---", error);
+      setSuperSessions(null);
+    }
+    console.log("getSessionAttendees err+++++++++", qqq);
+  }
 
   const value = {
     currentUser,
@@ -422,10 +449,12 @@ export function AuthProvider({ children }) {
     createSessions,
     userDetails,
     openSessions,
-    globalFriday,
+
     globalFridayFb,
     updateAttendance,
     clearUserJumaSession,
+    getSessionAttendees,
+    superSessions,
   };
   return (
     <AuthContext.Provider value={value}>

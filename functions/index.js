@@ -5,16 +5,87 @@ admin.initializeApp();
 
 let db = admin.database();
 
-exports.testFunc = functions.https.onCall((data, context) => {
-  let ref = admin
+exports.getSessionAttendees = functions.https.onCall(async (data, context) => {
+  let asd;
+  result = await admin
     .database()
-    .ref("users/K01mUx3JHBM1wTtRvNGaS4avrPm0")
-    .once("value", (snapshot) => {})
-    .then((val) => {
-      return val.val();
+    .ref("adminUsers/" + context.auth.uid)
+    .once("value")
+    .then((snapshot) => {
+      console.log("result adminuser+++++", JSON.stringify(snapshot.val()));
+      if (snapshot.val() === null) {
+        throw new functions.https.HttpsError(
+          "unauthenticated",
+          "You must be authenticated to call this function."
+        );
+      } else {
+        return true;
+      }
+      /*   if (snapshot.val() === null) {
+        throw new functions.https.HttpsError(
+          "unauthenticated",
+          "You must be authenticated to call this function."
+        );
+      } */
+    })
+
+    .catch((e) => {
+      console.log("caught adminuser error", e);
+      return e;
     });
-  console.log("ref", ref);
-  return ref;
+
+  if (result === true) {
+    asd = await admin
+      .database()
+      .ref("adminSessions")
+      .once("value")
+      .then(async (snap) => {
+        console.log("isAdmin", JSON.stringify(snap.val()));
+        if (snap.val() === null) {
+          return "no-sessions";
+        } else {
+          return snap.val();
+        }
+      })
+      .catch((e) => {
+        console.log("caught folder adminuser error", e);
+        return e;
+      });
+  }
+  console.log("result adminuser", JSON.stringify(result));
+  console.log("asd adminuser", JSON.stringify(asd));
+  /* if (Object.keys(result).length === 0 && result.constructor === Object) {
+    throw new functions.https.HttpsError(
+      "unauthenticated",
+      "You must be authenticated to call this function."
+    );
+  } else { */
+  /*   if (result) {
+    adminSessions = await admin
+      .database()
+      .ref("adminSessions/")
+      .once("value")
+      .then((snap) => {
+        console.log("snap", snap.val());
+        return snap.val();
+      });
+    console.log("adminSessions", adminSessions);
+  } */
+  return asd === undefined ? result : asd;
+});
+
+exports.testFunc = functions.https.onCall((data, context) => {
+  let user = admin.database().ref("users/" + context.auth.uid);
+  let adminUser = admin.database().ref("adminUsers/" + context.auth.uid);
+
+  /* user.once('value', function(snap)  {
+    newRef.set( snap.value(), function(error) {
+         if( error && typeof(console) !== 'undefined' && console.error ) {  console.error(error); }
+    });
+}); */
+  return user.once("value").then((snapshot) => {
+    return adminUser.update(snapshot.val() || "Anonymous");
+  });
 });
 
 exports.createSessions = functions.https.onCall((data, context) => {
@@ -72,22 +143,6 @@ exports.newUserSignUp = functions.https.onCall((data, context) => {
   let promises = [];
   console.log("data new user", data);
   console.log("context new user", context.auth.uid);
-  promises.push(
-    db.ref("users/" + context.auth.uid).set({
-      firstname: data.firstName,
-      surname: data.surName,
-      mobile: data.mobileNum,
-      jumaDate: "",
-      jumaSession: "",
-      newsletter: data.agreeNewsletter,
-      lastupdate: admin.firestore.FieldValue.serverTimestamp(),
-      company: {
-        melbourne: {
-          cic: "cic",
-        },
-      },
-    })
-  );
 
   /*   promises.push(
     admin
@@ -115,7 +170,23 @@ exports.newUserSignUp = functions.https.onCall((data, context) => {
       })
   ); */
 
-  return Promise.all(promises);
+  return admin
+    .database()
+    .ref("users/" + context.auth.uid)
+    .set({
+      firstname: data.firstName,
+      surname: data.surName,
+      mobile: data.mobileNum,
+      jumaDate: "",
+      jumaSession: "",
+      newsletter: data.agreeNewsletter,
+      lastupdate: admin.firestore.FieldValue.serverTimestamp(),
+      company: {
+        melbourne: {
+          cic: "cic",
+        },
+      },
+    });
 });
 
 // auth trigger (user deleted)
@@ -163,6 +234,13 @@ exports.bookSession = functions.https.onCall((data, context) => {
 
   console.log("oldBookingSession", oldBookingSession);
 
+  let bookingData = {
+    ...data.newSessionDetails,
+    firstname: data.userDetails.firstname,
+    surname: data.userDetails.surname,
+    mobile: data.userDetails.mobile,
+  };
+
   if (newBookingDate !== "") {
     console.log("hit true adm2 ", data);
     promises.push(
@@ -176,7 +254,7 @@ exports.bookSession = functions.https.onCall((data, context) => {
             "/confirmed/" +
             uid
         )
-        .update(data.newSessionDetails)
+        .update(bookingData)
     );
     if (oldBookingDate !== "") {
       promises.push(

@@ -210,14 +210,10 @@ function DashboardBody(props) {
       console.log("res from func  - ", result.data);
     });
   }
-  return (
-    <>
-      <div style={{ height: "50vh" }}>
-        {props.userDetails.jumaDate ? (
-          <div className="pt-4"></div>
-        ) : (
-          <Row className="p-4 justify-content-center ">{noSessionBooked()}</Row>
-        )}
+
+  function printBody() {
+    return (
+      <>
         {printSessionInfo()}
 
         <Row className="pt-4 text-center " style={{ minHeight: "50vh" }}>
@@ -234,17 +230,27 @@ function DashboardBody(props) {
                 : "transparent",
             }}
           >
-            {props.userDetails.jumaDate && (
-              <QRCode
-                style={{}}
-                renderAs="SVG"
-                value={props.userDetails.sessionHash}
-                fgColor="#000"
-                //bgColor="#faa61a"
-              />
-            )}
+            <QRCode
+              style={{}}
+              renderAs="SVG"
+              value={props.userDetails.sessionHash}
+              fgColor="#000"
+              //bgColor="#faa61a"
+            />
           </Col>
         </Row>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div style={{ height: "50vh" }}>
+        {props.userDetails.jumaDate ? (
+          printBody()
+        ) : (
+          <Row className="p-4 justify-content-center ">{noSessionBooked()}</Row>
+        )}
       </div>
       <div id="bottom-navigation"> {dashboardNavButtons}</div>
       <button onClick={fbclick}>asdasd</button>
