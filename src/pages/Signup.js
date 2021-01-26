@@ -64,7 +64,6 @@ export default function Signup(props) {
     }
 
     try {
-      console.log("--------after push");
       setError("");
       setLoading(true);
       await signup(
@@ -153,7 +152,7 @@ export default function Signup(props) {
         })}
 
         <Card.Body className="mt-2 pt-0" style={{ minHeight: "57vh" }}>
-          <Form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit} id="signup-form" class="signup-form">
             <div className="row">
               <div className="col-6">
                 <Form.Group id="firstname">

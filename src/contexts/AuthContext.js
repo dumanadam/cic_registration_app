@@ -13,45 +13,40 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
-  const [userDetails, setUserDetails] = useState({});
-
-  const [globalFridayFb, setGlobalFridayFb] = useState({});
+  const [userDetails, setUserDetails] = useState("waiting");
+  const [globalFridayUnformatted, setGlobalFridayUnformatted] = useState(
+    FindFriday(0, true)
+  );
+  const [globalFriday, setGlobalFriday] = useState(FindFriday());
+  const [globalFridayFb, setGlobalFridayFb] = useState(FindFriday(1, true));
   const [openSessions, setOpenSessions] = useState("");
   const [superSessions, setSuperSessions] = useState(null);
+  const [adminSessions, setAdminSessions] = useState(null);
 
   const now = moment().toString();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
+      setGlobalFridayFb();
+
       setLoading(false);
-      if (user) getCurrentUserDetails();
+      if (user) getCurrentUserDetails(user);
     });
 
     return unsubscribe;
   }, []);
 
-  /*   useEffect(() => {
-    console.log("globalFridayFb", globalFridayFb);
-  }, [globalFridayFb]); */
+  useEffect(() => {
+    console.log("globalFridayUnformatted auth", globalFridayUnformatted);
+  }, [globalFridayUnformatted]);
 
-  function getCurrentUserDetails() {
-    try {
-      db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
-        console.log("*Google DB*getting latest userdetails", snapshot.val());
-        setUserDetails(snapshot.val());
-        setGlobalFridayFb(FindFriday(1, true));
-      });
-    } catch (error) {
-      console.log("getcurrentuserdetails error", error);
-    }
-    try {
-      db.ref("/pubSessions/cic/openSessions").on("value", (snapshot) => {
-        console.log("sessions printout", snapshot.val());
-      });
-    } catch (error) {
-      console.log("print error", error);
-    }
+  async function getCurrentUserDetails() {
+    await db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
+      console.log("*Google DB*getting latest userdetails", snapshot.val());
+
+      setUserDetails(snapshot.val());
+    });
   }
 
   useEffect(() => {
@@ -66,6 +61,10 @@ export function AuthProvider({ children }) {
     }
   }, [userDetails]);
 
+  useEffect(() => {
+    console.log("res adminSessions", adminSessions);
+  }, [adminSessions]);
+
   function getOpenSessions(adminCompany) {
     try {
       db.ref("pubSessions/" + adminCompany.toLowerCase() + "/openSessions").on(
@@ -79,7 +78,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  function signup(
+  async function signup(
     email,
     password,
     firstName,
@@ -97,20 +96,16 @@ export function AuthProvider({ children }) {
     };
     let newUserSignUp = fbfunc.httpsCallable("newUserSignUp");
 
-    return auth
+    let newuserDetails = await auth
       .createUserWithEmailAndPassword(email, password)
       .then((newUser) => {
         console.log("newuser is > ", newUser);
       })
-      .then((seconduser) => {
-        newUserSignUp(registrationDetails)
-          .then((result) => {
-            console.log("res from new user auth func  ->>> ", result);
-          })
-          .catch((e) => {
-            console.log("FBfunc from new user auth error returned >>>", e);
-          });
+      .then(() => {
+        newUserSignUp(registrationDetails);
       });
+    console.log("newuser details", userDetails);
+    return userDetails;
   }
 
   function login(email, password) {
@@ -263,70 +258,6 @@ export function AuthProvider({ children }) {
     return false;
   }
 
-  function updateSession(
-    removeSession = false,
-    oldDBAddress,
-    newDBAdress,
-    companyBookingSessionDetails,
-    newSessionDetails,
-    userCancelBooking = false
-  ) {
-    const oldCompanyCountDBAddress =
-      "sessions/" +
-      userDetails.company.melbourne.cic +
-      "/openSessions/" +
-      userDetails.jumaDate +
-      "/" +
-      userDetails.jumaSession;
-
-    const newCompanyCountDBAddress =
-      "sessions/" +
-      userDetails.company.melbourne.cic +
-      "/openSessions/" +
-      newSessionDetails.jumaDate +
-      "/" +
-      newSessionDetails.jumaSession;
-
-    /* let newIncrementBookingDB =
-      openSessions[newSessionDetails.jumaDate][newSessionDetails.jumaSession]; */
-    console.log("newSessionDetails xxx", newSessionDetails);
-    console.log("olddb address xxx", oldDBAddress);
-    console.log("userdetrals xxx", userDetails);
-    console.log("removeSession xxx", removeSession);
-    console.log("opensessions updatesessions", openSessions);
-    console.log("userCancelBooking", userCancelBooking);
-
-    if (removeSession) {
-      let oldIncrementBookingDB =
-        openSessions[globalFridayFb][userDetails.jumaSession];
-
-      let oldBookingCount =
-        openSessions[globalFridayFb][userDetails.jumaSession].currentBooked - 1;
-      console.log("oldIncrementBookingDB", oldIncrementBookingDB.currentBooked);
-      console.log("hit remove oldDBAddress", oldDBAddress);
-      db.ref(oldDBAddress)
-        .remove()
-        .catch((e) => {
-          console.log("db remove promise error>", e);
-        });
-      updateDB(oldCompanyCountDBAddress, { currentBooked: oldBookingCount });
-      console.log("AFTER userdetrals xxx", userDetails);
-    }
-
-    if (userCancelBooking === false) {
-      console.log("Qqqqqqqqq hit !usercancelbooking", userCancelBooking);
-      let newBookingCount =
-        openSessions[newSessionDetails.jumaDate][newSessionDetails.jumaSession]
-          .currentBooked + 1;
-      updateDB(newCompanyCountDBAddress, { currentBooked: newBookingCount });
-      console.log("newDBAdress", newDBAdress);
-      console.log("companyBookingSessionDetails", companyBookingSessionDetails);
-      updateDB(newDBAdress, companyBookingSessionDetails);
-    }
-
-    console.log("userDetails xxx2", userDetails);
-  }
-
   function bookSession(
     newSessionDetails,
     currentUserSession,
@@ -363,26 +294,34 @@ export function AuthProvider({ children }) {
     updateDB(userDBAddress, blankSessionDetails);
   }
 
+  async function checkUserSession() {
+    /* let fbObj = {
+      sessionDetails: sessionDetails,
+      sessionOwner: sessionOwner,
+      company: company,
+    }; */
+
+    let userSessionConfirmed = fbfunc.httpsCallable("checkUserSession");
+
+    return await userSessionConfirmed(userDetails)
+      .then((result) => {
+        console.log("res from checkUserSession func  ->>> ", result.data);
+        return result.data;
+      })
+      .catch((e) => {
+        console.log("FBfunc checkUserSession error returned >>>", e);
+      });
+  }
+
   function createSessions(sessiondetails, company) {
     console.log("booksession auth", sessiondetails);
-    /*     for (const date in openSessions) {
-      console.log("key", date);
-      console.log("key2", openSessions[date]);
-      for (const time in openSessions[date]) {
-        if (time.booked >= 1) {
-          console.log("time.booked >1", time.booked);
-        } else {
-          console.log("time.booked 0", time.booked);
-        }
-      }
-    } */
+
     let sessionDetails = {
       ...sessiondetails,
     };
 
     let sessionOwner = "sessions/" + company.toLowerCase() + "/";
 
-    // let upd = db.ref(sessionOwner).update(sessionDetails);
     let fbObj = {
       sessionDetails: sessionDetails,
       sessionOwner: sessionOwner,
@@ -415,12 +354,13 @@ export function AuthProvider({ children }) {
 
   async function getSessionAttendees() {
     let qqq;
+    let aaa;
 
     let getSessionAttendeesa = fbfunc.httpsCallable("getSessionAttendees");
-    try {
+    /*   try {
       qqq = await getSessionAttendeesa().then((result) => {
         console.log(
-          "res from getSessionAttendees func  superSessions ->>> ",
+          "res from getSessionAttendees func  superSessions ->>>111 ",
           result
         );
         setSuperSessions(result.data);
@@ -429,8 +369,26 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.log("getSessionAttendees err---", error);
       setSuperSessions(null);
+    } */
+
+    try {
+      console.log("hit try res");
+      aaa = db
+        .ref("adminSessions/cic/openSessions/")
+        .on("value", (snapshot) => {
+          console.log(
+            "res from getSessionAttendees func  superSessions ->>> adminsessions",
+            snapshot
+          );
+          setSuperSessions(snapshot.val());
+          return true;
+        });
+    } catch (error) {
+      console.log("adminsessions error", error);
     }
-    console.log("getSessionAttendees err+++++++++", qqq);
+
+    console.log("res getSessionAttendees qqq ", qqq);
+    console.log("res getSessionAttendees aaa ", aaa);
   }
 
   const value = {
@@ -449,12 +407,14 @@ export function AuthProvider({ children }) {
     createSessions,
     userDetails,
     openSessions,
-
+    globalFriday,
     globalFridayFb,
     updateAttendance,
     clearUserJumaSession,
     getSessionAttendees,
     superSessions,
+    checkUserSession,
+    globalFridayUnformatted,
   };
   return (
     <AuthContext.Provider value={value}>

@@ -83,8 +83,7 @@ export default function Sessions() {
     openSessions,
     userDetails,
     bookSession,
-    globalFriday,
-    globalFridayFb,
+    globalFridayUnformatted,
   } = useAuth();
   const [error, setError] = useState("");
   const [session, setSession] = useState({});
@@ -110,11 +109,13 @@ export default function Sessions() {
   }, [session]); */
 
   useEffect(() => {
+    console.log("session openSessions", openSessions);
     if (userDetails.firstname && openSessions) {
       console.log("userDetails + openSessions", openSessions);
 
       getSessionTimes();
       setListKey(checkKey());
+
       setLoading(false);
     }
   }, [openSessions]);
@@ -147,7 +148,10 @@ export default function Sessions() {
 
   useEffect(() => {
     let friday = FindFriday();
+
     console.log("friday eff", friday);
+    console.log("globalFridayUnformatted ", globalFridayUnformatted);
+    console.log("globalFridayUnformatted ", globalFridayUnformatted);
   }, []);
 
   function handleSubmit(e) {
@@ -170,7 +174,7 @@ export default function Sessions() {
       return;
     }
 
-    promises.push(bookSession(session, currentUserSession));
+    promises.push(bookSession(session, currentUserSession, userDetails));
     Promise.all(promises)
       .then(() => {
         history.push("/session-confirmed");
@@ -230,17 +234,17 @@ export default function Sessions() {
 
   function handleClick(time) {
     console.log("time", time);
-    console.log("jumadate", globalFridayFb.substring(7));
+    console.log("jumadate", globalFridayUnformatted.substring(7));
     let toMD5 = {
       firstname: userDetails.firstname,
       surname: userDetails.surname,
-      jumaDate: globalFridayFb.substring(7),
+      jumaDate: globalFridayUnformatted.substring(7),
       jumaSession: time,
     };
 
     setSession({
       jumaSession: time,
-      jumaDate: globalFridayFb,
+      jumaDate: globalFridayUnformatted,
       sessionHash: md5Qr(JSON.stringify(toMD5)),
     });
   }
@@ -282,7 +286,7 @@ export default function Sessions() {
           <div className=" text-center w-100">
             {TEXTDEFINITION.SESSIONS_NEXT_JUMA}
           </div>
-          <div className=" text-center w-100"> {globalFriday}</div>
+          <div className=" text-center w-100"> {globalFridayUnformatted}</div>
         </>
       );
     }
@@ -322,7 +326,7 @@ export default function Sessions() {
                     handleClick,
                     openSessions,
                     userDetails,
-                    globalFridayFb
+                    globalFridayUnformatted
                   )}
             </ListGroup>
             <div className="text-center pb-4">

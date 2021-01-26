@@ -168,7 +168,7 @@ function CreateSession() {
     function createUploadObject() {
       let sessionUploadObject = {};
 
-      for (let index = 1; index <= weeksQty; index++) {
+      for (let index = 0; index <= weeksQty - 1; index++) {
         let sessionDateString = FindFriday(index, true);
         console.log("sessionDateString", sessionDateString);
         sessionUploadObject.openSessions = {

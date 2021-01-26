@@ -55,9 +55,7 @@ function AdminDashboard(props) {
   let buttonDetails = {
     b1: {
       buttonText:
-        /*  Object.keys(openSessions).length === 0
-          ? "Create Session"
-          :  */ "Update Session",
+        superSessions == "no-sessions" ? "Create Session" : "Update Session",
       link: "/create-session",
       variant: "primary w-100",
       loading: loading,
@@ -79,8 +77,14 @@ function AdminDashboard(props) {
   useEffect(() => {
     setpageTitle(PageTitle("Dashboard"));
     setAdminNavButtons(NavButtons(3, buttonDetails));
-    console.log("attendee getusersess", getSessionAttendees());
-    setSessionAttendees(getSessionAttendees());
+
+    async function adminGetSessions() {
+      let res = await getSessionAttendees();
+      console.log("attendee getusersess", res);
+
+      return res;
+    }
+    setSessionAttendees(adminGetSessions());
   }, []);
 
   /*   useEffect(() => {
@@ -102,9 +106,11 @@ function AdminDashboard(props) {
         history.push({
           pathname: "/",
         });
-      }
-      if (superSessions === "no-sessions") {
+      } else if (superSessions === "no-sessions") {
         console.log("admindashboard supersessions", superSessions);
+        setSuperSessionsx(superSessions);
+        setLoading(false);
+      } else {
         setSuperSessionsx(superSessions);
         setLoading(false);
       }
@@ -153,7 +159,7 @@ function AdminDashboard(props) {
   function SessionList() {
     console.log("loop superSessionsx", superSessionsx);
     function loopSessions() {
-      if (superSessionsx !== "no-sessions") {
+      if (superSessionsx !== "no-sessions" && superSessionsx !== null) {
         let sessionDates = Object.keys(superSessionsx).map(function (
           key,
           index

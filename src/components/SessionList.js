@@ -8,9 +8,9 @@ function SessionList(
   handleClick,
   openSessions,
   userDetails,
-  globalFridayFb
+  globalFriday
 ) {
-  /*   console.log(
+  console.log(
     "listDetails" +
       "listKey" +
       listKey +
@@ -18,24 +18,25 @@ function SessionList(
       latestSessionTimes +
       "handleClick" +
       handleClick +
-      "checkKey" +
-      checkKey
-  ); */
+      "globalFriday" +
+      globalFriday
+  );
 
   function loopSessions() {
     let result = latestSessionTimes.map((sessionDetails) => {
-      // console.log("globalFridayFb subs", globalFridayFb.substring(7));
-      let sub = globalFridayFb.substring(7);
+      // console.log("globalFriday subs", globalFriday.substring(7));
+      let sub = globalFriday.substring(7);
+      console.log("loopSessions sub", sub);
       /*       console.log("userDetails jumadate", userDetails.jumaDate);
       console.log("openSessions[max.", openSessions);
       console.log(
         "openSessions[max.",
-        openSessions[globalFridayFb][sessionDetails.time].maxPerSession -
-          openSessions[globalFridayFb][sessionDetails.time].currentBooked
+        openSessions[globalFriday][sessionDetails.time].maxPerSession -
+          openSessions[globalFriday][sessionDetails.time].currentBooked
       ); */
       /*   console.log(
         "openSessions[booked.",
-        openSessions[globalFridayFb][sessionDetails.time].currentBooked
+        openSessions[globalFriday][sessionDetails.time].currentBooked
       );
       console.log("subs = > ", openSessions[sub]); */
       return (
@@ -48,8 +49,8 @@ function SessionList(
         >
           {sessionDetails.time}
           <Badge variant="warning" pill>
-            {openSessions[globalFridayFb][sessionDetails.time].maxPerSession -
-              openSessions[globalFridayFb][sessionDetails.time].currentBooked}
+            {openSessions[globalFriday][sessionDetails.time].maxPerSession -
+              openSessions[globalFriday][sessionDetails.time].currentBooked}
           </Badge>
         </ListGroup.Item>
       );

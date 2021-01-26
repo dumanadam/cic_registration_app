@@ -14,10 +14,13 @@ function DashboardBody(props) {
   const history = useHistory();
   const [myProps, setMyProps] = useState(props);
   const [noSessions, setNoSessions] = useState(true);
+  const [bookingsText, setBookingsText] = useState([]);
+  const [buttonDetails, setButtonDetails] = useState(true);
 
   useEffect(() => {
-    console.log("props", props);
-    if (props.openSessions !== "" && props.userDetails.jumaDate !== "") {
+    console.log("Dashboard body props", props);
+
+    /*  if (props.openSessions !== "" && props.userDetails.jumaDate !== "") {
       console.log(
         "user has jumadate",
         props.openSessions[props.userDetails.jumaDate][
@@ -53,23 +56,78 @@ function DashboardBody(props) {
           );
         }
       }
-    }
+    } */
+    if (props.userDetails !== null) {
+      /*       if (
+        props.userDetails.jumaDate !== "" &&
+        props.myProps.checkUserSession() == null
+      ) {
+        console.log("remove session dashboard actual");
+        removeUserSession();
+      } */
 
-    props.openSessions === "" || props.openSessions === null
-      ? setNoSessions(true)
-      : setNoSessions(false);
-    setMyProps(props);
+      props.openSessions === "" || props.openSessions === null
+        ? setNoSessions(true)
+        : setNoSessions(false);
+      setMyProps(props);
+      setBookingsText([
+        {
+          title: TEXTDEFINITION.DASHBOARD_GREETING,
+          detail: props.userDetails.firstname,
+        },
+        { title: " Date:", detail: props.userDetails.jumaDate },
+        { title: "Session:", detail: props.userDetails.jumaSession },
+      ]);
+
+      setButtonDetails({
+        b1: {
+          buttonText:
+            props.userDetails.jumaDate !== ""
+              ? "Update Session"
+              : "Book Session",
+          link: "/sessions",
+          variant: "primary w-100",
+          loading: myProps.loading,
+          disabled: noSessions,
+        },
+        b2: {
+          buttonText: "Update Profile",
+          variant: "primary w-100",
+          link: "/update-profile",
+          loading: myProps.loading,
+        },
+        b3: {
+          buttonText: "Logout",
+          variant: "outline-light w-100 border-0 mt-2",
+          link: "/",
+          loading: myProps.loading,
+          handleLogout: handleLogout,
+        },
+      });
+    } else {
+      console.log("wtf");
+      props.myProps.setLoading(true);
+    }
   }, [props]);
 
   useEffect(() => {
-    setDashboardNavButtons(NavButtons(3, buttonDetails));
-    // console.log("dbody props", props);
+    if (buttonDetails !== true) {
+      console.log("NavButtons buttondewt", buttonDetails);
+      setDashboardNavButtons(NavButtons(3, buttonDetails));
+    }
   }, [NavButtons]);
 
   useEffect(() => {
     console.log("dbody nosess", noSessions);
     !noSessions && setDashboardNavButtons(NavButtons(3, buttonDetails));
   }, [noSessions]);
+
+  useEffect(() => {
+    if (buttonDetails !== true) {
+      console.log(" buttondewt", buttonDetails);
+      setDashboardNavButtons(NavButtons(3, buttonDetails));
+    }
+  }, [buttonDetails]);
 
   function removeUserSession() {
     console.log("hit remove session");
@@ -170,39 +228,6 @@ function DashboardBody(props) {
     );
   }
 
-  const bookingsText = [
-    {
-      title: TEXTDEFINITION.DASHBOARD_GREETING,
-      detail: props.userDetails.firstname,
-    },
-    { title: " Date:", detail: props.userDetails.jumaDate },
-    { title: "Session:", detail: props.userDetails.jumaSession },
-  ];
-
-  let buttonDetails = {
-    b1: {
-      buttonText: props.userDetails.jumaDate
-        ? "Update Session"
-        : "Book Session",
-      link: "/sessions",
-      variant: "primary w-100",
-      loading: myProps.loading,
-      disabled: noSessions,
-    },
-    b2: {
-      buttonText: "Update Profile",
-      variant: "primary w-100",
-      link: "/update-profile",
-      loading: myProps.loading,
-    },
-    b3: {
-      buttonText: "Logout",
-      variant: "outline-light w-100 border-0 mt-2",
-      link: "/",
-      loading: myProps.loading,
-      handleLogout: handleLogout,
-    },
-  };
   function fbclick(params) {
     console.log("params", params);
     const sayHello = fbfunc.httpsCallable("testFunc");
@@ -246,7 +271,7 @@ function DashboardBody(props) {
   return (
     <>
       <div style={{ height: "50vh" }}>
-        {props.userDetails.jumaDate ? (
+        {props.loading ? (
           printBody()
         ) : (
           <Row className="p-4 justify-content-center ">{noSessionBooked()}</Row>

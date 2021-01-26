@@ -37,10 +37,10 @@ exports.getSessionAttendees = functions.https.onCall(async (data, context) => {
   if (result === true) {
     asd = await admin
       .database()
-      .ref("adminSessions")
+      .ref("adminSessions/cic/openSessions/")
       .once("value")
       .then(async (snap) => {
-        console.log("isAdmin", JSON.stringify(snap.val()));
+        console.log("isAdmin snap", JSON.stringify(snap.val()));
         if (snap.val() === null) {
           return "no-sessions";
         } else {
@@ -72,6 +72,44 @@ exports.getSessionAttendees = functions.https.onCall(async (data, context) => {
     console.log("adminSessions", adminSessions);
   } */
   return asd === undefined ? result : asd;
+});
+
+exports.checkUserSession = functions.https.onCall(async (data, context) => {
+  let user = admin.database().ref("users/" + context.auth.uid);
+  let adminSessionUserBooking = await admin
+    .database()
+    .ref(
+      `adminSessions/cic/openSessions/${data.jumaDate}/${data.jumaSession}/confirmed/${context.auth.uid}`
+    )
+    .once("value")
+    .then((snap) => {
+      return snap.val();
+    });
+
+  /* user.once('value', function(snap)  {
+    newRef.set( snap.value(), function(error) {
+         if( error && typeof(console) !== 'undefined' && console.error ) {  console.error(error); }
+    });
+}); */
+  console.log("adminSessionUserBooking", adminSessionUserBooking);
+  console.log("adminSessionUserBooking data", data.jumaDate);
+  res = await admin
+    .database()
+    .ref(
+      "adminSessions/cic/openSessions/" +
+        data.jumaDate +
+        "/" +
+        data.jumaSession +
+        "/confirmed/" +
+        context.auth.uid
+    )
+    .once("value")
+    .then((snap) => {
+      return snap.val();
+    });
+
+  console.log("adminSessionUserBooking booking res", res);
+  return res;
 });
 
 exports.testFunc = functions.https.onCall((data, context) => {
