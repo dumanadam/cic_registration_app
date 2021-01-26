@@ -102,7 +102,7 @@ const UpdateProfile = () => {
   const history = useHistory();
 
   useEffect(() => {
-    // console.log("userDetails", userDetails);
+    console.log("userDetails updatedetails", userDetails);
     if (userDetails.firstname) {
       setMyProps({
         userDetails: userDetails,
@@ -156,11 +156,11 @@ const UpdateProfile = () => {
   } */
 
   function handleSubmitf(values, { setErrors }) {
-    console.log("hit update profile function");
+    console.log("hit update profile values", values);
+    setIsSubmitting(true);
+    setLoading(true);
 
     if (values.password !== "" && values.confirm == "") {
-      setIsSubmitting(true);
-
       setErrors({ confirm: "Please confirm password" });
       setTimeout(() => {
         setIsSubmitting(false);
@@ -170,35 +170,64 @@ const UpdateProfile = () => {
       return;
     }
 
-    setLoading(true);
-    setIsSubmitting(true);
-
-    const promises = [];
-
     if (values.firstname !== "") {
-      promises.push(updateFirstName(values.firstname));
+      console.log("values.firstname ", values.firstname);
+      updateFirstName(values.firstname);
     }
 
     if (values.surname !== "") {
-      promises.push(updateSurname(values.surname));
+      console.log("values.surname ", values.surname);
+      updateSurname(values.surname);
     }
 
     if (values.mobile !== "") {
-      promises.push(updateMobile(values.mobile));
+      updateMobile(values.mobile);
     }
 
     if (values.email !== "") {
-      promises.push(updateEmail(values.email));
+      updateEmail(values.email);
     }
 
     if (values.password !== "") {
-      promises.push(updatePassword(values.password));
+      console.log("values.password ", values.password);
+      updatePassword(values.password);
     }
     setModalDetails({
       bodyText: "Updating",
     });
-    console.log("promises", promises);
-    PushPromises(promises, setModalDetails, setLoading, setIsSubmitting);
+    //console.log("promises", promises);
+    /* Promise.all(promises)
+      .then((fbreturn) => {
+        console.log("fbreturn", fbreturn);
+        setModalDetails({
+          bodyText: "Success",
+        });
+        setLoading(true);
+
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
+        // history.push("/");
+      })
+      .catch((e) => {
+        console.log("promise erroe", e);
+        console.log("promise erroe message", e.message);
+        if (e.code == "auth/requires-recent-login") {
+          setModalDetails({
+            bodyText:
+              "Password & email change requires recent authentication. Log in again before retrying this request.",
+          });
+          setLoading(true);
+
+          setTimeout(() => {
+            setLoading(false);
+          }, 3500);
+        }
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      }); */
+    setLoading(false);
     setIsSubmitting(false);
   }
 

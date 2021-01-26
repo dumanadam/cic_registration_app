@@ -18,7 +18,7 @@ function DeleteProfile(props) {
   });
 
   useEffect(() => {
-    if (userDetails.firstname) {
+    if (userDetails !== null && userDetails.firstname) {
       setMyProps({
         userDetails: userDetails,
         loading: loading,

@@ -81,31 +81,40 @@ export function AuthProvider({ children }) {
   async function signup(
     email,
     password,
-    firstName,
-    surName,
+    firstname,
+    surname,
     mobileNum,
     agreeNewsletter
   ) {
     let registrationDetails = {
       email,
-      password,
-      firstName,
-      surName,
+      firstname,
+      surname,
       mobileNum,
       agreeNewsletter,
+      jumaDate: "",
+      jumaSession: "",
+      sessionHash: "",
+      company: {
+        melbourne: {
+          cic: "cic",
+        },
+      },
     };
-    let newUserSignUp = fbfunc.httpsCallable("newUserSignUp");
 
-    let newuserDetails = await auth
+    await auth
       .createUserWithEmailAndPassword(email, password)
       .then((newUser) => {
         console.log("newuser is > ", newUser);
-      })
-      .then(() => {
-        newUserSignUp(registrationDetails);
       });
-    console.log("newuser details", userDetails);
-    return userDetails;
+
+    let upd = await db
+      .ref("users/" + auth.currentUser.uid)
+      .update(registrationDetails)
+      .catch((e) => {
+        console.log("registrationDetails auth error>", e);
+      });
+    return upd;
   }
 
   function login(email, password) {
@@ -122,14 +131,14 @@ export function AuthProvider({ children }) {
   }
 
   function updateEmail(email) {
-    let result;
+    let promises = [];
 
-    try {
-      result = currentUser.updateEmail(email);
-    } catch (e) {
-      return e;
-    }
-    return result;
+    promises.push(currentUser.updateEmail(email));
+    promises.push(
+      db.ref("users/" + auth.currentUser.uid).update({ email: email })
+    );
+
+    return Promise.all(promises);
   }
 
   function updatePassword(password) {
@@ -142,30 +151,13 @@ export function AuthProvider({ children }) {
     return result;
   }
 
-  function updateFirstName(firstName) {
+  async function updateFirstName(firstName) {
     console.log("firstname auth");
 
-    let upd = db
+    let upd = await db
       .ref("users/" + auth.currentUser.uid)
       .update({
         firstname: firstName,
-        lastupdate: now,
-      })
-      .catch((e) => {
-        console.log("firstname auth error>", e);
-      });
-    return upd;
-  }
-
-  function accountDeleted(date) {
-    console.log("delete account auth");
-
-    let upd = db
-      .ref("users/" + auth.currentUser.uid)
-      .update({
-        deleted: true,
-        deleteDate: now,
-        lastupdate: now,
       })
       .catch((e) => {
         console.log("firstname auth error>", e);
@@ -179,7 +171,6 @@ export function AuthProvider({ children }) {
       .ref("users/" + auth.currentUser.uid)
       .update({
         surname: surName,
-        lastupdate: now,
       })
       .catch((e) => {
         console.log("surname auth error>", e);
@@ -192,8 +183,7 @@ export function AuthProvider({ children }) {
     let upd = db
       .ref("users/" + auth.currentUser.uid)
       .update({
-        mobile: mobile,
-        lastupdate: now,
+        mobileNum: mobile,
       })
       .catch((e) => {
         console.log("mobile auth error>", e);
@@ -260,17 +250,18 @@ export function AuthProvider({ children }) {
 
   function bookSession(
     newSessionDetails,
-    currentUserSession,
+    oldSessionDetails,
     userCancelBooking = false
   ) {
-    newSessionDetails = {
-      ...newSessionDetails,
-      userCancelBooking,
-    };
     console.log("newSessionDetails", newSessionDetails);
-    console.log("currentUserSession", currentUserSession);
+    console.log("oldSessionDetails", oldSessionDetails);
     let bookSessionFunc = fbfunc.httpsCallable("bookSession");
-    bookSessionFunc({ newSessionDetails, currentUserSession, userDetails })
+    bookSessionFunc({
+      newSessionDetails,
+      oldSessionDetails,
+      userDetails,
+      userCancelBooking,
+    })
       .then((result) => {
         console.log("res from createAdminSess func  ->>> ", result.data);
       })
@@ -287,7 +278,6 @@ export function AuthProvider({ children }) {
     let blankSessionDetails = {
       jumaDate: "",
       jumaSession: "",
-      lastupdate: now,
     };
     console.log("blankSessionDetails", blankSessionDetails);
 
@@ -342,6 +332,15 @@ export function AuthProvider({ children }) {
   }
 
   function deleteProfile(password) {
+    auth.currentUser
+      .delete()
+      .then(function () {
+        // User deleted.
+      })
+      .catch(function (error) {
+        // An error happened.
+      });
+
     return auth.currentUser.updatePassword(password);
   }
   useEffect(() => {
@@ -357,7 +356,7 @@ export function AuthProvider({ children }) {
     let aaa;
 
     let getSessionAttendeesa = fbfunc.httpsCallable("getSessionAttendees");
-    /*   try {
+    try {
       qqq = await getSessionAttendeesa().then((result) => {
         console.log(
           "res from getSessionAttendees func  superSessions ->>>111 ",
@@ -369,7 +368,7 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.log("getSessionAttendees err---", error);
       setSuperSessions(null);
-    } */
+    }
 
     try {
       console.log("hit try res");

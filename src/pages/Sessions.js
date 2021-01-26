@@ -173,8 +173,8 @@ export default function Sessions() {
       }, 2000);
       return;
     }
-
-    promises.push(bookSession(session, currentUserSession, userDetails));
+    let cancelBooking = false;
+    promises.push(bookSession(session, currentUserSession, cancelBooking));
     Promise.all(promises)
       .then(() => {
         history.push("/session-confirmed");

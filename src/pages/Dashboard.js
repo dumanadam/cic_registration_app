@@ -48,7 +48,12 @@ const Dashboard = (props) => {
 
   return (
     <>
-      {loading ? null : ( //<ShowModal loading={loading} modalDetails={modalDetails} />
+      {loading ? (
+        <ShowModal
+          loading={loading}
+          modalDetails={{ bodyText: "Connecting to CIC" }}
+        /> //<ShowModal loading={loading} modalDetails={modalDetails} />
+      ) : (
         <DashboardBody
           loading={loading}
           userDetails={userDetails}

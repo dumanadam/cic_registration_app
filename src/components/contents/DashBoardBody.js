@@ -66,9 +66,7 @@ function DashboardBody(props) {
         removeUserSession();
       } */
 
-      props.openSessions === "" || props.openSessions === null
-        ? setNoSessions(true)
-        : setNoSessions(false);
+      setNoSessions(false);
       setMyProps(props);
       setBookingsText([
         {
@@ -107,6 +105,7 @@ function DashboardBody(props) {
     } else {
       console.log("wtf");
       props.myProps.setLoading(true);
+      setNoSessions(true);
     }
   }, [props]);
 

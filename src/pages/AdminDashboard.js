@@ -99,7 +99,7 @@ function AdminDashboard(props) {
   }, [openSessions]); */
 
   useEffect(() => {
-    console.log("super", superSessions);
+    console.log("supersessions useeff", superSessions);
     if (superSessions !== null) {
       console.log("supersessions not null", superSessions);
       if (superSessions.code === "unauthenticated") {

@@ -9,6 +9,7 @@ import MediaQuery, { useMediaQuery } from "react-responsive";
 import MQuery from "../components/MQueury";
 import bgImage from "../assets/images/bg2.jpg";
 import ErrorHeader from "../components/ErrorHeader";
+import ShowModal from "../components/ShowModal";
 export default function Signup(props) {
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -66,7 +67,8 @@ export default function Signup(props) {
     try {
       setError("");
       setLoading(true);
-      await signup(
+
+      let signupResult = await signup(
         emailRef.current.value,
         passwordRef.current.value,
         firstnameRef.current.value,
@@ -74,6 +76,7 @@ export default function Signup(props) {
         mobileRef.current.value,
         agreeNewsletter
       );
+      console.log("signupResult", signupResult);
       history.push("/");
       console.log("--------after push", e);
     } catch (e) {
@@ -142,100 +145,115 @@ export default function Signup(props) {
     );
   }
 
+  function showBody() {
+    return (
+      <>
+        {!show ? null : privacyModal()}
+        <Card className=" border-0" bg="transparent">
+          {ErrorHeader({
+            headerText: "Juma Registration",
+            errorMessage: errorMessage,
+          })}
+
+          <Card.Body className="mt-2 pt-0" style={{ minHeight: "57vh" }}>
+            <Form onSubmit={handleSubmit} id="signup-form" class="signup-form">
+              <div className="row">
+                <div className="col-6">
+                  <Form.Group id="firstname">
+                    <Form.Label className="text-light">First Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      ref={firstnameRef}
+                      required
+                      placeholder={props.wid}
+                    />
+                  </Form.Group>{" "}
+                </div>
+                <div className="col-6">
+                  <Form.Group id="surname">
+                    <Form.Label className="text-light">Surname</Form.Label>
+                    <Form.Control
+                      type="text"
+                      ref={surnameRef}
+                      placeholder={props.hei}
+                    />
+                  </Form.Group>
+                </div>
+              </div>
+              <Form.Group id="mobile">
+                <Form.Label className="text-light">Mobile</Form.Label>
+                <Form.Control
+                  type="tel"
+                  ref={mobileRef}
+                  required
+                  //onFocus={() => setError("")}
+                  onBlur={() => props.flipErrorState()}
+                />
+              </Form.Group>
+              <Form.Group id="email">
+                <Form.Label className="text-light">Email</Form.Label>
+                <Form.Control type="email" ref={emailRef} required />
+              </Form.Group>
+              <div className="row">
+                <div className="col-6">
+                  <Form.Group id="password">
+                    <Form.Label className="text-light">Password</Form.Label>
+                    <Form.Control
+                      type="password"
+                      autoComplete="current-password"
+                      ref={passwordRef}
+                      required
+                    />
+                  </Form.Group>
+                </div>
+                <div className="col-6">
+                  <Form.Group id="password-confirm">
+                    <Form.Label className="text-light">Confirmation</Form.Label>
+                    <Form.Control
+                      type="password"
+                      ref={passwordConfirmRef}
+                      autoComplete="current-password"
+                      required
+                    />
+                  </Form.Group>
+                </div>
+              </div>
+
+              <Button disabled={loading} className="w-100" type="submit">
+                Sign Up
+              </Button>
+            </Form>
+            <Link className="" to="/login">
+              <Button
+                disabled={loading}
+                variant="outline-light w-100 mt-2 border-0"
+              >
+                Already have an account? <span variant="">Log In</span>
+              </Button>
+            </Link>
+
+            <Button
+              onClick={handleShow}
+              variant="outline-primary-* text-primary col shadow-none"
+            >
+              Privacy Policy
+            </Button>
+          </Card.Body>
+        </Card>
+      </>
+    );
+  }
+
   return (
     <>
-      {!show ? null : privacyModal()}
-      <Card className=" border-0" bg="transparent">
-        {ErrorHeader({
-          headerText: "Juma Registration",
-          errorMessage: errorMessage,
-        })}
-
-        <Card.Body className="mt-2 pt-0" style={{ minHeight: "57vh" }}>
-          <Form onSubmit={handleSubmit} id="signup-form" class="signup-form">
-            <div className="row">
-              <div className="col-6">
-                <Form.Group id="firstname">
-                  <Form.Label className="text-light">First Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    ref={firstnameRef}
-                    required
-                    placeholder={props.wid}
-                  />
-                </Form.Group>{" "}
-              </div>
-              <div className="col-6">
-                <Form.Group id="surname">
-                  <Form.Label className="text-light">Surname</Form.Label>
-                  <Form.Control
-                    type="text"
-                    ref={surnameRef}
-                    placeholder={props.hei}
-                  />
-                </Form.Group>
-              </div>
-            </div>
-            <Form.Group id="mobile">
-              <Form.Label className="text-light">Mobile</Form.Label>
-              <Form.Control
-                type="tel"
-                ref={mobileRef}
-                required
-                //onFocus={() => setError("")}
-                onBlur={() => props.flipErrorState()}
-              />
-            </Form.Group>
-            <Form.Group id="email">
-              <Form.Label className="text-light">Email</Form.Label>
-              <Form.Control type="email" ref={emailRef} required />
-            </Form.Group>
-            <div className="row">
-              <div className="col-6">
-                <Form.Group id="password">
-                  <Form.Label className="text-light">Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    autoComplete="current-password"
-                    ref={passwordRef}
-                    required
-                  />
-                </Form.Group>
-              </div>
-              <div className="col-6">
-                <Form.Group id="password-confirm">
-                  <Form.Label className="text-light">Confirmation</Form.Label>
-                  <Form.Control
-                    type="password"
-                    ref={passwordConfirmRef}
-                    autoComplete="current-password"
-                    required
-                  />
-                </Form.Group>
-              </div>
-            </div>
-
-            <Button disabled={loading} className="w-100" type="submit">
-              Sign Up
-            </Button>
-          </Form>
-          <Link className="" to="/login">
-            <Button
-              disabled={loading}
-              variant="outline-light w-100 mt-2 border-0"
-            >
-              Already have an account? <span variant="">Log In</span>
-            </Button>
-          </Link>
-
-          <Button
-            onClick={handleShow}
-            variant="outline-primary-* text-primary col shadow-none"
-          >
-            Privacy Policy
-          </Button>
-        </Card.Body>
-      </Card>
+      {loading === true ? (
+        <ShowModal
+          loading={loading}
+          modalDetails={{ bodyText: "Signing you Up!" }}
+        />
+      ) : (
+        showBody()
+      )}
     </>
   );
 }

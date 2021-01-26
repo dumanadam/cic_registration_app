@@ -7,6 +7,7 @@ let db = admin.database();
 
 exports.getSessionAttendees = functions.https.onCall(async (data, context) => {
   let asd;
+  console.log("hit getsession");
   result = await admin
     .database()
     .ref("adminUsers/" + context.auth.uid)
@@ -86,11 +87,6 @@ exports.checkUserSession = functions.https.onCall(async (data, context) => {
       return snap.val();
     });
 
-  /* user.once('value', function(snap)  {
-    newRef.set( snap.value(), function(error) {
-         if( error && typeof(console) !== 'undefined' && console.error ) {  console.error(error); }
-    });
-}); */
   console.log("adminSessionUserBooking", adminSessionUserBooking);
   console.log("adminSessionUserBooking data", data.jumaDate);
   res = await admin
@@ -147,105 +143,33 @@ exports.createSessions = functions.https.onCall((data, context) => {
   return Promise.all(promises);
 });
 
-// Saves a message to the Firebase Realtime Database but sanitizes the text by removing swearwords.
-exports.addMessage = functions.https.onCall((data, context) => {
-  // Message text passed from the client.
-  const text = data.text;
-  // Authentication / user information is automatically added to the request.
-  const uid = context.auth.uid;
-  const name = context.auth.token.name || null;
-  const picture = context.auth.token.picture || null;
-  const email = context.auth.token.email || null;
-
-  let myret = {
-    text: "sanitizedMessage",
-    author: { uid, name, picture, email },
+// auth trigger (user deleted)
+exports.userDeleted = functions.auth.user().onDelete(async (user) => {
+  console.log("user deleted: ", user.email, user.uid);
+  let deleteDetails = {
+    deleteDetails: {
+      lastupdate: admin.database.ServerValue.TIMESTAMP,
+    },
   };
-
-  return admin
-    .database()
-    .ref("/messages")
-    .push({
-      text: "sanitizedMessage",
-      author: { uid, name, picture, email },
-    })
-    .then(() => {
-      console.log("New Message written");
-      // Returning the sanitized message to the client.
-      return myret;
-    });
-});
-
-// auth trigger (new user signup)
-exports.newUserSignUp = functions.https.onCall((data, context) => {
   let promises = [];
-  console.log("data new user", data);
-  console.log("context new user", context.auth.uid);
 
-  /*   promises.push(
+  promises.push(
     admin
       .database()
-      .ref("/adminUsers/" + context.auth.uid + "/adminDetails")
-      .set({
-        firstname: data.firstName,
-        surname: data.surName,
-        mobile: data.mobileNum,
-        jumaDate: "",
-        jumaSession: "",
-        cancelCount: 0,
-        warningCount: 0,
-        banned: 0,
-        newsletter: data.agreeNewsletter,
-        admin: 0,
-        deleted: false,
-        deleteDate: "",
-        lastupdate: admin.firestore.FieldValue.serverTimestamp(),
-        company: {
-          melbourne: {
-            cic: "cic",
-          },
-        },
-      })
-  ); */
+      .ref("/users/" + user.uid)
+      .remove()
+  );
+  promises.push(
+    admin
+      .database()
+      .ref("privUserDetails/" + user.uid)
+      .update(deleteDetails)
+  );
 
-  return admin
-    .database()
-    .ref("users/" + context.auth.uid)
-    .set({
-      firstname: data.firstName,
-      surname: data.surName,
-      mobile: data.mobileNum,
-      jumaDate: "",
-      jumaSession: "",
-      newsletter: data.agreeNewsletter,
-      lastupdate: admin.firestore.FieldValue.serverTimestamp(),
-      company: {
-        melbourne: {
-          cic: "cic",
-        },
-      },
-    });
-});
-
-// auth trigger (user deleted)
-exports.userDeleted = functions.auth.user().onDelete((user) => {
-  console.log("user deleted: ", user.email, user.uid);
-  return admin
-    .database()
-    .ref("/adminUsers/" + user.uid)
-    .remove()
-    .then(() => {
-      console.log("private degtails deleted");
-      // Returning the sanitized message to the client.
-      return true;
-    });
+  return Promise.all(promises);
 });
 
 exports.bookSession = functions.https.onCall((data, context) => {
-  console.log("contextauth", context.auth.uid);
-
-  console.log("data2", JSON.stringify(data));
-
   //if (!(context.auth && context.auth.token && context.auth.token.admin)) {
   if (!(context.auth && context.auth.token)) {
     throw new functions.https.HttpsError(
@@ -255,28 +179,25 @@ exports.bookSession = functions.https.onCall((data, context) => {
   }
 
   let promises = [];
-  let prepPromises = [];
-  let userBookingDate = data.newSessionDetails.jumaDate;
-  let userBookingSession = data.newSessionDetails.jumaSession;
-  let userBookingHash = data.newSessionDetails.sessionHash;
   let uid = context.auth.uid;
-  console.log(
-    "data.newSessionDetails.userCancelBooking",
-    data.newSessionDetails.userCancelBooking
-  );
-  console.log("qqqqq", uid);
+
   let newBookingDate = data.newSessionDetails.jumaDate;
   let newBookingSession = data.newSessionDetails.jumaSession;
-  let oldBookingDate = data.currentUserSession.jumaDate;
-  let oldBookingSession = data.currentUserSession.jumaSession;
-
+  let oldBookingDate = data.oldSessionDetails.jumaDate;
+  let oldBookingSession = data.oldSessionDetails.jumaSession;
+  console.log("contextauth", context.auth.uid);
+  console.log("newBookingDate", newBookingDate);
+  console.log("data.newBookingSession", newBookingSession);
+  console.log("data.oldBookingDate", oldBookingDate);
   console.log("oldBookingSession", oldBookingSession);
+  console.log("usercancel", data.userCancelBooking);
+  console.log("qqqqq", uid);
 
   let bookingData = {
     ...data.newSessionDetails,
     firstname: data.userDetails.firstname,
     surname: data.userDetails.surname,
-    mobile: data.userDetails.mobile,
+    mobile: data.userDetails.mobileNum,
   };
 
   if (newBookingDate !== "") {
@@ -311,7 +232,7 @@ exports.bookSession = functions.https.onCall((data, context) => {
     }
   }
 
-  if (data.newSessionDetails.userCancelBooking) {
+  if (data.userCancelBooking) {
     console.log("hit cancel -------");
     promises.push(
       admin
@@ -331,75 +252,43 @@ exports.bookSession = functions.https.onCall((data, context) => {
   return Promise.all(promises);
 });
 
-/* exports.jumaDate = functions.database
-  .ref("/users/{userId}/jumaDate")
-  .onWrite((change, context) => {
-    let promises = [];
-    console.log("context params is", context.params.jumaDate);
-    const after = change.after.val();
-    const before = change.before.val();
-    console.log("context params after ", after);
-    console.log("context params before", before);
-    let updatedKey = context.params.jumaDate;
-
-    if (updatedKey === "jumaDate" && after === "") {
-      promises.push(
-        admin
-          .database()
-          .ref(
-            "adminSessions/cic/openSessions/" +
-              userBookingDate +
-              "/" +
-              userBookingSession +
-              "/confirmed/" +
-              before
-          )
-          .remove()
-      );
-    }
-    return Promise.all([]);
-  });
- */
-exports.copyPrivUserDetails = functions.database
+exports.userDetailsUpdated = functions.database
   .ref("/users/{userId}")
-  .onWrite((change, context) => {
-    let promises = [];
+  .onUpdate((change, context) => {
     const after = change.after.val();
-    //console.log("exists after log", after);
+    let privUserDetailsObj = {
+      ...after,
+      lastupdate: admin.database.ServerValue.TIMESTAMP,
+    };
 
-    // Only edit data when it is first created.
-    if (change.before.exists()) {
-      /*   console.log(
-        "context change before exists",
-        JSON.stringify(change.before.val())
-      ); */
-    }
-    if (after.jumaDate === "") {
-      //  console.log("change context after exists", JSON.stringify(after));
-    }
-    promises.push(
-      admin
-        .database()
-        .ref("/privUserDetails/" + context.params.userId)
-        .update({
-          ...after,
-          cancelCount: 0,
-          warningCount: 0,
-          banned: 0,
+    return admin
+      .database()
+      .ref("/privUserDetails/" + context.params.userId)
+      .update(privUserDetailsObj);
+  });
 
-          admin: 0,
-          deleted: false,
-          deleteDate: "",
+exports.newUserDetails = functions.database
+  .ref("/users/{userId}")
+  .onCreate((snapshot, context) => {
+    console.log("newUserDetails user snapshot", snapshot.val());
+    let privUserDetailsObj = {
+      firstname: snapshot.val().firstname,
+      surname: snapshot.val().surname,
+      mobileNum: snapshot.val().mobileNum,
+      email: snapshot.val().email,
+      agreeNewsletter: snapshot.val().agreeNewsletter,
+      company: snapshot.val().company,
+      cancelCount: 0,
+      warningCount: 0,
+      banned: 0,
+      admin: 0,
+      lastupdate: admin.database.ServerValue.TIMESTAMP,
+    };
 
-          company: {
-            melbourne: {
-              cic: "cic",
-            },
-          },
-        })
-    );
-
-    return Promise.all(promises);
+    return admin
+      .database()
+      .ref("/privUserDetails/" + context.auth.uid)
+      .set(privUserDetailsObj);
   });
 
 function calculateBooked(before, after, context) {
