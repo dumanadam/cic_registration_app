@@ -82,13 +82,19 @@ function AdminDashboard(props) {
   }, [openSessions]); */
 
   useEffect(() => {
-    console.log("admindash supersessions useeff +++++", superSessions);
+    console.log(
+      "admindash supersessions useeff +++++",
+      typeof superSessions,
+      superSessions
+    );
+
     if (!!superSessions) {
       setButtonDetails(
         {
           b1: {
-            buttonText:
-              superSessions.length > 1 ? "Update Session" : "Create Session",
+            buttonText: Array.isArray(superSessions)
+              ? "Create Session"
+              : "Update Session",
             link: "/create-session",
             variant: "primary w-100",
             loading: superSessions.length > 1 ? true : false,

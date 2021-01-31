@@ -87,7 +87,7 @@ exports.checkUserBooking = functions.https.onCall(
     let adminSessionUserBooking = await admin
       .database()
       .ref(
-        `adminSessions/cic/openSessions/${userDetails.jumaDate}/${userDetails.jumaSession}/booked/${context.auth.uid}`
+        `adminSessions/cic/openSessions/${userDetails.jumaDate}/${userDetails.jumaSession}/booked/${userDetails.sessionHash}`
       )
       .once("value")
       .then((snap) => {
@@ -192,12 +192,12 @@ exports.confirmAttendance = functions.https.onCall((data, context) => {
     admin
       .database()
       .ref(
-        "adminSessions/cic/" +
+        "adminSessions/cic/openSessions/" +
           data.jumaDate +
           "/" +
           data.jumaSession +
-          "/" +
-          data.uid +
+          "/booked/" +
+          data.sessionHash +
           "/"
       )
       .update(entryTimeUpdateObj)
@@ -377,6 +377,7 @@ exports.newUserDetails = functions.database
       warningCount: 0,
       banned: 0,
       admin: 0,
+      uid: snapshot.val().uid,
       lastupdate: admin.database.ServerValue.TIMESTAMP,
     };
 

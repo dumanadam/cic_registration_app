@@ -110,12 +110,18 @@ export function AuthProvider({ children }) {
           cic: "cic",
         },
       },
+
+      asd: "asd",
     };
 
     await auth
       .createUserWithEmailAndPassword(email, password)
       .then((newUser) => {
         console.log("newuser is > ", newUser);
+        registrationDetails = {
+          ...registrationDetails,
+          uid: auth.currentUser.uid,
+        };
       });
 
     let upd = await db
@@ -277,6 +283,7 @@ export function AuthProvider({ children }) {
   ) {
     console.log("newSessionDetails", newSessionDetails);
     console.log("oldSessionDetails", oldSessionDetails);
+
     let bookSessionFunc = fbfunc.httpsCallable("bookSession");
     let bookingRequest = bookSessionFunc({
       newSessionDetails,

@@ -101,7 +101,7 @@ function AttendeeScanner() {
   const [listKey, setListKey] = useState("");
   const [bookingAvailability, setBookingAvailability] = useState(0);
   const [sessionAttendees, setSessionAttendees] = useState([]);
-  const [sessionBookedIds, setSessionBookedIds] = useState({});
+  const [sessionBookedHashs, setSessionBookedHashs] = useState({});
   const [attendeeDetails, setAttendeeDetails] = useState({});
   const history = useHistory();
   const [attendeeList, setAttendeeList] = useState([]);
@@ -129,23 +129,25 @@ function AttendeeScanner() {
   useEffect(() => {
     if (!!superSessions) {
       let userCards = [];
-      let bookedIdListArr = [];
-      let bookedIds =
+      let bookedHashListArr = [];
+      let bookedHashs =
         superSessions[location.state.selectedDate][location.state.selectedTime]
           .booked;
-      setSessionBookedIds(bookedIds);
-      console.log("attendee supersessions bookedIds", bookedIds);
-      console.log("attendee supersessions bookedIds", bookedIds);
+      setSessionBookedHashs(bookedHashs);
+      console.log("attendee supersessions bookedHashs", bookedHashs);
+      console.log("attendee supersessions bookedHashs", bookedHashs);
 
-      for (const userId in bookedIds) {
+      for (const userSessionHash in bookedHashs) {
         if (
-          Object.hasOwnProperty.call(bookedIds, userId) &&
-          bookedIds[userId].userCancelBooking !== true
+          Object.hasOwnProperty.call(bookedHashs, userSessionHash) &&
+          bookedHashs[userSessionHash].userCancelBooking !== true
         )
-          bookedIdListArr.push(bookedIds[userId]);
+          bookedHashListArr.push(bookedHashs[userSessionHash]);
       }
-      bookedIdListArr.forEach((singleUser, index) => {
+      bookedHashListArr.forEach((singleUser, index) => {
         console.log("singleUser is", singleUser);
+        console.log("singleUser is time", singleUser.entryTime);
+
         userCards.push(
           <>
             <ListGroup.Item
@@ -167,7 +169,7 @@ function AttendeeScanner() {
 
                 <Col xl={5}>{singleUser.mobile}</Col>
                 <Col xl={2}>
-                  {singleUser.entrytime ? (
+                  {singleUser.entryTime ? (
                     <IconContext.Provider value={{ color: "green" }}>
                       <BsCheck></BsCheck>
                     </IconContext.Provider>
@@ -204,28 +206,28 @@ function AttendeeScanner() {
       // setResult({ result: data });
       console.log("scan is ", data);
 
-      console.log("sessionBookedIds is ", sessionBookedIds);
-      if (sessionBookedIds) {
+      console.log("sessionBookedHashs is ", sessionBookedHashs);
+      if (sessionBookedHashs) {
         scannedUserDetails = Object.fromEntries(
-          Object.entries(sessionBookedIds).filter(
+          Object.entries(sessionBookedHashs).filter(
             ([key, value]) => key === data
           )
         );
-        console.log("scannedUserDetails", scannedUserDetails);
+        console.log("scannedUserDetails", scannedUserDetails[data].uid);
+        console.log("scannedUserDetails data", data);
 
         let scanResult = updateAttendance(
           {
             jumaDate: location.state.selectedDate,
             jumaSession: location.state.selectedTime,
             sessionHash: data,
-            uid: scannedUserDetails.uid,
+            uid: scannedUserDetails[data].uid,
           },
           "entry"
         );
         if (scanResult) {
           playSuccessAudio();
           setResult(scanResult.firstname + " " + scanResult.surname);
-          confirmAttendance(scanResult);
         } else {
           setResult("No user in this session");
           playFailAudio();
@@ -236,8 +238,6 @@ function AttendeeScanner() {
       }
     }
   }
-
-  function confirmAttendance(user) {}
 
   function handleError(err) {
     console.error(err);
