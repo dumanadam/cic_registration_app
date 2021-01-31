@@ -10,7 +10,7 @@ function SessionList(
   userDetails,
   globalFriday
 ) {
-  console.log(
+  /* console.log(
     "listDetails" +
       "listKey" +
       listKey +
@@ -20,7 +20,7 @@ function SessionList(
       handleClick +
       "globalFriday" +
       globalFriday
-  );
+  ); */
 
   function loopSessions() {
     let result = latestSessionTimes.map((sessionDetails) => {

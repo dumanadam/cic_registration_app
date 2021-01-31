@@ -191,7 +191,6 @@ function CreateSession() {
               maxPerSession: parseInt(maxPerSession),
               full: false,
               currentBooked: 0,
-              confirmed: "",
             },
           };
         }

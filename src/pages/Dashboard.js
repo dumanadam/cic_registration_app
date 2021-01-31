@@ -12,13 +12,13 @@ const Dashboard = (props) => {
     userDetails,
     openSessions,
     clearUserJumaSession,
-    checkUserSession,
+    checkUserBooking,
   } = useAuth();
   const history = useHistory();
 
   useEffect(() => {
     console.log("userDetails dashboard before", userDetails);
-    if (userDetails !== "waiting") {
+    if (!!userDetails) {
       console.log("userDetails dashboard received", userDetails);
 
       setMyProps({
@@ -27,7 +27,7 @@ const Dashboard = (props) => {
         setLoading: setLoading,
         logout: logout,
         headerText: TEXTDEFINITION.DASHBOARD_CARD_HEADER,
-        checkUserSession: checkUserSession,
+        checkUserBooking: checkUserBooking,
       });
 
       setLoading(false);

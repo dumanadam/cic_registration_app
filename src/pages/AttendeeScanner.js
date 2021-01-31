@@ -91,7 +91,6 @@ function AttendeeScanner() {
     globalFriday,
     globalFridayFb,
     updateAttendance,
-    getSessionAttendees,
     superSessions,
   } = useAuth();
   const [error, setError] = useState("");
@@ -102,9 +101,11 @@ function AttendeeScanner() {
   const [listKey, setListKey] = useState("");
   const [bookingAvailability, setBookingAvailability] = useState(0);
   const [sessionAttendees, setSessionAttendees] = useState([]);
+  const [sessionBookedIds, setSessionBookedIds] = useState({});
   const [attendeeDetails, setAttendeeDetails] = useState({});
   const history = useHistory();
   const [attendeeList, setAttendeeList] = useState([]);
+  const [attendeeListDiv, setAttendeeListDiv] = useState([]);
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
@@ -126,45 +127,66 @@ function AttendeeScanner() {
   }, [sessionAttendees]);
 
   useEffect(() => {
-    console.log("attendee getusersess", getSessionAttendees());
-    setSessionAttendees(getSessionAttendees());
-    console.log("location");
-  }, []);
+    if (!!superSessions) {
+      let userCards = [];
+      let bookedIdListArr = [];
+      let bookedIds =
+        superSessions[location.state.selectedDate][location.state.selectedTime]
+          .booked;
+      setSessionBookedIds(bookedIds);
+      console.log("attendee supersessions bookedIds", bookedIds);
+      console.log("attendee supersessions bookedIds", bookedIds);
 
-  useEffect(() => {
-    if (superSessions) {
-      let sessionAttendeeList =
-        location.state.superSessionsx[location.state.selectedDate][
-          location.state.selectedTime
-        ].confirmed;
-      setAttendeeDetails(sessionAttendeeList);
-      console.log("attendee supersessions", sessionAttendeeList);
+      for (const userId in bookedIds) {
+        if (
+          Object.hasOwnProperty.call(bookedIds, userId) &&
+          bookedIds[userId].userCancelBooking !== true
+        )
+          bookedIdListArr.push(bookedIds[userId]);
+      }
+      bookedIdListArr.forEach((singleUser, index) => {
+        console.log("singleUser is", singleUser);
+        userCards.push(
+          <>
+            <ListGroup.Item
+              // disabled={showSessions}
+              action
+              className="d-flex justify-content-between align-items-center"
+              //  onClick={(clicked) => handleSelectDate(clicked)}
+              key={index}
+              id={index}
+              href={index}
+            >
+              <Row className="w-100 text-center">
+                <Col xl={5}>
+                  <div>
+                    {" "}
+                    {singleUser.firstname} {singleUser.surname}
+                  </div>
+                </Col>
+
+                <Col xl={5}>{singleUser.mobile}</Col>
+                <Col xl={2}>
+                  {singleUser.entrytime ? (
+                    <IconContext.Provider value={{ color: "green" }}>
+                      <BsCheck></BsCheck>
+                    </IconContext.Provider>
+                  ) : (
+                    <IconContext.Provider value={{ color: "red" }}>
+                      <BsX></BsX>
+                    </IconContext.Provider>
+                  )}
+                </Col>
+              </Row>
+            </ListGroup.Item>
+          </>
+        );
+      });
+
+      console.log("userCards", userCards);
+      setAttendeeListDiv(userCards);
     }
   }, [superSessions]);
-
-  useEffect(() => {
-    // let sessionAttendeeList = superSessions.cic.openSessions;
-    console.log("attendee openSessions", openSessions);
-    console.log("attendee location", location);
-    //  console.log("attendee supersessions", sessionAttendeeList);
-
-    let spreadArr = [];
-    if (openSessions == "") {
-      history.push("/admin");
-    } else {
-      console.log("attendees supersessionssupersessions", attendeeDetails);
-      for (const key in attendeeDetails) {
-        if (Object.hasOwnProperty.call(attendeeDetails, key)) {
-          const element = attendeeDetails[key];
-          console.log("element", element);
-          spreadArr.push(element);
-        }
-      }
-
-      console.log("spreafarr", spreadArr);
-      setAttendeeList(spreadArr);
-    }
-  }, [attendeeDetails]);
 
   function playSuccessAudio() {
     console.log("hit audio play");
@@ -177,24 +199,26 @@ function AttendeeScanner() {
   }
 
   function handleScan(data) {
-    let filteredByKey;
+    let scannedUserDetails;
     if (data) {
       // setResult({ result: data });
       console.log("scan is ", data);
-      console.log("location is ", location.state);
-      let sessionConfirmedCheck = attendeeDetails;
-      if (sessionConfirmedCheck) {
-        console.log("attendeeDetails match is  ", attendeeDetails);
-        filteredByKey = Object.fromEntries(
-          Object.entries(attendeeDetails).filter(([key, value]) => key === data)
+
+      console.log("sessionBookedIds is ", sessionBookedIds);
+      if (sessionBookedIds) {
+        scannedUserDetails = Object.fromEntries(
+          Object.entries(sessionBookedIds).filter(
+            ([key, value]) => key === data
+          )
         );
-        console.log("filteredByKey", filteredByKey);
+        console.log("scannedUserDetails", scannedUserDetails);
 
         let scanResult = updateAttendance(
           {
             jumaDate: location.state.selectedDate,
             jumaSession: location.state.selectedTime,
             sessionHash: data,
+            uid: scannedUserDetails.uid,
           },
           "entry"
         );
@@ -234,48 +258,6 @@ function AttendeeScanner() {
       variant: "primary-outline w-100 mt-2",
     },
   };
-  function arrivedAttendeeList() {
-    let arrivedList = [];
-    attendeeList.forEach((item, index) => {
-      console.log(" handle key is", index);
-      console.log("item is", item);
-      arrivedList.push(
-        <>
-          <ListGroup.Item
-            // disabled={showSessions}
-            action
-            className="d-flex justify-content-between align-items-center"
-            //  onClick={(clicked) => handleSelectDate(clicked)}
-            key={index}
-            id={index}
-            href={index}
-          >
-            <Row className="w-100 text-center">
-              <Col xl={5}>
-                <div>Name:</div> {item.firstname} {item.surname}
-              </Col>
-
-              <Col xl={5}>Mobile: {item.mobile}</Col>
-              <Col xl={2}>
-                {item.entrytime ? (
-                  <IconContext.Provider value={{ color: "green" }}>
-                    <BsCheck></BsCheck>
-                  </IconContext.Provider>
-                ) : (
-                  <IconContext.Provider value={{ color: "red" }}>
-                    <BsX></BsX>
-                  </IconContext.Provider>
-                )}
-              </Col>
-            </Row>
-          </ListGroup.Item>
-        </>
-      );
-    });
-
-    console.log("arrivedList", arrivedList);
-    return arrivedList;
-  }
 
   function showBody() {
     return (
@@ -303,7 +285,30 @@ function AttendeeScanner() {
               <p>{result}</p>
             </div>
           </div>
-          {arrivedAttendeeList()}
+          <ListGroup.Item
+            // disabled={showSessions}
+            action
+            className="d-flex justify-content-between align-items-center"
+            //  onClick={(clicked) => handleSelectDate(clicked)}
+            key={1}
+            id={1}
+            active
+          >
+            <Row className="w-100 text-center">
+              <Col xl={5}>
+                <div>Name</div>
+              </Col>
+
+              <Col xl={5}>Mobile </Col>
+              <Col xl={2}>
+                {" "}
+                <IconContext.Provider value={{ color: "green" }}>
+                  <BsCheck></BsCheck>
+                </IconContext.Provider>
+              </Col>
+            </Row>
+          </ListGroup.Item>
+          {attendeeListDiv}
 
           <Link className="" to="/admin">
             <Button

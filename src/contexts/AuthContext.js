@@ -13,7 +13,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
-  const [userDetails, setUserDetails] = useState("waiting");
+  const [userDetails, setUserDetails] = useState(null);
   const [globalFridayUnformatted, setGlobalFridayUnformatted] = useState(
     FindFriday(0, true)
   );
@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
   const [openSessions, setOpenSessions] = useState("");
   const [superSessions, setSuperSessions] = useState(null);
   const [adminSessions, setAdminSessions] = useState(null);
+  const [adminCheckResult, setAdminCheckResult] = useState(null);
 
   const now = moment().toString();
 
@@ -31,15 +32,25 @@ export function AuthProvider({ children }) {
       setGlobalFridayFb();
 
       setLoading(false);
-      if (user) getCurrentUserDetails(user);
     });
 
     return unsubscribe;
   }, []);
 
   useEffect(() => {
+    if (!!currentUser) {
+      getCurrentUserDetails(currentUser);
+      console.log("currentUser auth", currentUser);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
     console.log("globalFridayUnformatted auth", globalFridayUnformatted);
   }, [globalFridayUnformatted]);
+
+  useEffect(() => {
+    console.log("authcontext superSessions changed +++++", superSessions);
+  }, [superSessions]);
 
   async function getCurrentUserDetails() {
     await db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
@@ -55,7 +66,6 @@ export function AuthProvider({ children }) {
         typeof userDetails.firstname !== "undefined" &&
         userDetails !== null
       ) {
-        console.log("userDetails.firstname", userDetails.firstname);
         getOpenSessions(userDetails.company.melbourne.cic);
       }
     }
@@ -206,10 +216,11 @@ export function AuthProvider({ children }) {
     }
   }
 
-  function updateAttendance(attendeeDetails, status) {
-    const attendeeSessionAddress =
-      openSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
-        .confirmed[attendeeDetails.sessionHash];
+  async function updateAttendance(scannedUserDetails, status) {
+    let entryConfirmation;
+    /*  const attendeeSessionAddress =
+      superSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
+        .booked[attendeeDetails.sessionHash];
 
     console.log("attendeeDetails", attendeeDetails);
     console.log("status", status);
@@ -220,32 +231,43 @@ export function AuthProvider({ children }) {
       attendeeDetails.jumaDate +
       "/" +
       attendeeDetails.jumaSession +
-      "/confirmed/" +
+      "/booked/" +
       "/" +
       attendeeDetails.sessionHash +
       "/";
     const sessionDBAddress =
-      openSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
-        .confirmed[attendeeDetails.sessionHash];
+      superSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
+        .booked[attendeeDetails.sessionHash];
     console.log("attendeeSessionAddress", attendeeSessionAddress);
     console.log("attendeeDetails.sessionHash", attendeeDetails.sessionHash);
     console.log("sessionDBAddress", sessionDBAddress);
-    console.log("opensess ", openSessions);
+    console.log("superSessions ", superSessions);
     console.log(
-      "opensess sessionDBAddress",
-      openSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
-        .confirmed[attendeeDetails.sessionHash]
+      "superSessions sessionDBAddress",
+      superSessions[attendeeDetails.jumaDate][attendeeDetails.jumaSession]
+        .booked[attendeeDetails.sessionHash]
     );
     attendeeDetails = {
-      entrytime: now,
+      entryTime: now,
     };
     console.log("attendeeDetails", attendeeDetails);
-    if (attendeeSessionAddress !== undefined) {
-      updateDB(testadd, attendeeDetails);
+    if (attendeeSessionAddress !== undefined) { */
+    let confirmAttendance = fbfunc.httpsCallable("confirmAttendance");
 
-      return attendeeSessionAddress;
-    }
-    return false;
+    entryConfirmation = await confirmAttendance(scannedUserDetails)
+      .then((result) => {
+        console.log("res from confirmAttendance func  ->>> ", result.data);
+        return result.data;
+      })
+      .catch((e) => {
+        console.log("FBfunc confirmAttendance error returned >>>", e);
+      });
+
+    //  updateDB(testadd, attendeeDetails);
+    //console.log("adminsession entry", attendeeDetails);
+    // return attendeeSessionAddress;
+    //}
+    return entryConfirmation;
   }
 
   function bookSession(
@@ -256,21 +278,23 @@ export function AuthProvider({ children }) {
     console.log("newSessionDetails", newSessionDetails);
     console.log("oldSessionDetails", oldSessionDetails);
     let bookSessionFunc = fbfunc.httpsCallable("bookSession");
-    bookSessionFunc({
+    let bookingRequest = bookSessionFunc({
       newSessionDetails,
       oldSessionDetails,
       userDetails,
       userCancelBooking,
     })
       .then((result) => {
-        console.log("res from createAdminSess func  ->>> ", result.data);
+        console.log("res from bookSession func  ->>> ", result.data);
+        const userDBAddress = "users/" + auth.currentUser.uid;
+        updateDB(userDBAddress, newSessionDetails);
+        return result.data;
       })
       .catch((e) => {
-        console.log("FBfunc createsessions error returned >>>", e);
+        console.log("FBfunc bookSession error returned >>>", e);
+        return null;
       });
-
-    const userDBAddress = "users/" + auth.currentUser.uid;
-    updateDB(userDBAddress, newSessionDetails);
+    return bookingRequest;
   }
 
   function clearUserJumaSession(params) {
@@ -284,22 +308,22 @@ export function AuthProvider({ children }) {
     updateDB(userDBAddress, blankSessionDetails);
   }
 
-  async function checkUserSession() {
+  async function checkUserBooking() {
     /* let fbObj = {
       sessionDetails: sessionDetails,
       sessionOwner: sessionOwner,
       company: company,
     }; */
 
-    let userSessionConfirmed = fbfunc.httpsCallable("checkUserSession");
+    let userSessionConfirmed = fbfunc.httpsCallable("checkUserBooking");
 
-    return await userSessionConfirmed(userDetails)
+    userSessionConfirmed(userDetails)
       .then((result) => {
-        console.log("res from checkUserSession func  ->>> ", result.data);
+        console.log("res from checkUserBooking func  ->>> ", result.data);
         return result.data;
       })
       .catch((e) => {
-        console.log("FBfunc checkUserSession error returned >>>", e);
+        console.log("FBfunc checkUserBooking error returned >>>", e);
       });
   }
 
@@ -343,40 +367,59 @@ export function AuthProvider({ children }) {
 
     return auth.currentUser.updatePassword(password);
   }
-  useEffect(() => {
+  /*   useEffect(() => {
     if (superSessions == null) {
       console.log("createAdminSess superSessions null");
     } else {
       console.log("createAdminSess superSessions ", superSessions);
     }
-  }, [superSessions]);
+  }, [superSessions]); */
 
-  async function getSessionAttendees() {
-    let qqq;
-    let aaa;
+  async function checkAdminStatus() {
+    let adminStatus;
+    let adminSessions;
 
-    let getSessionAttendeesa = fbfunc.httpsCallable("getSessionAttendees");
-    try {
-      qqq = await getSessionAttendeesa().then((result) => {
+    let checkAdminStatusa = fbfunc.httpsCallable("checkAdminStatus");
+
+    adminStatus = await checkAdminStatusa().then((result) => {
+      console.log(
+        "res from checkAdminStatus func  superSessions ->>>111 ",
+        result.data
+      );
+
+      if (result.data.adminSessions) {
         console.log(
-          "res from getSessionAttendees func  superSessions ->>>111 ",
-          result
+          "checkadminstatus hit result.data.adminSessions",
+          result.data.adminSessions
         );
-        setSuperSessions(result.data);
-        return result.data;
-      });
-    } catch (error) {
-      console.log("getSessionAttendees err---", error);
-      setSuperSessions(null);
-    }
+        return result.data.adminSessions;
+      }
+      if (
+        result.data.httpErrorCode !== undefined &&
+        result.data.httpErrorCode.status === 401
+      ) {
+        console.log("checkadminstatus hit 401", result.data);
+        setAdminCheckResult(401);
+        return false;
+        //  throw new Error(result.data.httpErrorCode.status);
+      }
+      return result.data ? setAdminCheckResult(true) : setAdminCheckResult(401);
+    });
+    /*       .catch((error) => {
+        //console.log("res from  checkAdminStatus err---error", error);
+        console.log("res from  checkAdminStatus err---type", typeof error);
+        console.log("res from  checkAdminStatus err---name", error.name);
+        console.log("res from  checkAdminStatus err--- mesg", error.message);
+        adminStatus = error;
+      }); */
 
-    try {
+    /*     try {
       console.log("hit try res");
-      aaa = db
+      adminSessions = db
         .ref("adminSessions/cic/openSessions/")
         .on("value", (snapshot) => {
           console.log(
-            "res from getSessionAttendees func  superSessions ->>> adminsessions",
+            "res from checkAdminStatus func  superSessions ->>> adminsessions",
             snapshot
           );
           setSuperSessions(snapshot.val());
@@ -385,9 +428,31 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.log("adminsessions error", error);
     }
+*/
 
-    console.log("res getSessionAttendees qqq ", qqq);
-    console.log("res getSessionAttendees aaa ", aaa);
+    console.log("res checkAdminStatus adminSessions ", adminSessions);
+    console.log("res checkAdminStatus adminSessions adminStatus ", adminStatus);
+    return adminStatus;
+  }
+
+  function openSSessions() {
+    console.log("hit supersessions openSSessions", adminSessions);
+    if (adminCheckResult === true && superSessions == null) {
+      db.ref("/adminSessions/cic/openSessions/").on("value", (snapshot) => {
+        console.log("*Google DB*getting latest adminSessions", snapshot.val());
+        if (!snapshot.exists()) {
+          console.log(
+            "res checkAdminStatus supersessions checkadmin",
+            snapshot.exists()
+          );
+          setSuperSessions([]);
+          return false;
+        } else {
+          setSuperSessions(snapshot.val());
+          return true;
+        }
+      });
+    }
   }
 
   const value = {
@@ -410,10 +475,12 @@ export function AuthProvider({ children }) {
     globalFridayFb,
     updateAttendance,
     clearUserJumaSession,
-    getSessionAttendees,
+    checkAdminStatus,
     superSessions,
-    checkUserSession,
+    checkUserBooking,
     globalFridayUnformatted,
+    adminCheckResult,
+    openSSessions,
   };
   return (
     <AuthContext.Provider value={value}>

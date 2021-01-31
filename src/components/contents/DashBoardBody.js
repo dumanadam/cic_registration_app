@@ -12,7 +12,6 @@ function DashboardBody(props) {
   const [error, setError] = useState("");
   const [dashboardNavButtons, setDashboardNavButtons] = useState("");
   const history = useHistory();
-  const [myProps, setMyProps] = useState(props);
   const [noSessions, setNoSessions] = useState(true);
   const [bookingsText, setBookingsText] = useState([]);
   const [buttonDetails, setButtonDetails] = useState(true);
@@ -20,93 +19,38 @@ function DashboardBody(props) {
   useEffect(() => {
     console.log("Dashboard body props", props);
 
-    /*  if (props.openSessions !== "" && props.userDetails.jumaDate !== "") {
-      console.log(
-        "user has jumadate",
-        props.openSessions[props.userDetails.jumaDate][
-          props.userDetails.jumaSession
-        ]
-      );
-      if (
-        typeof props.openSessions[props.userDetails.jumaDate][
-          props.userDetails.jumaSession
-        ].confirmed === "undefined"
-      ) {
-        console.log("userdetails jumassession FAILED match");
-        // removeUserSession();
-      } else {
-        if (
-          typeof props.openSessions[props.userDetails.jumaDate][
-            props.userDetails.jumaSession
-          ].confirmed[props.userDetails.sessionHash] == "undefined"
-        ) {
-          console.log(
-            "session hash in confirmed failed",
-            props.openSessions[props.userDetails.jumaDate][
-              props.userDetails.jumaSession
-            ].confirmed[props.userDetails.sessionHash]
-          );
-          // removeUserSession();
-        } else {
-          console.log(
-            "everything ok in user to db match",
-            props.openSessions[props.userDetails.jumaDate][
-              props.userDetails.jumaSession
-            ].confirmed[props.userDetails.sessionHash]
-          );
-        }
-      }
-    } */
-    if (props.userDetails !== null) {
-      /*       if (
-        props.userDetails.jumaDate !== "" &&
-        props.myProps.checkUserSession() == null
-      ) {
-        console.log("remove session dashboard actual");
-        removeUserSession();
-      } */
+    setBookingsText([
+      {
+        title: TEXTDEFINITION.DASHBOARD_GREETING,
+        detail: props.userDetails.firstname,
+      },
+      { title: " Date:", detail: props.userDetails.jumaDate },
+      { title: "Session:", detail: props.userDetails.jumaSession },
+    ]);
 
-      setNoSessions(false);
-      setMyProps(props);
-      setBookingsText([
-        {
-          title: TEXTDEFINITION.DASHBOARD_GREETING,
-          detail: props.userDetails.firstname,
-        },
-        { title: " Date:", detail: props.userDetails.jumaDate },
-        { title: "Session:", detail: props.userDetails.jumaSession },
-      ]);
-
-      setButtonDetails({
-        b1: {
-          buttonText:
-            props.userDetails.jumaDate !== ""
-              ? "Update Session"
-              : "Book Session",
-          link: "/sessions",
-          variant: "primary w-100",
-          loading: myProps.loading,
-          disabled: noSessions,
-        },
-        b2: {
-          buttonText: "Update Profile",
-          variant: "primary w-100",
-          link: "/update-profile",
-          loading: myProps.loading,
-        },
-        b3: {
-          buttonText: "Logout",
-          variant: "outline-light w-100 border-0 mt-2",
-          link: "/",
-          loading: myProps.loading,
-          handleLogout: handleLogout,
-        },
-      });
-    } else {
-      console.log("wtf");
-      props.myProps.setLoading(true);
-      setNoSessions(true);
-    }
+    setButtonDetails({
+      b1: {
+        buttonText:
+          props.userDetails.jumaDate == "" ? "Book Session" : "Update Session",
+        link: "/sessions",
+        variant: "primary w-100",
+        loading: !!props.openSessions ? false : true,
+        disabled: props.openSessions == null ? false : true,
+      },
+      b2: {
+        buttonText: "Update Profile",
+        variant: "primary w-100",
+        link: "/update-profile",
+        loading: props.loading,
+      },
+      b3: {
+        buttonText: "Logout",
+        variant: "outline-light w-100 border-0 mt-2",
+        link: "/",
+        loading: props.loading,
+        handleLogout: handleLogout,
+      },
+    });
   }, [props]);
 
   useEffect(() => {
@@ -122,35 +66,16 @@ function DashboardBody(props) {
   }, [noSessions]);
 
   useEffect(() => {
+    console.log("props.userDetails.jumaDate", props.userDetails.jumaDate);
+    props.myProps.checkUserBooking();
+  }, [props.openSessions]);
+
+  useEffect(() => {
     if (buttonDetails !== true) {
       console.log(" buttondewt", buttonDetails);
       setDashboardNavButtons(NavButtons(3, buttonDetails));
     }
   }, [buttonDetails]);
-
-  function removeUserSession() {
-    console.log("hit remove session");
-    props.myProps.setLoading(true);
-
-    const promises = [];
-    promises.push(props.clearUserJumaSession());
-    Promise.all(promises)
-      .then((res) => {
-        console.log("res", res);
-      })
-      .catch((e) => {
-        console.log("delete error=>", error);
-        console.log("delete error=>", e);
-        // setModalDetails({ bodyText: e.message });
-        setTimeout(() => {
-          props.myProps.setLoading(false);
-          //setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
-        }, 1000);
-      })
-      .finally(() => {
-        props.myProps.setLoading(false);
-      });
-  }
 
   async function handleLogout() {
     console.log("handle logout");
@@ -212,7 +137,7 @@ function DashboardBody(props) {
     return result;
   }
 
-  function noSessionBooked() {
+  function noSessionBookedPrintMessage() {
     return (
       <div className="text-light text-center ">
         {props.openSessions ? (
@@ -233,6 +158,10 @@ function DashboardBody(props) {
     sayHello({ name: "asd" }).then((result) => {
       console.log("res from func  - ", result.data);
     });
+  }
+
+  function adminPage() {
+    history.push("/admin");
   }
 
   function printBody() {
@@ -270,14 +199,13 @@ function DashboardBody(props) {
   return (
     <>
       <div style={{ height: "50vh" }}>
-        {props.loading ? (
-          printBody()
-        ) : (
-          <Row className="p-4 justify-content-center ">{noSessionBooked()}</Row>
-        )}
+        {props.userDetails.jumaDate == ""
+          ? noSessionBookedPrintMessage()
+          : printBody()}
       </div>
       <div id="bottom-navigation"> {dashboardNavButtons}</div>
-      <button onClick={fbclick}>asdasd</button>
+      <button onClick={fbclick}>add admin</button>
+      <button onClick={adminPage}>admin page</button>
     </>
   );
 }

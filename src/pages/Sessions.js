@@ -90,33 +90,49 @@ export default function Sessions() {
   const [latestSessionTimes, setLatestSessionTimes] = useState({});
   const [loading, setLoading] = useState(true);
   const [listKey, setListKey] = useState("");
-  const [bookingAvailability, setBookingAvailability] = useState(0);
   const history = useHistory();
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
 
   useEffect(() => {
-    console.log("sessiosn userDetails", userDetails);
+    console.log("session userDetails", userDetails);
   }, [userDetails]);
 
-  useEffect(() => {
+  /*   useEffect(() => {
     console.log("sessiosn listkey", listKey);
-  }, [listKey]);
+  }, [listKey]); */
 
   /*   useEffect(() => {
     console.log("session obj", session);
   }, [session]); */
 
+  /*   useEffect(() => {
+    //  console.log("session", session);
+  }, [session]); */
+
+  useEffect(() => {
+    console.log("userDetails", userDetails);
+    console.log("session", session);
+  }, [session]);
+
+  useEffect(() => {
+    console.log("session loading", loading);
+  }, [loading]);
+
   useEffect(() => {
     console.log("session openSessions", openSessions);
-    if (userDetails.firstname && openSessions) {
-      console.log("userDetails + openSessions", openSessions);
-
+    console.log("session modaldetails", modalDetails);
+    console.log("session modaldetails", TEXTDEFINITION.LOADING_DEFAULT);
+    if (
+      userDetails.firstname &&
+      openSessions &&
+      modalDetails.bodyText === TEXTDEFINITION.LOADING_DEFAULT
+    ) {
       getSessionTimes();
       setListKey(checkKey());
-
       setLoading(false);
+      console.log("sessions opensessions loading", loading);
     }
   }, [openSessions]);
 
@@ -137,25 +153,7 @@ export default function Sessions() {
     setLatestSessionTimes(sessionTimes2);
   }
 
-  /*   useEffect(() => {
-    //  console.log("session", session);
-  }, [session]); */
-
-  useEffect(() => {
-    console.log("userDetails", userDetails);
-    console.log("session", session);
-  }, [session]);
-
-  useEffect(() => {
-    let friday = FindFriday();
-
-    console.log("friday eff", friday);
-    console.log("globalFridayUnformatted ", globalFridayUnformatted);
-    console.log("globalFridayUnformatted ", globalFridayUnformatted);
-  }, []);
-
-  function handleSubmit(e) {
-    const promises = [];
+  async function handleSubmit(e) {
     let currentUserSession = {
       jumaDate: userDetails.jumaDate,
       jumaSession: userDetails.jumaSession,
@@ -163,34 +161,40 @@ export default function Sessions() {
     };
     e.preventDefault();
     setLoading(true);
-    console.log("e", e);
+    console.log("sessions handlesubmit loading", loading);
+    setModalDetails({
+      bodyText: "Booking Session",
+    });
 
     if (!session.jumaSession) {
-      setModalDetails({ bodyText: "Selected Session time hasnt changed" });
+      setModalDetails({
+        bodyText: "Selected Session hasnt changed\n Please try again",
+      });
       setTimeout(() => {
         setLoading(false);
+        console.log("sessions jumasession loading", loading);
         setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
       }, 2000);
       return;
     }
     let cancelBooking = false;
-    promises.push(bookSession(session, currentUserSession, cancelBooking));
-    Promise.all(promises)
-      .then(() => {
-        history.push("/session-confirmed");
-      })
-      .catch((e) => {
-        console.log("delete error=>", error);
-        console.log("delete error=>", e);
-        setModalDetails({ bodyText: e.message });
-        setTimeout(() => {
-          setLoading(false);
-          setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
-        }, 1000);
-      })
-      .finally(() => {
-        setLoading(false);
+    let bookingResult = await bookSession(
+      session,
+      currentUserSession,
+      cancelBooking
+    );
+    console.log("booksession res", bookingResult);
+    if (!!bookingResult) {
+      history.push("/session-confirmed");
+    } else {
+      setLoading(true);
+      setModalDetails({
+        bodyText: "Booking Failed, Try again in 5 mins",
       });
+      setTimeout(() => {
+        history.push("/");
+      }, 1000);
+    }
   }
 
   function handleCancel(e) {
@@ -201,6 +205,7 @@ export default function Sessions() {
       sessionHash: userDetails.sessionHash,
     };
     e.preventDefault();
+    console.log("sessions handlecancel loading", loading);
     setLoading(true);
 
     const promises = [];
@@ -223,6 +228,7 @@ export default function Sessions() {
         console.log("delete error=>", e);
         setModalDetails({ bodyText: e.message });
         setTimeout(() => {
+          console.log("sessions handlecancel promise loading", loading);
           setLoading(false);
           setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
         }, 1000);

@@ -141,10 +141,10 @@ const NavButtons = (buttonCount, buttonDetails) => {
       return (
         <Container>
           <Row>
-            {b1.disabled ? (
+            {b1.loading ? (
               <Button
                 className="text-light col p-0 mr-2 "
-                disabled={b1.disabled}
+                disabled={b1.loading}
                 variant={b1.variant ? b1.variant : "w-100"}
               >
                 No Sessions
@@ -153,7 +153,7 @@ const NavButtons = (buttonCount, buttonDetails) => {
               <Link className="text-light col p-0 mr-2 " to={b1.link}>
                 <Button
                   disabled={b1.loading}
-                  variant={b1.variant ? b1.variant : "w-100"}
+                  variant={b1.variant ? b2.variant : "w-100"}
                 >
                   {b1.buttonText}
                 </Button>
@@ -162,7 +162,7 @@ const NavButtons = (buttonCount, buttonDetails) => {
 
             <Link className="text-light col p-0" to={b2.link}>
               <Button
-                disabled={b1.loading}
+                disabled={b2.loading}
                 variant={b2.variant ? b2.variant : "danger w-100"}
               >
                 {b2.buttonText}

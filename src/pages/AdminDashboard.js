@@ -30,61 +30,44 @@ function AdminDashboard(props) {
     userDetails,
     openSessions,
     superSessions,
-    getSessionAttendees,
+    checkAdminStatus,
+    adminCheckResult,
+    openSSessions,
   } = useAuth();
   const [pageTitle, setpageTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [adminNavButtons, setAdminNavButtons] = useState("");
   const history = useHistory();
   const sessionOptions = [{ label: "Send QR Code email" }];
-  const [showAttendees, setShowAttendees] = useState("");
   const [session, setSession] = useState({});
   const [showSessions, setShowSessions] = useState(false);
   const [clickedDate, setClickedDate] = useState("");
-  const [sessionAttendees, setSessionAttendees] = useState([]);
-  const [superSessionsx, setSuperSessionsx] = useState(null);
+  const [buttonDetails, setButtonDetails] = useState(null);
 
-  const bookingsText = [
-    {
-      title: "Salamu Aleykum",
-      detail: userDetails.firstname,
-    },
-    { title: " Date:", detail: userDetails.jumaDate },
-    { title: "Session:", detail: userDetails.jumaSession },
-  ];
-  let buttonDetails = {
-    b1: {
-      buttonText:
-        superSessions == "no-sessions" ? "Create Session" : "Update Session",
-      link: "/create-session",
-      variant: "primary w-100",
-      loading: loading,
-    },
-    b2: {
-      buttonText: "Update Profile",
-      variant: "primary w-100",
-      link: "/update-profile",
-      loading: loading,
-    },
-    b3: {
-      buttonText: "Logout",
-      variant: "outline-light w-100 border-0 mt-2",
-      link: "/",
-      loading: loading,
-    },
-  };
+  const [modalDetails, setModalDetails] = useState({
+    bodyText: TEXTDEFINITION.LOADING_DEFAULT,
+  });
 
   useEffect(() => {
+    setLoading(true);
     setpageTitle(PageTitle("Dashboard"));
-    setAdminNavButtons(NavButtons(3, buttonDetails));
 
-    async function adminGetSessions() {
-      let res = await getSessionAttendees();
-      console.log("attendee getusersess", res);
+    checkAdminStatus();
 
-      return res;
-    }
-    setSessionAttendees(adminGetSessions());
+    /*     if (adminResult === "no-sessions") {
+      // setAdminNavButtons(NavButtons(3, buttonDetails));
+      console.log("admindash supersessions not null", superSessions);
+      if (superSessions.code === "unauthenticated") {
+      } else if (superSessions === "no-sessions") {
+        console.log("admindashboard supersessions", superSessions);
+
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
+    } else {
+      console.log("admindash hit false supersessions");
+    } */
   }, []);
 
   /*   useEffect(() => {
@@ -99,41 +82,97 @@ function AdminDashboard(props) {
   }, [openSessions]); */
 
   useEffect(() => {
-    console.log("supersessions useeff", superSessions);
-    if (superSessions !== null) {
-      console.log("supersessions not null", superSessions);
-      if (superSessions.code === "unauthenticated") {
-        history.push({
-          pathname: "/",
-        });
-      } else if (superSessions === "no-sessions") {
-        console.log("admindashboard supersessions", superSessions);
-        setSuperSessionsx(superSessions);
-        setLoading(false);
-      } else {
-        setSuperSessionsx(superSessions);
-        setLoading(false);
-      }
+    console.log("admindash supersessions useeff +++++", superSessions);
+    if (!!superSessions) {
+      setButtonDetails(
+        {
+          b1: {
+            buttonText:
+              superSessions.length > 1 ? "Update Session" : "Create Session",
+            link: "/create-session",
+            variant: "primary w-100",
+            loading: superSessions.length > 1 ? true : false,
+          },
+          b2: {
+            buttonText: "Update Profile",
+            variant: "primary w-100",
+            link: "/update-profile",
+          },
+          b3: {
+            buttonText: "Logout",
+            variant: "outline-light w-100 border-0 mt-2",
+            link: "/",
+          },
+        },
+        3
+      );
     }
   }, [superSessions]);
 
   useEffect(() => {
-    setAdminNavButtons(NavButtons(3, buttonDetails));
-    console.log("loading admindash", loading);
-  }, [loading]);
+    /*     if (loading === false) {
+      console.log("loading admindash hit false ", loading);
+      console.log("loading admindash hit false ", userDetails);
+      setAdminNavButtons(NavButtons(3, buttonDetails));
+    }*/
+    if (!!buttonDetails) {
+      setAdminNavButtons(NavButtons(3, buttonDetails));
+      setLoading(false);
+    }
+    console.log("buttondet", buttonDetails);
+  }, [buttonDetails]);
 
   useEffect(() => {
     console.log("user details", userDetails);
   }, [userDetails]);
 
   useEffect(() => {
-    console.log("showAttendees", showAttendees);
-    //  setShowAttendees(Attendees);
-  }, [Attendees]);
+    console.log("loading admindash", loading);
+  }, [loading]);
 
   useEffect(() => {
-    setAdminNavButtons(NavButtons(3, buttonDetails));
-  }, [NavButtons]);
+    console.log("admindash adminCheckResult", adminCheckResult);
+
+    //  console.log("admin resa", adminCheckResult);
+    console.log("admin resa", adminCheckResult);
+    // console.log("admin resa", adminCheckResult.message);
+
+    if (adminCheckResult === 401) {
+      console.log("admin resa", typeof adminCheckResult);
+
+      setModalDetails({
+        bodyText: "Unauthorised Access",
+      });
+      setTimeout(() => {
+        history.push({
+          pathname: "/",
+        });
+      }, 1500);
+      return false;
+    }
+
+    if (adminCheckResult) {
+      console.log("adminCheckResult is true admindash", adminCheckResult);
+      openSSessions();
+    }
+  }, [adminCheckResult]);
+
+  /*   useEffect(() => {
+    console.log("admincheck  updated", buttonDetails);
+    if (adminCheck == "no-sessions") {
+      setButtonDetails({
+        ...buttonDetails,
+        b1: {
+          buttonText: "Create Session",
+          link: "/create-session",
+          variant: "primary w-100",
+          loading: loading,
+        },
+      });
+    }
+
+    //
+  }, [adminCheck]); */
 
   function handleSelectDate(e) {
     e.preventDefault();
@@ -151,16 +190,16 @@ function AdminDashboard(props) {
       state: {
         selectedDate: clickedDate,
         selectedTime: e.target.textContent,
-        superSessionsx: superSessionsx,
+        superSessions: superSessions,
       },
     });
   }
 
   function SessionList() {
-    console.log("loop superSessionsx", superSessionsx);
+    console.log("loop superSessions", superSessions);
     function loopSessions() {
-      if (superSessionsx !== "no-sessions" && superSessionsx !== null) {
-        let sessionDates = Object.keys(superSessionsx).map(function (
+      if (superSessions !== "no-sessions" && superSessions !== null) {
+        let sessionDates = Object.keys(superSessions).map(function (
           key,
           index
         ) {
@@ -208,9 +247,9 @@ function AdminDashboard(props) {
   }
 
   function listSessionTimes() {
-    console.log("session superSessionsx", session);
-    console.log("superSessionsx[session]", superSessionsx[session]);
-    let sessionTimes = Object.keys(superSessionsx[session]).map(function (
+    console.log("session superSessions", session);
+    console.log("superSessions[session]", superSessions[session]);
+    let sessionTimes = Object.keys(superSessions[session]).map(function (
       key,
       index
     ) {
@@ -282,10 +321,7 @@ function AdminDashboard(props) {
   return (
     <>
       {loading === true ? (
-        <ShowModal
-          loading={loading}
-          modalDetails={{ bodyText: "Connecting to CIC" }}
-        />
+        <ShowModal loading={loading} modalDetails={modalDetails} />
       ) : (
         showBody()
       )}

@@ -34,7 +34,7 @@ function Attendees(props) {
     /*   console.log(
       "attendees",
       openSessions[location.state.selectedDate][location.state.selectedTime]
-        .confirmed
+        .booked
     ); */
   }, [openSessions]);
 
@@ -60,14 +60,14 @@ function Attendees(props) {
     function loopSessions() {
       let sessionDates = Object.keys(
         openSessions[location.state.selectedDate][location.state.selectedTime]
-          .confirmed
+          .booked
       ).map(function (key, index) {
         console.log("key is", key);
         console.log("index is", index);
         console.log(
           "name  is",
           openSessions[location.state.selectedDate][location.state.selectedTime]
-            .confirmed[key].firstname
+            .booked[key].firstname
         );
         return (
           <>
@@ -82,15 +82,15 @@ function Attendees(props) {
                 <Col xl={10}>
                   {openSessions[location.state.selectedDate][
                     location.state.selectedTime
-                  ].confirmed[key].firstname +
+                  ].booked[key].firstname +
                     " " +
                     openSessions[location.state.selectedDate][
                       location.state.selectedTime
-                    ].confirmed[key].surname +
+                    ].booked[key].surname +
                     " - " +
                     openSessions[location.state.selectedDate][
                       location.state.selectedTime
-                    ].confirmed[key].mobile}
+                    ].booked[key].mobile}
                 </Col>
                 <Col xl={2}>{index}</Col>
               </Row>

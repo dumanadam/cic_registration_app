@@ -5,15 +5,15 @@ admin.initializeApp();
 
 let db = admin.database();
 
-exports.getSessionAttendees = functions.https.onCall(async (data, context) => {
-  let asd;
+exports.checkAdminStatus = functions.https.onCall(async (data, context) => {
+  let openAdminSession;
   console.log("hit getsession");
-  result = await admin
+  let adminUser = await admin
     .database()
     .ref("adminUsers/" + context.auth.uid)
     .once("value")
     .then((snapshot) => {
-      console.log("result adminuser+++++", JSON.stringify(snapshot.val()));
+      console.log("adminUser adminuser+++++", JSON.stringify(snapshot.val()));
       if (snapshot.val() === null) {
         throw new functions.https.HttpsError(
           "unauthenticated",
@@ -35,8 +35,8 @@ exports.getSessionAttendees = functions.https.onCall(async (data, context) => {
       return e;
     });
 
-  if (result === true) {
-    asd = await admin
+  /*   if (adminUser === true) {
+    openAdminSession = await admin
       .database()
       .ref("adminSessions/cic/openSessions/")
       .once("value")
@@ -45,23 +45,23 @@ exports.getSessionAttendees = functions.https.onCall(async (data, context) => {
         if (snap.val() === null) {
           return "no-sessions";
         } else {
-          return snap.val();
+          return { adminSessions: snap.val() };
         }
       })
       .catch((e) => {
         console.log("caught folder adminuser error", e);
         return e;
       });
-  }
-  console.log("result adminuser", JSON.stringify(result));
-  console.log("asd adminuser", JSON.stringify(asd));
-  /* if (Object.keys(result).length === 0 && result.constructor === Object) {
+  } */
+  console.log("adminUser adminuser", JSON.stringify(adminUser));
+  console.log("openAdminSession adminuser", JSON.stringify(openAdminSession));
+  /* if (Object.keys(adminUser).length === 0 && adminUser.constructor === Object) {
     throw new functions.https.HttpsError(
       "unauthenticated",
       "You must be authenticated to call this function."
     );
   } else { */
-  /*   if (result) {
+  /*   if (adminUser) {
     adminSessions = await admin
       .database()
       .ref("adminSessions/")
@@ -72,31 +72,55 @@ exports.getSessionAttendees = functions.https.onCall(async (data, context) => {
       });
     console.log("adminSessions", adminSessions);
   } */
-  return asd === undefined ? result : asd;
+  return adminUser;
 });
 
-exports.checkUserSession = functions.https.onCall(async (data, context) => {
-  let user = admin.database().ref("users/" + context.auth.uid);
-  let adminSessionUserBooking = await admin
-    .database()
-    .ref(
-      `adminSessions/cic/openSessions/${data.jumaDate}/${data.jumaSession}/confirmed/${context.auth.uid}`
-    )
-    .once("value")
-    .then((snap) => {
-      return snap.val();
-    });
+exports.checkUserBooking = functions.https.onCall(
+  async (userDetails, context) => {
+    let emptyUserBooking = {
+      jumaDate: "",
+      jumaSession: "",
+      sessionHash: "",
+    };
 
-  console.log("adminSessionUserBooking", adminSessionUserBooking);
-  console.log("adminSessionUserBooking data", data.jumaDate);
-  res = await admin
+    let user = admin.database().ref("users/" + context.auth.uid);
+    let adminSessionUserBooking = await admin
+      .database()
+      .ref(
+        `adminSessions/cic/openSessions/${userDetails.jumaDate}/${userDetails.jumaSession}/booked/${context.auth.uid}`
+      )
+      .once("value")
+      .then((snap) => {
+        return snap.val();
+      });
+
+    console.log("adminSessionUserBooking", adminSessionUserBooking);
+    console.log(
+      "adminSessionUserBooking userDetails.jumaDate",
+      userDetails.jumaDate
+    );
+
+    if (
+      adminSessionUserBooking !== null &&
+      adminSessionUserBooking.jumaDate === userDetails.jumaDate &&
+      adminSessionUserBooking.jumaSession === userDetails.jumaSession
+    ) {
+      return true;
+    } else {
+      return await admin
+        .database()
+        .ref("users/" + context.auth.uid)
+        .update(emptyUserBooking);
+    }
+
+    /*   res = await admin
     .database()
     .ref(
       "adminSessions/cic/openSessions/" +
-        data.jumaDate +
+        userDetails.jumaDate +
         "/" +
-        data.jumaSession +
-        "/confirmed/" +
+        userDetails.jumaSession +
+        "/booked/" +
         context.auth.uid
     )
     .once("value")
@@ -105,8 +129,9 @@ exports.checkUserSession = functions.https.onCall(async (data, context) => {
     });
 
   console.log("adminSessionUserBooking booking res", res);
-  return res;
-});
+  return res; */
+  }
+);
 
 exports.testFunc = functions.https.onCall((data, context) => {
   let user = admin.database().ref("users/" + context.auth.uid);
@@ -138,6 +163,44 @@ exports.createSessions = functions.https.onCall((data, context) => {
   );
   promises.push(
     admin.database().ref("pubSessions/cic/").set(data.sessionDetails)
+  );
+
+  return Promise.all(promises);
+});
+
+exports.confirmAttendance = functions.https.onCall((data, context) => {
+  if (!context.auth) {
+    // Throwing an HttpsError so that the client gets the error details.
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "The function must be called " + "while authenticated."
+    );
+  }
+  console.log("attendeance data", data);
+  let promises = [];
+  let entryTimeUpdateObj = {
+    entryTime: admin.database.ServerValue.TIMESTAMP,
+  };
+
+  promises.push(
+    admin
+      .database()
+      .ref("users/" + data.uid)
+      .update(entryTimeUpdateObj)
+  );
+  promises.push(
+    admin
+      .database()
+      .ref(
+        "adminSessions/cic/" +
+          data.jumaDate +
+          "/" +
+          data.jumaSession +
+          "/" +
+          data.uid +
+          "/"
+      )
+      .update(entryTimeUpdateObj)
   );
 
   return Promise.all(promises);
@@ -185,6 +248,8 @@ exports.bookSession = functions.https.onCall((data, context) => {
   let newBookingSession = data.newSessionDetails.jumaSession;
   let oldBookingDate = data.oldSessionDetails.jumaDate;
   let oldBookingSession = data.oldSessionDetails.jumaSession;
+  let oldBookingSessionHash = data.oldSessionDetails.sessionHash;
+  let newBookingSessionHash = data.newSessionDetails.sessionHash;
   console.log("contextauth", context.auth.uid);
   console.log("newBookingDate", newBookingDate);
   console.log("data.newBookingSession", newBookingSession);
@@ -198,10 +263,12 @@ exports.bookSession = functions.https.onCall((data, context) => {
     firstname: data.userDetails.firstname,
     surname: data.userDetails.surname,
     mobile: data.userDetails.mobileNum,
+    uid: uid,
   };
 
   if (newBookingDate !== "") {
     console.log("hit true adm2 ", data);
+
     promises.push(
       admin
         .database()
@@ -210,10 +277,14 @@ exports.bookSession = functions.https.onCall((data, context) => {
             newBookingDate +
             "/" +
             newBookingSession +
-            "/confirmed/" +
-            uid
+            "/booked/" +
+            newBookingSessionHash
         )
         .update(bookingData)
+        .then((res) => {
+          console.log("updated adminsession");
+          return "updated adminsession";
+        })
     );
     if (oldBookingDate !== "") {
       promises.push(
@@ -224,10 +295,14 @@ exports.bookSession = functions.https.onCall((data, context) => {
               oldBookingDate +
               "/" +
               oldBookingSession +
-              "/confirmed/" +
-              uid
+              "/booked/" +
+              oldBookingSessionHash
           )
           .remove()
+          .then((res) => {
+            console.log("deleted old adminsession");
+            return "deleted old";
+          })
       );
     }
   }
@@ -238,14 +313,34 @@ exports.bookSession = functions.https.onCall((data, context) => {
       admin
         .database()
         .ref(
+          "adminSessions/cancelled/openSessions/" +
+            oldBookingDate +
+            "/" +
+            oldBookingSession +
+            "/cancelled/" +
+            oldBookingSessionHash
+        )
+        .update({
+          ...bookingData,
+          userCancelBooking: admin.database.ServerValue.TIMESTAMP,
+        })
+        .then((res) => {
+          console.log("canceled usersession adminsession");
+          return "canceled usersession adminsession";
+        })
+    );
+    promises.push(
+      admin
+        .database()
+        .ref(
           "adminSessions/cic/openSessions/" +
             oldBookingDate +
             "/" +
             oldBookingSession +
-            "/confirmed/" +
-            uid
+            "/booked/" +
+            oldBookingSessionHash
         )
-        .update({ userCancelBooking: true })
+        .remove()
     );
   }
 
