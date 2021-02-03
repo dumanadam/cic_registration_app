@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect } from "react";
 import { auth, db, fbfunc } from "../firebase";
 import moment from "moment";
 import FindFriday from "../components/FindFriday";
-import FbAddress from "../components/contents/FbAddress";
 
 const AuthContext = React.createContext();
 
@@ -97,6 +96,7 @@ export function AuthProvider({ children }) {
     agreeNewsletter
   ) {
     let registrationDetails = {
+      entryTime: undefined,
       email,
       firstname,
       surname,
@@ -110,8 +110,6 @@ export function AuthProvider({ children }) {
           cic: "cic",
         },
       },
-
-      asd: "asd",
     };
 
     await auth
@@ -304,16 +302,18 @@ export function AuthProvider({ children }) {
     return bookingRequest;
   }
 
-  function clearUserJumaSession(params) {
+  /*   function clearUserJumaSession(params) {
     const userDBAddress = "users/" + auth.currentUser.uid;
     let blankSessionDetails = {
       jumaDate: "",
       jumaSession: "",
+      entryTime: "",
+      qqq: "qqq",
     };
     console.log("blankSessionDetails", blankSessionDetails);
 
     updateDB(userDBAddress, blankSessionDetails);
-  }
+  } */
 
   async function checkUserBooking() {
     /* let fbObj = {
@@ -442,8 +442,8 @@ export function AuthProvider({ children }) {
     return adminStatus;
   }
 
-  function openSSessions() {
-    console.log("hit supersessions openSSessions", adminSessions);
+  function getSupSessions() {
+    console.log("hit supersessions getSupSessions", adminSessions);
     if (adminCheckResult === true && superSessions == null) {
       db.ref("/adminSessions/cic/openSessions/").on("value", (snapshot) => {
         console.log("*Google DB*getting latest adminSessions", snapshot.val());
@@ -481,13 +481,12 @@ export function AuthProvider({ children }) {
     globalFriday,
     globalFridayFb,
     updateAttendance,
-    clearUserJumaSession,
     checkAdminStatus,
     superSessions,
     checkUserBooking,
     globalFridayUnformatted,
     adminCheckResult,
-    openSSessions,
+    getSupSessions,
   };
   return (
     <AuthContext.Provider value={value}>

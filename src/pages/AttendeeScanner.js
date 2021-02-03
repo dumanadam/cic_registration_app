@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Card, Form, Button, ListGroup, Row, Col } from "react-bootstrap";
+import {
+  Card,
+  Form,
+  Button,
+  ListGroup,
+  Row,
+  Col,
+  Badge,
+} from "react-bootstrap";
 import { useAuth, updateAttendance } from "../contexts/AuthContext";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import QrReader from "react-qr-reader";
@@ -106,6 +114,7 @@ function AttendeeScanner() {
   const history = useHistory();
   const [attendeeList, setAttendeeList] = useState([]);
   const [attendeeListDiv, setAttendeeListDiv] = useState([]);
+  const [scanErrorMsg, setScanErrorMsg] = useState(undefined);
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
@@ -135,7 +144,6 @@ function AttendeeScanner() {
           .booked;
       setSessionBookedHashs(bookedHashs);
       console.log("attendee supersessions bookedHashs", bookedHashs);
-      console.log("attendee supersessions bookedHashs", bookedHashs);
 
       for (const userSessionHash in bookedHashs) {
         if (
@@ -158,6 +166,7 @@ function AttendeeScanner() {
               key={index}
               id={index}
               href={index}
+              variant="light"
             >
               <Row className="w-100 text-center">
                 <Col xl={5}>
@@ -167,7 +176,7 @@ function AttendeeScanner() {
                   </div>
                 </Col>
 
-                <Col xl={5}>{singleUser.mobile}</Col>
+                <Col xl={5}>{singleUser.mobileNum}</Col>
                 <Col xl={2}>
                   {singleUser.entryTime ? (
                     <IconContext.Provider value={{ color: "green" }}>
@@ -201,35 +210,53 @@ function AttendeeScanner() {
   }
 
   function handleScan(data) {
-    let scannedUserDetails;
     if (data) {
-      // setResult({ result: data });
       console.log("scan is ", data);
 
       console.log("sessionBookedHashs is ", sessionBookedHashs);
+
       if (sessionBookedHashs) {
-        scannedUserDetails = Object.fromEntries(
+        let scannedUserDetails = Object.fromEntries(
           Object.entries(sessionBookedHashs).filter(
             ([key, value]) => key === data
           )
         );
-        console.log("scannedUserDetails", scannedUserDetails[data].uid);
-        console.log("scannedUserDetails data", data);
-
-        let scanResult = updateAttendance(
-          {
-            jumaDate: location.state.selectedDate,
-            jumaSession: location.state.selectedTime,
-            sessionHash: data,
-            uid: scannedUserDetails[data].uid,
-          },
-          "entry"
+        //  console.log("scannedUserDetails", scannedUserDetails[data].uid);
+        console.log("scannedUserDetails ", scannedUserDetails);
+        console.log(
+          "scannedUserDetails data type",
+          typeof scannedUserDetails.entryTime
         );
-        if (scanResult) {
-          playSuccessAudio();
-          setResult(scanResult.firstname + " " + scanResult.surname);
+
+        if (scannedUserDetails.entryTime === undefined) {
+          let scanResult = updateAttendance(
+            {
+              jumaDate: location.state.selectedDate,
+              jumaSession: location.state.selectedTime,
+              sessionHash: data,
+              uid: scannedUserDetails[data].uid,
+            },
+            "entry"
+          );
+          if (scanResult) {
+            playSuccessAudio();
+            setResult({
+              firstname: scannedUserDetails[data].firstname,
+              surname: scannedUserDetails[data].surname,
+              mobileNum: scannedUserDetails[data].mobileNum,
+            });
+          }
         } else {
-          setResult("No user in this session");
+          let formattedEntryTime = new Date(
+            parseInt(scannedUserDetails[data].entryTime)
+          ).toLocaleString();
+
+          console.log(formattedEntryTime);
+          setScanErrorMsg("User already entered at " + formattedEntryTime);
+          setTimeout(() => {
+            setScanErrorMsg(undefined);
+          }, 5000);
+          console.log();
           playFailAudio();
         }
       } else {
@@ -260,6 +287,7 @@ function AttendeeScanner() {
   };
 
   function showBody() {
+    let errorMsgCardClass = "mt-2 mb-2 align-items-center";
     return (
       <CARD
         className=" border-0 "
@@ -274,7 +302,7 @@ function AttendeeScanner() {
           <div>{TEXTDEFINITION.BOOKINGS_SESSION_CARD_HEADER}</div>
         </CARD.Header>
         <CARD.Body className="mt-0 pt-0 ">
-          <div style={{ height: "50vh" }}>
+          <div>
             <div>
               <QrReader
                 delay={1200}
@@ -282,13 +310,60 @@ function AttendeeScanner() {
                 onScan={handleScan}
                 style={{ width: "100%" }}
               />
-              <p>{result}</p>
             </div>
+
+            <ListGroup.Item
+              // disabled={showSessions}
+              action
+              variant="secondary"
+              className="d-flex justify-content-between align-items-center"
+              //  onClick={(clicked) => handleSelectDate(clicked)}
+              key={1}
+              id={1}
+              active
+            >
+              <Row className="w-100 text-center align-items-center ">
+                <Col xl={6} xs={6}>
+                  Last Entry :{" "}
+                </Col>
+                <Col xl={6} xs={6}>
+                  <p>{result.firstname + " " + result.surname}</p>
+                  <div>{result.mobileNum}</div>
+                </Col>
+              </Row>
+            </ListGroup.Item>
           </div>
+
+          <Card
+            border={!!scanErrorMsg ? "danger" : "border-0"}
+            bg={!!scanErrorMsg ? "danger" : "transparent"}
+            className={
+              !!scanErrorMsg
+                ? errorMsgCardClass
+                : errorMsgCardClass + " border-0"
+            }
+          >
+            <Card.Body className="d-flex p-0 ">
+              <Card.Text className="">
+                {!!scanErrorMsg ? (
+                  <div
+                    style={{ height: "2rem" }}
+                    className="d-flex align-items-center text-center"
+                  >
+                    {" "}
+                    {scanErrorMsg}
+                  </div>
+                ) : (
+                  <div style={{ height: "2rem" }}> </div>
+                )}
+              </Card.Text>
+            </Card.Body>
+          </Card>
+
           <ListGroup.Item
             // disabled={showSessions}
             action
-            className="d-flex justify-content-between align-items-center"
+            className="d-flex justify-content-between align-items-center mt-0 mb-0"
             //  onClick={(clicked) => handleSelectDate(clicked)}
             key={1}
             id={1}
@@ -308,8 +383,7 @@ function AttendeeScanner() {
               </Col>
             </Row>
           </ListGroup.Item>
-          {attendeeListDiv}
-
+          <ListGroup variant="flush">{attendeeListDiv}</ListGroup>
           <Link className="" to="/admin">
             <Button
               //onClick={handleShow}

@@ -125,9 +125,9 @@ function DateProfile() {
       setErrorMessage("Invalid Character in Surname");
     }
 
-    if (mobileRef.current.value !== userDetails.mobile) {
+    if (mobileRef.current.value !== userDetails.mobileNum) {
       //   promises.push(updateMobile(mobileRef.current.value));
-      console.log("hit mobile>  ", mobileRef.current.value);
+      console.log("hit mobileNum>  ", mobileRef.current.value);
     }
     console.log("promises", promises);
     /*   Promise.all(promises)

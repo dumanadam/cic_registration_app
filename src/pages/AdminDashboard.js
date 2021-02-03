@@ -32,7 +32,7 @@ function AdminDashboard(props) {
     superSessions,
     checkAdminStatus,
     adminCheckResult,
-    openSSessions,
+    getSupSessions,
   } = useAuth();
   const [pageTitle, setpageTitle] = useState("");
   const [loading, setLoading] = useState(true);
@@ -159,7 +159,7 @@ function AdminDashboard(props) {
 
     if (adminCheckResult) {
       console.log("adminCheckResult is true admindash", adminCheckResult);
-      openSSessions();
+      getSupSessions();
     }
   }, [adminCheckResult]);
 

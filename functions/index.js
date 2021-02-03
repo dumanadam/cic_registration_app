@@ -5,6 +5,17 @@ admin.initializeApp();
 
 let db = admin.database();
 
+exports.backupDbRef = functions.https.onCall(async (data, context) => {
+  return admin
+    .database()
+    .ref("/adminSessions/cic/openSessions")
+    .once("value")
+    .then((snap) => {
+      console.log("snap db", snap.val());
+      return snap.val();
+    });
+});
+
 exports.checkAdminStatus = functions.https.onCall(async (data, context) => {
   let openAdminSession;
   console.log("hit getsession");
@@ -262,8 +273,9 @@ exports.bookSession = functions.https.onCall((data, context) => {
     ...data.newSessionDetails,
     firstname: data.userDetails.firstname,
     surname: data.userDetails.surname,
-    mobile: data.userDetails.mobileNum,
+    mobileNum: data.userDetails.mobileNum,
     uid: uid,
+    entryTime: data.userDetails.entryTime,
   };
 
   if (newBookingDate !== "") {
@@ -350,16 +362,52 @@ exports.bookSession = functions.https.onCall((data, context) => {
 exports.userDetailsUpdated = functions.database
   .ref("/users/{userId}")
   .onUpdate((change, context) => {
+    let promises = [];
+    let personalDetails = {};
     const after = change.after.val();
-    let privUserDetailsObj = {
-      ...after,
-      lastupdate: admin.database.ServerValue.TIMESTAMP,
-    };
+    const before = change.before.val();
+    if (
+      after.firstname !== before.firstname ||
+      after.surname !== before.surname ||
+      after.mobileNum !== before.mobileNum ||
+      after.email !== before.email
+    ) {
+      personalDetails = {
+        firstname: after.firstname,
+        surname: after.surname,
+        mobileNum: after.mobileNum,
+        email: after.email,
+        lastupdate: admin.database.ServerValue.TIMESTAMP,
+      };
+      promises.push(
+        admin
+          .database()
+          .ref("/privUserDetails/" + context.params.userId)
+          .update(personalDetails)
+      );
+    }
 
-    return admin
-      .database()
-      .ref("/privUserDetails/" + context.params.userId)
-      .update(privUserDetailsObj);
+    if (after.jumaSession !== "") {
+      promises.push(
+        admin
+          .database()
+          .ref(
+            "adminSessions/cic/openSessions/" +
+              after.jumaDate +
+              "/" +
+              after.jumaSession +
+              "/booked/" +
+              after.sessionHash
+          )
+          .update(personalDetails)
+          .then((res) => {
+            console.log("Personal details updated in adminsessions");
+            return "Personal details updated in adminsessions";
+          })
+      );
+    }
+
+    return Promise.all(promises);
   });
 
 exports.newUserDetails = functions.database
@@ -379,6 +427,7 @@ exports.newUserDetails = functions.database
       admin: 0,
       uid: snapshot.val().uid,
       lastupdate: admin.database.ServerValue.TIMESTAMP,
+      entryTime: snapshot.val().entryTime,
     };
 
     return admin

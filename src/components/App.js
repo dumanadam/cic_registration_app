@@ -55,7 +55,7 @@ function App() {
     position: "absolute",
     //minHeight: "100vh",
     minWidth: "100%",
-    height: "100vh",
+    height: "150vh",
   });
 
   useLayoutEffect(() => {
@@ -80,7 +80,7 @@ function App() {
     setHeader(Header());
   }, []);
 
-  function flipErrorState(errorMessage) {
+  function flipErrorState() {
     console.log("errorState", errorState);
     seterrorState(!errorState);
   }

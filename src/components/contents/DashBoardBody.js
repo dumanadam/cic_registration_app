@@ -164,6 +164,20 @@ function DashboardBody(props) {
     history.push("/admin");
   }
 
+  async function backupDb() {
+    let backupdb = fbfunc.httpsCallable("backupDbRef");
+
+    let dbres = await backupdb()
+      .then((result) => {
+        console.log("res from backupDbRef func  ->>> ", result.data);
+        return result.data;
+      })
+      .catch((e) => {
+        console.log("FBfunc backupDbRef error returned >>>", e);
+      });
+    console.log("res from backupDbRef func  ->>> ", dbres);
+  }
+
   function printBody() {
     return (
       <>
@@ -206,6 +220,7 @@ function DashboardBody(props) {
       <div id="bottom-navigation"> {dashboardNavButtons}</div>
       <button onClick={fbclick}>add admin</button>
       <button onClick={adminPage}>admin page</button>
+      <button onClick={backupDb}>backupDB page</button>
     </>
   );
 }

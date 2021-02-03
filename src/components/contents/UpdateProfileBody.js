@@ -92,7 +92,7 @@ function UpdateProfileBody(props) {
       promises.push(updateSurname(surnameRef.current.value));
     }
 
-    if (mobileRef.current.value !== userDetails.mobile) {
+    if (mobileRef.current.value !== userDetails.mobileNum) {
       promises.push(updateMobile(mobileRef.current.value));
     }
     console.log("promises", promises);
@@ -187,7 +187,7 @@ function UpdateProfileBody(props) {
                 <Form.Control
                   type="email"
                   ref={mobileRef}
-                  defaultValue={userDetails.mobile}
+                  defaultValue={userDetails.mobileNum}
                   className="mb-0 pb-0 pt-0"
                 />
               </Col>

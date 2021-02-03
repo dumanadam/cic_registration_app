@@ -7,13 +7,7 @@ import { useHistory } from "react-router-dom";
 const Dashboard = (props) => {
   const [loading, setLoading] = useState(true);
   const [myProps, setMyProps] = useState({});
-  const {
-    logout,
-    userDetails,
-    openSessions,
-    clearUserJumaSession,
-    checkUserBooking,
-  } = useAuth();
+  const { logout, userDetails, openSessions, checkUserBooking } = useAuth();
   const history = useHistory();
 
   useEffect(() => {
@@ -60,7 +54,6 @@ const Dashboard = (props) => {
           logout={logout}
           myProps={myProps}
           openSessions={openSessions}
-          clearUserJumaSession={clearUserJumaSession}
         ></DashboardBody>
       )}
     </>

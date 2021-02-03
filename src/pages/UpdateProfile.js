@@ -180,8 +180,8 @@ const UpdateProfile = () => {
       updateSurname(values.surname);
     }
 
-    if (values.mobile !== "") {
-      updateMobile(values.mobile);
+    if (values.mobileNum !== "") {
+      updateMobile(values.mobileNum);
     }
 
     if (values.email !== "") {
@@ -279,7 +279,7 @@ const UpdateProfile = () => {
       .email("*Must be a valid email address")
       .max(100, "*Email must be less than 100 characters"),
 
-    mobile: Yup.string().matches(phoneRegExp, "*Phone number is not valid"),
+    mobileNum: Yup.string().matches(phoneRegExp, "*Phone number is not valid"),
 
     firstname: Yup.string()
       .min(2, "Min 2 characters")
@@ -323,7 +323,7 @@ const UpdateProfile = () => {
                   firstname: "",
                   surname: "",
                   email: "",
-                  mobile: "",
+                  mobileNum: "",
                   password: "",
                   confirm: "",
                 }}
@@ -416,17 +416,21 @@ const UpdateProfile = () => {
                           <Form.Label>Mobile :</Form.Label>
                           <Form.Control
                             type="tel"
-                            name="mobile"
-                            placeholder={userDetails.mobile}
+                            name="mobileNum"
+                            placeholder={userDetails.mobileNum}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            value={values.mobile}
+                            value={values.mobileNum}
                             className={
-                              touched.mobile && errors.mobile ? "error" : null
+                              touched.mobileNum && errors.mobileNum
+                                ? "error"
+                                : null
                             }
                           />
-                          {touched.mobile && errors.mobile ? (
-                            <div className="error-message">{errors.mobile}</div>
+                          {touched.mobileNum && errors.mobileNum ? (
+                            <div className="error-message">
+                              {errors.mobileNum}
+                            </div>
                           ) : null}
                         </Form.Group>
                       </Col>

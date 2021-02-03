@@ -2,6 +2,7 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
 import "firebase/functions";
+//import "firebase/messaging";
 
 const app = firebase.initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -15,9 +16,11 @@ const app = firebase.initializeApp({
 export const auth = app.auth();
 export const db = app.database();
 export const fbfunc = firebase.functions();
+//export const messaging = firebase.messaging();
 
 firebase.functions().useEmulator("localhost", 5001);
 firebase.auth().useEmulator("http://localhost:9099/");
+
 db.useEmulator("localhost", 9000);
 
 export default app;

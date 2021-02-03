@@ -90,7 +90,7 @@ function Attendees(props) {
                     " - " +
                     openSessions[location.state.selectedDate][
                       location.state.selectedTime
-                    ].booked[key].mobile}
+                    ].booked[key].mobileNum}
                 </Col>
                 <Col xl={2}>{index}</Col>
               </Row>
