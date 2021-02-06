@@ -11,18 +11,19 @@ import {
 import { useAuth, updateAttendance } from "../contexts/AuthContext";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import QrReader from "react-qr-reader";
-import SessionList from "../components/SessionList";
 import ShowModal from "../components/ShowModal";
 import TEXTDEFINITION from "../text/TextDefinition";
 import styled from "styled-components";
-import FindFriday from "../components/FindFriday";
+
 import correct from "../assets/audio/correct.mp3";
 import incorrect from "../assets/audio/incorrect.mp3";
 import { BsChevronBarRight, BsX, BsCheck } from "react-icons/bs";
 import { IconContext } from "react-icons";
-
-var QRCode = require("qrcode.react");
-var md5Qr = require("md5");
+import {
+  SwipeableList,
+  SwipeableListItem,
+} from "@sandstreamdev/react-swipeable-list";
+import "@sandstreamdev/react-swipeable-list/dist/styles.css";
 
 const CARD = styled(Card)`
   background: #f7f9fa;
@@ -88,6 +89,35 @@ const BUTTON = styled(Button)`
 
   &:hover {
     background: #1d3461;
+  }
+`;
+const USERLIST = styled.div`
+  color: red;
+  :nth-child(even) {
+    color: black;
+  }
+`;
+
+const BLINKTEXT = styled.div`
+  text-align: center;
+  animation: blinkingText 1.2s infinite;
+
+  @keyframes blinkingText {
+    0% {
+      color: #fff;
+    }
+    49% {
+      color: rgb(173, 104, 0);
+    }
+    60% {
+      color: transparent;
+    }
+    99% {
+      color: transparent;
+    }
+    100% {
+      color: #000;
+    }
   }
 `;
 
@@ -158,22 +188,24 @@ function AttendeeScanner() {
 
         userCards.push(
           <>
-            <ListGroup.Item
-              // disabled={showSessions}
-              action
-              className="d-flex justify-content-between align-items-center"
-              //  onClick={(clicked) => handleSelectDate(clicked)}
-              key={index}
-              id={index}
-              href={index}
-              variant="light"
+            <SwipeableListItem
+            /*               swipeLeft={{
+                content: <div>Revealed content during swipe</div>,
+                action: () => console.info("swipe action triggered"),
+              }}
+              swipeRight={{
+                content: <div>Revealed content during swipe</div>,
+                action: () => console.info("swipe action triggered"),
+              }}
+              onSwipeProgress={(progress) =>
+                console.info(`Swipe progress: ${progress}%`)
+              } */
             >
               <Row className="w-100 text-center">
                 <Col xl={5}>
-                  <div>
-                    {" "}
+                  <USERLIST>
                     {singleUser.firstname} {singleUser.surname}
-                  </div>
+                  </USERLIST>
                 </Col>
 
                 <Col xl={5}>{singleUser.mobileNum}</Col>
@@ -189,7 +221,7 @@ function AttendeeScanner() {
                   )}
                 </Col>
               </Row>
-            </ListGroup.Item>
+            </SwipeableListItem>
           </>
         );
       });
@@ -210,11 +242,15 @@ function AttendeeScanner() {
   }
 
   function handleScan(data) {
+    let singleHash;
     if (data) {
       console.log("scan is ", data);
 
       console.log("sessionBookedHashs is ", sessionBookedHashs);
-
+      singleHash =
+        Object.keys(sessionBookedHashs).length === 1
+          ? sessionBookedHashs.data
+          : sessionBookedHashs;
       if (sessionBookedHashs) {
         let scannedUserDetails = Object.fromEntries(
           Object.entries(sessionBookedHashs).filter(
@@ -299,41 +335,34 @@ function AttendeeScanner() {
         }}
       >
         <CARD.Header className="h3 text-center text-light border-1">
-          <div>{TEXTDEFINITION.BOOKINGS_SESSION_CARD_HEADER}</div>
+          <div>{TEXTDEFINITION.SCANNER_SESSION_CARD_HEADER}</div>
         </CARD.Header>
         <CARD.Body className="mt-0 pt-0 ">
-          <div>
-            <div>
-              <QrReader
-                delay={1200}
-                onError={handleError}
-                onScan={handleScan}
-                style={{ width: "100%" }}
-              />
-            </div>
-
-            <ListGroup.Item
-              // disabled={showSessions}
-              action
-              variant="secondary"
-              className="d-flex justify-content-between align-items-center"
-              //  onClick={(clicked) => handleSelectDate(clicked)}
-              key={1}
-              id={1}
-              active
-            >
-              <Row className="w-100 text-center align-items-center ">
-                <Col xl={6} xs={6}>
-                  Last Entry :{" "}
-                </Col>
-                <Col xl={6} xs={6}>
-                  <p>{result.firstname + " " + result.surname}</p>
-                  <div>{result.mobileNum}</div>
-                </Col>
-              </Row>
-            </ListGroup.Item>
+          <div className="mt-2 mb-2 pt-0 ">
+            <QrReader
+              delay={1200}
+              onError={handleError}
+              onScan={handleScan}
+              style={{ width: "80%", margin: "auto" }}
+            />
           </div>
+          <CARD
+            className="bg-dark"
+            style={{
+              height: "50px",
+            }}
+          >
+            <CARD.Body className="mt-0 pt-0 ">
+              <div className=" text-center">Last Entry</div>
 
+              <BLINKTEXT>
+                {!!result.firstname
+                  ? result.firstname + " " + result.surname
+                  : "waiting for scan"}
+              </BLINKTEXT>
+              <div>{result.mobileNum}</div>
+            </CARD.Body>
+          </CARD>
           <Card
             border={!!scanErrorMsg ? "danger" : "border-0"}
             bg={!!scanErrorMsg ? "danger" : "transparent"}
@@ -383,15 +412,8 @@ function AttendeeScanner() {
               </Col>
             </Row>
           </ListGroup.Item>
-          <ListGroup variant="flush">{attendeeListDiv}</ListGroup>
-          <Link className="" to="/admin">
-            <Button
-              //onClick={handleShow}
-              variant="outline-primary-* text-primary col shadow-none"
-            >
-              {buttonDetails.b2.buttonText}
-            </Button>
-          </Link>
+
+          <SwipeableList>{attendeeListDiv}</SwipeableList>
         </CARD.Body>
       </CARD>
     );

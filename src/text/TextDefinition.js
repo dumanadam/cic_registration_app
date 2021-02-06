@@ -13,6 +13,7 @@ const TEXTDEFINITION = {
   UPDATEPROFILE_CARD_HEADER: "Update Profile",
   CR_SESSION_CARD_HEADER: "Create Session",
   BOOKINGS_SESSION_CARD_HEADER: "Book Session",
+  SCANNER_SESSION_CARD_HEADER: "Scan Attendees",
   LOADING_DEFAULT: "Connecting to CIC",
   SESSIONS_NEXT_JUMA: "Next Juma Date :",
   SESSIONS_CONFIRMED_JUMA: "Confirmed Juma :",
