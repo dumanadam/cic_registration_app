@@ -14,6 +14,7 @@ import TEXTDEFINITION from "../text/TextDefinition";
 import NavButtons from "../components/NavButtons";
 import ShowModal from "../components/ShowModal";
 import PushPromises from "../components/contents/PushPromises";
+import WithTemplate from "../components/wrappers/WithTemplate";
 
 const CARD = styled(Card)`
   background: #f7f9fa;
@@ -100,6 +101,7 @@ const UpdateProfile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dashboardNavButtons, setDashboardNavButtons] = useState("");
   const history = useHistory();
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     console.log("userDetails updatedetails", userDetails);
@@ -237,7 +239,7 @@ const UpdateProfile = () => {
 
   function renderDelete() {
     return (
-      <div className="col-8 pt-2" variant="light">
+      <div className="pt-2 w-100" variant="light">
         <Link to="/delete-profile" className="btn btn-danger w-100 ">
           Delete Profile
         </Link>
@@ -261,7 +263,7 @@ const UpdateProfile = () => {
     },
     b3: {
       icon: "icon",
-      variant: "outline-light",
+      variant: "outline-light w-100",
       link: "/",
       openSettings: openSettings,
       renderDelete: renderDelete,
@@ -298,257 +300,231 @@ const UpdateProfile = () => {
       "Passwords must match"
     ),
   });
+
+  function showBody() {
+    return (
+      <div style={{ position: "relative", top: "15%" }}>
+        <Formik
+          initialValues={{
+            firstname: "",
+            surname: "",
+            email: "",
+            mobileNum: "",
+            password: "",
+            confirm: "",
+          }}
+          validationSchema={validationSchema}
+          onSubmit={(
+            values,
+            {
+              setSubmitting,
+              resetForm,
+              setstatus,
+
+              setErrors,
+            }
+          ) =>
+            handleSubmitf(values, {
+              setSubmitting,
+              resetForm,
+              setstatus,
+
+              setErrors,
+            })
+          }
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+          }) => (
+            <MYFORM
+              onSubmit={handleSubmit}
+              className="mx-auto text-light"
+              id="update-profile-form"
+            >
+              {console.log(values)}
+              {console.log("errors", errors)}
+
+              <Form.Row>
+                <Col>
+                  <Form.Group controlId="formFName">
+                    <Form.Label>First Name :</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="firstname"
+                      placeholder={userDetails.firstname}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.firstname}
+                      className={
+                        touched.firstname && errors.firstname ? "error" : null
+                      }
+                    />
+                    {touched.firstname && errors.firstname ? (
+                      <div className="error-message">{errors.firstname}</div>
+                    ) : null}
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group controlId="formSName">
+                    <Form.Label>Surname</Form.Label>
+                    <Form.Control
+                      name="surname"
+                      type="text"
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.surname}
+                      placeholder={userDetails.surname}
+                      className={
+                        touched.surname && errors.surname ? "error" : null
+                      }
+                    />
+                    {touched.surname && errors.surname ? (
+                      <div className="error-message">{errors.surname}</div>
+                    ) : null}
+                  </Form.Group>
+                </Col>
+              </Form.Row>
+
+              <Form.Row>
+                <Col>
+                  <Form.Group controlId="formmobile">
+                    <Form.Label>Mobile :</Form.Label>
+                    <Form.Control
+                      type="tel"
+                      name="mobileNum"
+                      placeholder={userDetails.mobileNum}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.mobileNum}
+                      className={
+                        touched.mobileNum && errors.mobileNum ? "error" : null
+                      }
+                    />
+                    {touched.mobileNum && errors.mobileNum ? (
+                      <div className="error-message">{errors.mobileNum}</div>
+                    ) : null}
+                  </Form.Group>
+                </Col>
+              </Form.Row>
+              <Form.Row>
+                <Col>
+                  <Form.Group controlId="formemail">
+                    <Form.Label>Email :</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="email"
+                      placeholder={currentUser.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.email}
+                      className={touched.email && errors.email ? "error" : null}
+                    />
+                    {touched.email && errors.email ? (
+                      <div className="error-message">{errors.email}</div>
+                    ) : null}
+                  </Form.Group>
+                </Col>
+              </Form.Row>
+              <Form.Row>
+                <Col>
+                  <Form.Group controlId="forpassword">
+                    <Form.Label className="">Password</Form.Label>
+                    <Form.Control
+                      type="password"
+                      name="password"
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.password}
+                      placeholder="Unchanged"
+                    />
+                    {touched.password && errors.password ? (
+                      <div className="error-message">{errors.password}</div>
+                    ) : null}
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group controlId="forconfirm">
+                    <Form.Label className="">Confirmation</Form.Label>
+                    <Form.Control
+                      type="password"
+                      name="confirm"
+                      placeholder="Unchanged"
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.confirm}
+                      className={
+                        touched.confirm && errors.confirm ? "error" : null
+                      }
+                    />
+                    {touched.confirm && errors.confirm ? (
+                      <div className="error-message">{errors.confirm}</div>
+                    ) : null}
+                  </Form.Group>
+                </Col>
+              </Form.Row>
+            </MYFORM>
+          )}
+        </Formik>
+      </div>
+    );
+  }
+
+  function showButtons() {
+    return (
+      <>
+        <BUTTON
+          variant="primary"
+          type="submit"
+          disabled={isSubmitting}
+          form="update-profile-form"
+          className=" w-100 "
+          loading={isSubmitting}
+        >
+          {buttonDetails.b1.buttonText}
+        </BUTTON>
+
+        <Link className="text-light col p-0 pt-2  " to={buttonDetails.b2.link}>
+          <Button
+            disabled={buttonDetails.b2.loading}
+            variant="outline-light border-0 w-100"
+          >
+            {buttonDetails.b2.buttonText}
+          </Button>
+        </Link>
+
+        <div className="row ">
+          <div className="col text-center pt-2">
+            <Form.Label
+              variant="light"
+              onClick={() => buttonDetails.b3.openSettings()}
+              className="text-light"
+            >
+              <BsGearFill></BsGearFill>
+              {buttonDetails.b3.showSettings ? (
+                <BsChevronBarRight></BsChevronBarRight>
+              ) : (
+                <BsChevronBarLeft></BsChevronBarLeft>
+              )}
+            </Form.Label>
+          </div>
+          {buttonDetails.b3.showSettings ? buttonDetails.b3.renderDelete() : ""}
+        </div>
+      </>
+    );
+  }
   return (
     <>
-      {loading === true ? (
-        <ShowModal loading={loading} modalDetails={modalDetails} />
-      ) : (
-        <CARD
-          className=" border-0 "
-          bg="transparent"
-          style={{
-            WebkitBoxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-            MozBoxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-            boxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-          }}
-        >
-          <CARD.Header className="h3 text-center text-light border-1">
-            <div>Update Degtails</div>
-            {console.log("userDetails", userDetails)}
-          </CARD.Header>
-          <CARD.Body className="mt-0 pt-0 ">
-            <Row className="pt-1 text-left " style={{ minHeight: "50vh" }}>
-              <Formik
-                initialValues={{
-                  firstname: "",
-                  surname: "",
-                  email: "",
-                  mobileNum: "",
-                  password: "",
-                  confirm: "",
-                }}
-                validationSchema={validationSchema}
-                onSubmit={(
-                  values,
-                  {
-                    setSubmitting,
-                    resetForm,
-                    setstatus,
-
-                    setErrors,
-                  }
-                ) =>
-                  handleSubmitf(values, {
-                    setSubmitting,
-                    resetForm,
-                    setstatus,
-
-                    setErrors,
-                  })
-                }
-              >
-                {({
-                  values,
-                  errors,
-                  touched,
-                  handleChange,
-                  handleBlur,
-                  handleSubmit,
-                }) => (
-                  <MYFORM
-                    onSubmit={handleSubmit}
-                    className="mx-auto"
-                    id="update-profile-form"
-                  >
-                    {console.log(values)}
-                    {console.log("errors", errors)}
-
-                    <Form.Row>
-                      <Col>
-                        <Form.Group controlId="formFName">
-                          <Form.Label>First Name :</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="firstname"
-                            placeholder={userDetails.firstname}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            value={values.firstname}
-                            className={
-                              touched.firstname && errors.firstname
-                                ? "error"
-                                : null
-                            }
-                          />
-                          {touched.firstname && errors.firstname ? (
-                            <div className="error-message">
-                              {errors.firstname}
-                            </div>
-                          ) : null}
-                        </Form.Group>
-                      </Col>
-                      <Col>
-                        <Form.Group controlId="formSName">
-                          <Form.Label>Surname</Form.Label>
-                          <Form.Control
-                            name="surname"
-                            type="text"
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            value={values.surname}
-                            placeholder={userDetails.surname}
-                            className={
-                              touched.surname && errors.surname ? "error" : null
-                            }
-                          />
-                          {touched.surname && errors.surname ? (
-                            <div className="error-message">
-                              {errors.surname}
-                            </div>
-                          ) : null}
-                        </Form.Group>
-                      </Col>
-                    </Form.Row>
-
-                    <Form.Row>
-                      <Col>
-                        <Form.Group controlId="formmobile">
-                          <Form.Label>Mobile :</Form.Label>
-                          <Form.Control
-                            type="tel"
-                            name="mobileNum"
-                            placeholder={userDetails.mobileNum}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            value={values.mobileNum}
-                            className={
-                              touched.mobileNum && errors.mobileNum
-                                ? "error"
-                                : null
-                            }
-                          />
-                          {touched.mobileNum && errors.mobileNum ? (
-                            <div className="error-message">
-                              {errors.mobileNum}
-                            </div>
-                          ) : null}
-                        </Form.Group>
-                      </Col>
-                    </Form.Row>
-                    <Form.Row>
-                      <Col>
-                        <Form.Group controlId="formemail">
-                          <Form.Label>Email :</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="email"
-                            placeholder={currentUser.email}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            value={values.email}
-                            className={
-                              touched.email && errors.email ? "error" : null
-                            }
-                          />
-                          {touched.email && errors.email ? (
-                            <div className="error-message">{errors.email}</div>
-                          ) : null}
-                        </Form.Group>
-                      </Col>
-                    </Form.Row>
-                    <Form.Row>
-                      <Col>
-                        <Form.Group controlId="forpassword">
-                          <Form.Label className="">Password</Form.Label>
-                          <Form.Control
-                            type="password"
-                            name="password"
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            value={values.password}
-                            placeholder="Unchanged"
-                          />
-                          {touched.password && errors.password ? (
-                            <div className="error-message">
-                              {errors.password}
-                            </div>
-                          ) : null}
-                        </Form.Group>
-                      </Col>
-                      <Col>
-                        <Form.Group controlId="forconfirm">
-                          <Form.Label className="">Confirmation</Form.Label>
-                          <Form.Control
-                            type="password"
-                            name="confirm"
-                            placeholder="Unchanged"
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            value={values.confirm}
-                            className={
-                              touched.confirm && errors.confirm ? "error" : null
-                            }
-                          />
-                          {touched.confirm && errors.confirm ? (
-                            <div className="error-message">
-                              {errors.confirm}
-                            </div>
-                          ) : null}
-                        </Form.Group>
-                      </Col>
-                    </Form.Row>
-                  </MYFORM>
-                )}
-              </Formik>
-            </Row>
-            <Form.Row>
-              <BUTTON
-                variant="primary"
-                type="submit"
-                disabled={isSubmitting}
-                form="update-profile-form"
-                className=" w-100 "
-                loading={isSubmitting}
-              >
-                {buttonDetails.b1.buttonText}
-              </BUTTON>
-            </Form.Row>
-            <Row>
-              <Link
-                className="text-light col p-0 pt-2  "
-                to={buttonDetails.b2.link}
-              >
-                <Button
-                  disabled={buttonDetails.b2.loading}
-                  variant="outline-light border-0 w-100"
-                >
-                  {buttonDetails.b2.buttonText}
-                </Button>
-              </Link>
-            </Row>
-            <div className="row ">
-              <div className="col text-center pt-2">
-                <Form.Label
-                  variant="light"
-                  onClick={() => buttonDetails.b3.openSettings()}
-                  className="text-light"
-                >
-                  {" "}
-                  <BsGearFill></BsGearFill>
-                  {buttonDetails.b3.showSettings ? (
-                    <BsChevronBarRight></BsChevronBarRight>
-                  ) : (
-                    <BsChevronBarLeft></BsChevronBarLeft>
-                  )}
-                </Form.Label>
-              </div>
-              {buttonDetails.b3.showSettings
-                ? buttonDetails.b3.renderDelete()
-                : ""}
-            </div>
-          </CARD.Body>
-        </CARD>
-      )}
+      <WithTemplate
+        buttons={showButtons()}
+        modal={{ loading: loading, modalText: "update details text" }}
+      >
+        {showBody()}
+      </WithTemplate>
     </>
   );
 };

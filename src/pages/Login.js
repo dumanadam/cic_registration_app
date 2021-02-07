@@ -13,6 +13,7 @@ import { Link, useHistory } from "react-router-dom";
 import ErrorHeader from "../components/ErrorHeader";
 import TEXTDEFINITION from "../text/TextDefinition";
 import WithTemplate from "../components/wrappers/WithTemplate";
+import { checkError } from "../functions/checkError";
 
 function Login(props) {
   const emailRef = useRef();
@@ -21,7 +22,7 @@ function Login(props) {
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [enteredEmail, setEnteredEmail] = useState(undefined);
+
   const [modalText, setModalText] = useState(undefined);
   const history = useHistory();
 
@@ -29,6 +30,10 @@ function Login(props) {
     console.log("dashboard props", props);
     props.setHeaders(TEXTDEFINITION.LOGIN_CARD_HEADER);
   }, []);
+
+  useEffect(() => {
+    console.log("modal text", modalText);
+  }, [modalText]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -41,13 +46,13 @@ function Login(props) {
       history.push("/");
     } catch (e) {
       console.log("e", e);
-      e.code === "auth/user-not-found" &&
-        setErrorMessage("Please check user name and password ");
-      e.code === "auth/wrong-password" &&
-        setErrorMessage("Please check password ");
-      setTimeout(() => setErrorMessage(""), 3500);
+      setModalText(checkError(e.code));
+
+      setTimeout(() => {
+        setErrorMessage("");
+        setLoading(false);
+      }, 3500);
     } finally {
-      setLoading(false);
     }
   }
 
@@ -128,7 +133,6 @@ function Login(props) {
   return (
     <WithTemplate
       buttons={showButtons()}
-      errorMessage={errorMessage}
       modal={{ loading: loading, modalText: modalText }}
     >
       {showBody()}

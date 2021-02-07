@@ -13,6 +13,8 @@ const TEXTDEFINITION = {
   UPDATEPROFILE_CARD_HEADER: "Update Profile",
   CR_SESSION_CARD_HEADER: "Create Session",
   BOOKINGS_SESSION_CARD_HEADER: "Book Session",
+  LOGIN_CARD_HEADER: "Login",
+  SIGNUP_CARD_HEADER: "Signup",
   SCANNER_SESSION_CARD_HEADER: "Scan Attendees",
   LOADING_DEFAULT: "Connecting to CIC",
   SESSIONS_NEXT_JUMA: "Next Juma Date :",
@@ -21,6 +23,8 @@ const TEXTDEFINITION = {
     "To open a new Juma sessiom click Create Session button.",
   ADMIN_DASHBOARD_LINE1: "Please select a session date and time below",
   DASHBOARD_GREETING: "GREETING TEXT",
+  BOOKING_CONFIRMED_NOTE:
+    "Screenshot or take a photo with your phone. Please show CIC staff on arrival.",
 };
 
 export default TEXTDEFINITION;

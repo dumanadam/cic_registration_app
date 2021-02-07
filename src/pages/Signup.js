@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Card, Form, Button, Alert, Modal } from "react-bootstrap";
+import {
+  Card,
+  Form,
+  Button,
+  Alert,
+  Modal,
+  Row,
+  Container,
+  Col,
+} from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import PrivacyPolicy from "../components/PrivacyPolicy";
@@ -10,22 +19,25 @@ import MQuery from "../components/MQueury";
 import bgImage from "../assets/images/bg2.jpg";
 import ErrorHeader from "../components/ErrorHeader";
 import ShowModal from "../components/ShowModal";
+import TEXTDEFINITION from "../text/TextDefinition";
+import WithTemplate from "../components/wrappers/WithTemplate";
+import { checkError } from "../functions/checkError";
 export default function Signup(props) {
-  const emailRef = useRef();
-  const passwordRef = useRef();
-  const passwordConfirmRef = useRef();
-  const firstnameRef = useRef();
-  const surnameRef = useRef();
-  const mobileRef = useRef();
+  const emailRef = useRef("");
+  const passwordRef = useRef("");
+  const passwordConfirmRef = useRef("");
+  const firstnameRef = useRef("");
+  const surnameRef = useRef("");
+  const mobileRef = useRef("");
   const { signup } = useAuth();
-  const [error, setError] = useState("");
+
   const [showModal, setShowModal] = useState("");
   const [loading, setLoading] = useState(false);
   const history = useHistory();
   const [show, setShow] = useState("");
   const [agreePrivacy, setagreePrivacy] = useState(true);
   const [agreeNewsletter, setAgreeNewsletter] = useState(true);
-  const [errorState, setErrorState] = useState(false);
+  const [modalText, setModalText] = useState(undefined);
   const [errorMessage, setErrorMessage] = useState("");
   const [firstRun, setfirstRun] = useState(false);
 
@@ -33,11 +45,10 @@ export default function Signup(props) {
     "outline-primary-* text-primary shadow-none"
   );
 
-  console.log("signup props", props);
-  console.log("signup show", show);
   //console.log("signup props.errorstate", props.errorState);
 
   useEffect(() => {
+    props.setHeaders(TEXTDEFINITION.SIGNUP_CARD_HEADER);
     if (show == "" && firstRun == true) {
       console.log("setshow");
       setShow(true);
@@ -50,22 +61,27 @@ export default function Signup(props) {
       setAgreeColour("outline-primary-* text-primary shadow-none");
     } else setAgreeColour(" outline-danger-* text-danger shadow-none");
   }, [agreeNewsletter]);
-
-  /* useEffect(() => {
-    console.log("props.errorState", props.errorState);
-  }, [props.errorState]); */
+  useEffect(() => {
+    console.log("modal text", modalText);
+  }, [modalText]);
 
   async function handleSubmit(e) {
     e.preventDefault();
 
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      setErrorMessage("Passwords do not match");
-      setTimeout(() => setErrorMessage(""), 5000);
+      console.log();
+
+      setModalText("Passwords do not match");
+      setLoading(true);
+      setTimeout(() => {
+        setModalText("pass");
+        setLoading(false);
+      }, 1000);
       return;
     }
 
     try {
-      setError("");
+      setModalText("Signing you up!");
       setLoading(true);
 
       let signupResult = await signup(
@@ -81,13 +97,11 @@ export default function Signup(props) {
       console.log("--------after push", e);
     } catch (e) {
       console.log("******signup error", e);
-      setErrorState(!errorState);
-      setErrorMessage(e.message);
-      //setError(e.message);
-      setTimeout(() => setErrorMessage(""), 5000);
+      setModalText(checkError(e.code));
+      setTimeout(() => setModalText(""), 1000);
+    } finally {
+      // setLoading(false);
     }
-
-    setLoading(false);
   }
 
   function clickedPrivacy() {
@@ -149,80 +163,105 @@ export default function Signup(props) {
     return (
       <>
         {!show ? null : privacyModal()}
-        <Card className=" border-0" bg="transparent">
-          {ErrorHeader({
-            headerText: "Juma Registration",
-            errorMessage: errorMessage,
-          })}
+        <Row>
+          <Card
+            className="d-flex justify-content-between align-items-center w-100 border-0"
+            bg="transparent"
+          >
+            <Card.Body className="mt-6 pt-0 ">
+              <Form
+                onSubmit={handleSubmit}
+                id="signup-form"
+                class="signup-form "
+                style={{
+                  position: "relative",
+                  top: "33%",
+                }}
+              >
+                <div className="row">
+                  <div className="col-6">
+                    <Form.Group id="firstname">
+                      <Form.Label className="text-light">First Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        ref={firstnameRef}
+                        required
+                        placeholder={props.wid}
+                      />
+                    </Form.Group>{" "}
+                  </div>
+                  <div className="col-6">
+                    <Form.Group id="surname">
+                      <Form.Label className="text-light">Surname</Form.Label>
+                      <Form.Control
+                        type="text"
+                        ref={surnameRef}
+                        placeholder={props.hei}
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
+                <Form.Group id="mobile">
+                  <Form.Label className="text-light">Mobile</Form.Label>
+                  <Form.Control
+                    type="tel"
+                    ref={mobileRef}
+                    required
+                    //onFocus={() => setError("")}
+                    onBlur={() => props.flipErrorState()}
+                  />
+                </Form.Group>
+                <Form.Group id="email">
+                  <Form.Label className="text-light">Email</Form.Label>
+                  <Form.Control type="email" ref={emailRef} required />
+                </Form.Group>
+                <div className="row">
+                  <div className="col-6">
+                    <Form.Group id="password">
+                      <Form.Label className="text-light">Password</Form.Label>
+                      <Form.Control
+                        type="password"
+                        autoComplete="current-password"
+                        ref={passwordRef}
+                        required
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="col-6">
+                    <Form.Group id="password-confirm">
+                      <Form.Label className="text-light">
+                        Confirmation
+                      </Form.Label>
+                      <Form.Control
+                        type="password"
+                        ref={passwordConfirmRef}
+                        autoComplete="current-password"
+                        required
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Row>
+      </>
+    );
+  }
 
-          <Card.Body className="mt-2 pt-0" style={{ minHeight: "57vh" }}>
-            <Form onSubmit={handleSubmit} id="signup-form" class="signup-form">
-              <div className="row">
-                <div className="col-6">
-                  <Form.Group id="firstname">
-                    <Form.Label className="text-light">First Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      ref={firstnameRef}
-                      required
-                      placeholder={props.wid}
-                    />
-                  </Form.Group>{" "}
-                </div>
-                <div className="col-6">
-                  <Form.Group id="surname">
-                    <Form.Label className="text-light">Surname</Form.Label>
-                    <Form.Control
-                      type="text"
-                      ref={surnameRef}
-                      placeholder={props.hei}
-                    />
-                  </Form.Group>
-                </div>
-              </div>
-              <Form.Group id="mobile">
-                <Form.Label className="text-light">Mobile</Form.Label>
-                <Form.Control
-                  type="tel"
-                  ref={mobileRef}
-                  required
-                  //onFocus={() => setError("")}
-                  onBlur={() => props.flipErrorState()}
-                />
-              </Form.Group>
-              <Form.Group id="email">
-                <Form.Label className="text-light">Email</Form.Label>
-                <Form.Control type="email" ref={emailRef} required />
-              </Form.Group>
-              <div className="row">
-                <div className="col-6">
-                  <Form.Group id="password">
-                    <Form.Label className="text-light">Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      autoComplete="current-password"
-                      ref={passwordRef}
-                      required
-                    />
-                  </Form.Group>
-                </div>
-                <div className="col-6">
-                  <Form.Group id="password-confirm">
-                    <Form.Label className="text-light">Confirmation</Form.Label>
-                    <Form.Control
-                      type="password"
-                      ref={passwordConfirmRef}
-                      autoComplete="current-password"
-                      required
-                    />
-                  </Form.Group>
-                </div>
-              </div>
-
-              <Button disabled={loading} className="w-100" type="submit">
-                Sign Up
-              </Button>
-            </Form>
+  function showButtons() {
+    return (
+      <Container className="p-0 pt-2">
+        <Button
+          disabled={loading}
+          className="w-100"
+          type="submit"
+          form="signup-form"
+        >
+          Sign Up
+        </Button>
+        <Row className=" mt-1 pt-4">
+          <Col>
             <Link className="" to="/login">
               <Button
                 disabled={loading}
@@ -231,29 +270,24 @@ export default function Signup(props) {
                 Already have an account? <span variant="">Log In</span>
               </Button>
             </Link>
-
-            <Button
-              onClick={handleShow}
-              variant="outline-primary-* text-primary col shadow-none"
-            >
-              Privacy Policy
-            </Button>
-          </Card.Body>
-        </Card>
-      </>
+          </Col>
+        </Row>
+        <Button
+          onClick={handleShow}
+          variant="outline-primary-* text-primary col shadow-none"
+        >
+          Privacy Policy
+        </Button>
+      </Container>
     );
   }
 
   return (
-    <>
-      {loading === true ? (
-        <ShowModal
-          loading={loading}
-          modalDetails={{ bodyText: "Signing you Up!" }}
-        />
-      ) : (
-        showBody()
-      )}
-    </>
+    <WithTemplate
+      buttons={showButtons()}
+      modal={{ loading: loading, modalText: modalText }}
+    >
+      {showBody()}
+    </WithTemplate>
   );
 }

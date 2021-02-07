@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Button, Card, Alert, Row, Col, Spinner } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Alert,
+  Row,
+  Col,
+  Spinner,
+  Container,
+} from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import NavButtons from "../NavButtons";
 import TEXTDEFINITION from "../../text/TextDefinition";
 import MainShell from "../MainShell";
 import { fbfunc, functions } from "../../firebase";
+import WithTemplate from "../wrappers/WithTemplate";
+import { ListGroupItem } from "react-bootstrap";
+import { ListGroup } from "react-bootstrap";
 
 var QRCode = require("qrcode.react");
 
@@ -35,7 +46,7 @@ function DashboardBody(props) {
         link: "/sessions",
         variant: "primary w-100",
         loading: !!props.openSessions ? false : true,
-        disabled: props.openSessions == null ? false : true,
+        disabled: props.openSessions == null ? true : false,
       },
       b2: {
         buttonText: "Update Profile",
@@ -91,7 +102,7 @@ function DashboardBody(props) {
   }
 
   function printSessionInfo() {
-    let result = bookingsText.map((rowDetails) => {
+    /*     let result = bookingsText.map((rowDetails) => {
       let sessionCheck =
         rowDetails.detail === "" ? "No Booking" : rowDetails.detail;
       if (rowDetails.title == "Salamu Aleykum") {
@@ -117,24 +128,73 @@ function DashboardBody(props) {
         );
       } else {
         return (
-          <Row className="pb-2">
-            <Col
-              xl={7}
-              xs={4}
-              className="text-warning text-left"
-              style={{ fontSize: "18px" }}
-            >
-              {rowDetails.title}
-            </Col>
-            <Col className="text-light text-right" style={{ fontSize: "18px" }}>
-              {sessionCheck}
-            </Col>
-          </Row>
+          <>
+            <Row className="pb-2">
+              <Col
+                xl={12}
+                xs={12}
+                className="text-warning text-left"
+                style={{ fontSize: "18px" }}
+              >
+                {rowDetails.title}
+              </Col>
+            </Row>
+            <Row>
+              <Col
+                xl={12}
+                xs={12}
+                className="text-light text-left"
+                style={{ fontSize: "18px" }}
+              >
+                {sessionCheck}
+              </Col>
+            </Row>
+          </>
         );
       }
-    });
+    }); 
 
-    return result;
+    return result;*/
+    return (
+      <>
+        <ListGroupItem.Item
+          style={{ backgroundColor: "transparent" }}
+          className="py-2"
+        >
+          <Row className="text-center">
+            <Col xl={12} xs={12} className="text-warning ">
+              {TEXTDEFINITION.DASHBOARD_GREETING}
+            </Col>
+            <Col xl={12} xs={12} className="text-light ">
+              {props.userDetails.firstname} {props.userDetails.surname}
+            </Col>
+          </Row>
+        </ListGroupItem.Item>
+        <ListGroupItem.Item
+          style={{ backgroundColor: "transparent" }}
+          className="py-2"
+        >
+          <Row className="text-center">
+            <Col>
+              <Col xl={12} xs={12} className="text-warning ">
+                Date
+              </Col>
+              <Col xl={12} xs={12} className="text-light ">
+                {props.userDetails.jumaDate}
+              </Col>
+            </Col>
+            <Col>
+              <Col xl={12} xs={12} className="text-warning ">
+                Session
+              </Col>
+              <Col xl={12} xs={12} className="text-light ">
+                {props.userDetails.jumaSession}
+              </Col>
+            </Col>
+          </Row>
+        </ListGroupItem.Item>
+      </>
+    );
   }
 
   function noSessionBookedPrintMessage() {
@@ -181,14 +241,58 @@ function DashboardBody(props) {
   function printBody() {
     return (
       <>
-        {printSessionInfo()}
+        <ListGroup
+          style={{
+            backgroundColor: "transparent",
+            border: "none",
+            marginTop: "2vh",
+          }}
+          className="py-2"
+        >
+          <ListGroup.Item
+            style={{ backgroundColor: "transparent", border: "none" }}
+            className="py-2"
+          >
+            <Row className="text-center">
+              <Col xl={12} xs={12} className="text-warning ">
+                {TEXTDEFINITION.DASHBOARD_GREETING}
+              </Col>
+              <Col xl={12} xs={12} className="text-light ">
+                {props.userDetails.firstname} {props.userDetails.surname}
+              </Col>
+            </Row>
+          </ListGroup.Item>
+          <ListGroup.Item
+            style={{ backgroundColor: "transparent", border: "none" }}
+            className="py-2"
+          >
+            <Row className="text-center">
+              <Col>
+                <Col xl={12} xs={12} className="text-warning ">
+                  Date
+                </Col>
+                <Col xl={12} xs={12} className="text-light ">
+                  {props.userDetails.jumaDate}
+                </Col>
+              </Col>
+              <Col>
+                <Col xl={12} xs={12} className="text-warning ">
+                  Session
+                </Col>
+                <Col xl={12} xs={12} className="text-light ">
+                  {props.userDetails.jumaSession}
+                </Col>
+              </Col>
+            </Row>
+          </ListGroup.Item>
+        </ListGroup>
 
-        <Row className="pt-4 text-center " style={{ minHeight: "50vh" }}>
+        <Row style={{ position: "relative", top: "15%" }}>
           <Col
             bg="light"
             style={{
-              padding: "2vh",
-              margin: "5vw",
+              padding: "16px 3vh 1vh",
+              margin: "8px 101px",
 
               alignSelf: "flex-start",
 
@@ -212,17 +316,19 @@ function DashboardBody(props) {
 
   return (
     <>
-      <div style={{ height: "50vh" }}>
-        {props.userDetails.jumaDate == ""
-          ? noSessionBookedPrintMessage()
-          : printBody()}
-      </div>
-      <div id="bottom-navigation"> {dashboardNavButtons}</div>
-      <button onClick={fbclick}>add admin</button>
-      <button onClick={adminPage}>admin page</button>
-      <button onClick={backupDb}>backupDB page</button>
+      <Container>
+        <div style={{ height: "70vh", maxHeight: "70vh", overflow: "clip" }}>
+          {props.userDetails.jumaDate == ""
+            ? noSessionBookedPrintMessage()
+            : printBody()}
+        </div>
+        <div id="bottom-navigation"> {dashboardNavButtons}</div>
+        <button onClick={fbclick}>add admin</button>
+        <button onClick={adminPage}>admin page</button>
+        <button onClick={backupDb}>backupDB page</button>
+      </Container>
     </>
   );
 }
 
-export default MainShell(DashboardBody);
+export default DashboardBody;

@@ -141,10 +141,10 @@ const NavButtons = (buttonCount, buttonDetails) => {
       return (
         <Container>
           <Row>
-            {b1.loading ? (
+            {b1.disabled ? (
               <Button
                 className="text-light col p-0 mr-2 "
-                disabled={b1.loading}
+                disabled={b1.disabled}
                 variant={b1.variant ? b1.variant : "w-100"}
               >
                 No Sessions

@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
   );
   const [globalFriday, setGlobalFriday] = useState(FindFriday());
   const [globalFridayFb, setGlobalFridayFb] = useState(FindFriday(1, true));
-  const [openSessions, setOpenSessions] = useState("");
+  const [openSessions, setOpenSessions] = useState(null);
   const [superSessions, setSuperSessions] = useState(null);
   const [adminSessions, setAdminSessions] = useState(null);
   const [adminCheckResult, setAdminCheckResult] = useState(null);
@@ -38,7 +38,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!!currentUser) {
-      getCurrentUserDetails(currentUser);
+      getCurrentUserDetails();
+
       console.log("currentUser auth", currentUser);
     }
   }, [currentUser]);
@@ -52,6 +53,7 @@ export function AuthProvider({ children }) {
   }, [superSessions]);
 
   async function getCurrentUserDetails() {
+    console.log("qqqq", auth.currentUser.uid);
     await db.ref("/users/" + auth.currentUser.uid).on("value", (snapshot) => {
       console.log("*Google DB*getting latest userdetails", snapshot.val());
 
@@ -96,7 +98,7 @@ export function AuthProvider({ children }) {
     agreeNewsletter
   ) {
     let registrationDetails = {
-      entryTime: undefined,
+      entryTime: "",
       email,
       firstname,
       surname,

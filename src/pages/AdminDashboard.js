@@ -19,7 +19,7 @@ import { useAuth } from "../contexts/AuthContext";
 import PageTitle from "../components/PageTitle";
 import TEXTDEFINITION from "../text/TextDefinition.js";
 import NavButtons from "../components/NavButtons";
-import Attendees from "../components/Attendees";
+
 import ShowModal from "../components/ShowModal";
 
 function AdminDashboard(props) {

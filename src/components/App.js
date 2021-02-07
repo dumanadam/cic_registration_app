@@ -5,7 +5,12 @@ import Signup from "../pages/Signup";
 import ForgotPassword from "../pages/ForgotPassword";
 import Dashboard from "../pages/Dashboard";
 import { AuthProvider } from "../contexts/AuthContext";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
 import UpdateProfile from "../pages/UpdateProfile";
 import DeleteProfile from "../pages/DeleteProfile";
@@ -24,8 +29,7 @@ import GetWindow from "./GetWindow";
 import CreateSession from "../pages/CreateSession";
 import AdminDashboard from "../pages/AdminDashboard";
 import Login from "../pages/Login";
-import DateProfile from "../pages/DateProfile";
-import Attendees from "./Attendees";
+
 import TestQr from "../pages/TestQr";
 import AttendeeScanner from "../pages/AttendeeScanner";
 
@@ -38,6 +42,7 @@ function App() {
   const [firstRun, setfirstRun] = useState(true);
   const [currentHeight, setcurrentHeight] = useState(height);
   const [currentWidth, setcurrentWidth] = useState(width);
+  const [header, setHeader] = useState("XXX");
   const [bgJSON, setbgJSON] = useState({
     /* backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${bgImage})`,
     backgroundSize: "auto cover",
@@ -72,13 +77,8 @@ function App() {
         height: "105vh",
       });
     }
-    setfirstRun(false);
+    firstRun && setfirstRun(false);
   }, [height]);
-
-  const [header, setHeader] = useState("");
-  useEffect(() => {
-    setHeader(Header());
-  }, []);
 
   function flipErrorState() {
     console.log("errorState", errorState);
@@ -88,76 +88,87 @@ function App() {
   return (
     <>
       <div style={bgJSON}>
-        <Container className="d-flex justify-content-center ">
-          <div className="w-100 " style={{ maxWidth: "400px" }}>
-            <Header></Header>
-          </div>
+        <Container style={width > 600 ? { width: "25vw" } : { width: "100vw" }}>
+          <Header headerTitle={header}></Header>
         </Container>
         <Container
-          className="d-flex align-items-center justify-content-center "
+          style={width > 600 ? { width: "25vw" } : { width: "100vw" }}
           // style={{ minHeight: "70vh" }}
         >
-          <div className="w-100 " style={{ maxWidth: "400px" }}>
-            <Router>
-              <AuthProvider>
-                <Switch>
-                  <PrivateRoute exact path="/" component={Dashboard} />
-                  <PrivateRoute
-                    exact
-                    path="/admin"
-                    component={AdminDashboard}
-                  />
-                  <PrivateRoute exact path="/ate" component={AdminDashboard} />
-                  <PrivateRoute path="/attendees" component={Attendees} />
-                  <PrivateRoute
-                    exact
-                    path="/create-session"
-                    component={CreateSession}
-                  />
-                  <PrivateRoute
-                    path="/update-profile"
-                    component={UpdateProfile}
-                  />
-                  <PrivateRoute
-                    path="/delete-profile"
-                    component={DeleteProfile}
-                  />
-                  <PrivateRoute path="/Sessions" component={Sessions} />
-                  <PrivateRoute
-                    path="/session-confirmed"
-                    component={SessionConfirmed}
-                  />
-                  <PrivateRoute path="/test" component={TestQr} />
-                  <PrivateRoute path="/scanner" component={AttendeeScanner} />
-                  <Route
-                    path="/signup"
-                    render={(props) => (
-                      <Signup
-                        {...props}
-                        flipErrorState={flipErrorState}
-                        wid={width}
-                        hei={height}
-                      />
-                    )}
-                  />
+          <Router>
+            <AuthProvider>
+              <Switch>
+                <PrivateRoute
+                  exact
+                  path="/"
+                  component={(props) => (
+                    <Dashboard {...props} setHeaders={setHeader} />
+                  )}
+                />
 
-                  <Route
-                    path="/login"
-                    render={(props) => (
-                      <Login
-                        {...props}
-                        flipErrorState={flipErrorState}
-                        wid={width}
-                        hei={height}
-                      />
-                    )}
-                  />
-                  <Route path="/forgot-password" component={ForgotPassword} />
-                  <Route path="/privacy-policy" component={PrivacyPolicy} />
-                </Switch>
-              </AuthProvider>
-            </Router>
-          </div>
+                <PrivateRoute exact path="/admin" component={AdminDashboard} />
+
+                <PrivateRoute
+                  exact
+                  path="/create-session"
+                  component={CreateSession}
+                />
+                <PrivateRoute
+                  path="/update-profile"
+                  component={UpdateProfile}
+                />
+                <PrivateRoute
+                  path="/delete-profile"
+                  component={DeleteProfile}
+                />
+                <PrivateRoute
+                  path="/Sessions"
+                  component={(props) => (
+                    <Sessions {...props} setHeaders={setHeader} />
+                  )}
+                />
+                <PrivateRoute
+                  path="/session-confirmed"
+                  component={SessionConfirmed}
+                />
+                <PrivateRoute path="/test" component={TestQr} />
+                <PrivateRoute path="/scanner" component={AttendeeScanner} />
+                <Route
+                  path="/signup"
+                  render={(props) => (
+                    <Signup
+                      {...props}
+                      flipErrorState={flipErrorState}
+                      setHeaders={setHeader}
+                      wid={width}
+                      hei={height}
+                    />
+                  )}
+                />
+
+                <Route
+                  path="/login"
+                  render={(props) => (
+                    <Login
+                      {...props}
+                      flipErrorState={flipErrorState}
+                      wid={width}
+                      hei={height}
+                      setHeaders={setHeader}
+                    />
+                  )}
+                />
+                <Route path="/forgot-password" component={ForgotPassword} />
+                <Route path="/privacy-policy" component={PrivacyPolicy} />
+                <Route
+                  path="*"
+                  component={(props) => (
+                    <Dashboard {...props} setHeaders={setHeader} />
+                  )}
+                />
+              </Switch>
+            </AuthProvider>
+          </Router>
         </Container>
       </div>
     </>

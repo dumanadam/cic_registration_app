@@ -1,51 +1,47 @@
 import React from "react";
 import logo from "../assets/images/icon-demo.png";
 import covidlogo from "../assets/images/covidsafe.png";
-import { Card, Container } from "react-bootstrap";
+import { Card, Col, Container, Row } from "react-bootstrap";
+import styled from "styled-components";
+import TEXTDEFINITION from "../text/TextDefinition";
 
-const Header = () => {
-  //console.log("headerprops", props);
+const Header = (props) => {
+  console.log("headerprops", props);
 
   //console.log("headererror", errorText);
   //console.log("eerererer", errorState);
 
   return (
     <>
-      <Container fluid className=" text-center mt-2">
-        <Card bg="transparent" className="h3 text-center text-light border-0">
-          {" "}
-          <Card.Body>
-            <div className="row">
-              <div className="col">
-                <img
-                  src={logo}
-                  alt="CIC Logo"
-                  className=""
-                  style={{
-                    width: "75px",
-                    height: "auto",
-                  }}
-                ></img>
-              </div>
-              <div className="col">
-                <img
-                  src={covidlogo}
-                  alt="CIC Logo"
-                  className=""
-                  style={{
-                    width: "75px",
-                    height: "auto",
-                  }}
-                ></img>
-                {/*      <Card.Title> CIC Juma Registrations </Card.Title>
-                  <div>
-                    <Card.Subtitle>Covid Safe Juma</Card.Subtitle>
-                  </div> */}
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
-      </Container>
+      <Card.Header className="h3 d-flex justify-content-center text-center text-light d-flex align-items-center mt-0 mb-0 border-0">
+        <Col sm={2} xl={3}>
+          <img
+            src={logo}
+            alt="CIC Logo"
+            className=""
+            style={{
+              width: "50px",
+              height: "auto",
+              marginRight: "15px",
+            }}
+          ></img>
+        </Col>
+        <Col sm={5} xl={6}>
+          <div>{props.headerTitle}</div>
+        </Col>
+        <Col sm={2} xl={3}>
+          <img
+            src={covidlogo}
+            alt="CIC Logo"
+            className=""
+            style={{
+              width: "55px",
+              height: "auto",
+              marginLeft: "15px",
+            }}
+          ></img>
+        </Col>
+      </Card.Header>
     </>
   );
 };

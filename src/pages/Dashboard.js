@@ -11,6 +11,11 @@ const Dashboard = (props) => {
   const history = useHistory();
 
   useEffect(() => {
+    console.log("dashboard props", props);
+    props.setHeaders(TEXTDEFINITION.DASHBOARD_CARD_HEADER);
+  }, []);
+
+  useEffect(() => {
     console.log("userDetails dashboard before", userDetails);
     if (!!userDetails) {
       console.log("userDetails dashboard received", userDetails);

@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Form, Button, Alert, Modal, Spinner } from "react-bootstrap";
+import { Card, Button, Modal, Spinner } from "react-bootstrap";
 
 import { FiSquare, FiCheckSquare } from "react-icons/fi";
 
@@ -32,7 +32,14 @@ function ShowModal(props) {
               <Card.Text>{modalDetails.bodyText} </Card.Text>
 
               <Card.Text>
-                <Spinner animation="border" variant="warning" />
+                <Spinner
+                  animation={
+                    modalDetails.modalType === "error" ? "grow" : "border"
+                  }
+                  variant={
+                    modalDetails.modalType === "error" ? "danger" : "warning"
+                  }
+                />
               </Card.Text>
             </div>
           </Modal.Body>

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Card, Form, Button, ListGroup, Row, Col } from "react-bootstrap";
+import {
+  Card,
+  Form,
+  Button,
+  ListGroup,
+  Row,
+  Col,
+  Container,
+} from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 
@@ -8,6 +16,7 @@ import ShowModal from "../components/ShowModal";
 import TEXTDEFINITION from "../text/TextDefinition";
 import styled from "styled-components";
 import FindFriday from "../components/FindFriday";
+import WithTemplate from "../components/wrappers/WithTemplate";
 var QRCode = require("qrcode.react");
 var md5Qr = require("md5");
 
@@ -78,7 +87,7 @@ const BUTTON = styled(Button)`
   }
 `;
 
-export default function Sessions() {
+export default function Sessions(props) {
   const {
     openSessions,
     userDetails,
@@ -94,6 +103,11 @@ export default function Sessions() {
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
+
+  useEffect(() => {
+    console.log("sessions props", props);
+    props.setHeaders(TEXTDEFINITION.BOOKINGS_SESSION_CARD_HEADER);
+  }, []);
 
   useEffect(() => {
     console.log("session userDetails", userDetails);
@@ -125,7 +139,6 @@ export default function Sessions() {
     console.log("session modaldetails", modalDetails);
     console.log("session modaldetails", TEXTDEFINITION.LOADING_DEFAULT);
     if (
-      userDetails.firstname &&
       openSessions &&
       modalDetails.bodyText === TEXTDEFINITION.LOADING_DEFAULT
     ) {
@@ -300,65 +313,56 @@ export default function Sessions() {
 
   function showBody(params) {
     return (
-      <CARD
-        className=" border-0 "
-        bg="transparent"
-        style={{
-          WebkitBoxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-          MozBoxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-          boxShadow: "5px 5px 5px 3px rgba(0, 0, 0, 0.4)",
-        }}
-      >
-        <CARD.Header className="h3 text-center text-light border-1">
-          <div>{TEXTDEFINITION.BOOKINGS_SESSION_CARD_HEADER}</div>
-        </CARD.Header>
-        <CARD.Body className="mt-0 pt-0 ">
-          <div style={{ height: "50vh" }}>
-            {checkJuma()}
-            <div className="text-center mb-2 mt-3 text-">
-              <strong>
-                <u>Available Sessions</u>
-              </strong>
-            </div>{" "}
-            <ListGroup
-              className="d-flex justify-content-between align-items-center w-100 "
-              defaultActiveKey={listKey}
-            >
-              {loading
-                ? null
-                : SessionList(
-                    listKey,
-                    latestSessionTimes,
-                    handleClick,
-                    openSessions,
-                    userDetails,
-                    globalFridayUnformatted
-                  )}
-            </ListGroup>
-            <div className="text-center pb-4">
-              <strong className=" mr-2">Selected Session :</strong>
-              {session.jumaSession}
-            </div>{" "}
-          </div>
-
-          <Form onSubmit={handleSubmit}>
-            <Button disabled={loading} className="w-100" type="submit">
-              {checkButton()}
-            </Button>
-            <Link className="text-light " to="/">
-              <Button
-                disabled={loading}
-                variant="outline-light w-100 border-0 mt-2"
-              >
-                Dashboard
-              </Button>
-            </Link>
-          </Form>
-        </CARD.Body>
-      </CARD>
+      <>
+        {checkJuma()}
+        <div className="text-center mb-2 mt-3 text-light">
+          <strong>
+            <u>Available Sessions</u>
+          </strong>
+        </div>{" "}
+        <ListGroup
+          className="d-flex justify-content-between align-items-center w-100 "
+          defaultActiveKey={listKey}
+        >
+          {loading
+            ? null
+            : SessionList(
+                listKey,
+                latestSessionTimes,
+                handleClick,
+                openSessions,
+                userDetails,
+                globalFridayUnformatted
+              )}
+        </ListGroup>
+        <div className="text-center pb-4">
+          <strong className=" mr-2">Selected Session :</strong>
+          {session.jumaSession}
+        </div>
+        {/* {showButtons()} */}
+      </>
     );
   }
 
+  function showButtons() {
+    return (
+      <Container className="p-0 pt-2">
+        <Form onSubmit={handleSubmit}>
+          <Button disabled={loading} className="w-100" type="submit">
+            {checkButton()}
+          </Button>
+          <Link className="text-light " to="/">
+            <Button
+              disabled={loading}
+              variant="outline-light w-100 mt-2 border-0"
+            >
+              Dashboard
+            </Button>
+          </Link>
+        </Form>
+      </Container>
+    );
+  }
   function checkButton() {
     if (userDetails.jumaDate) {
       return "Update Session";
@@ -368,11 +372,12 @@ export default function Sessions() {
   }
   return (
     <>
-      {loading ? (
-        <ShowModal loading={loading} modalDetails={modalDetails} />
-      ) : (
-        showBody()
-      )}
+      <WithTemplate
+        buttons={showButtons()}
+        modal={{ loading: loading, modalText: "sessions text" }}
+      >
+        {showBody()}
+      </WithTemplate>
     </>
   );
 }
