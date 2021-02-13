@@ -86,6 +86,45 @@ exports.checkAdminStatus = functions.https.onCall(async (data, context) => {
   return adminUser;
 });
 
+exports.missedBooking = functions.https.onCall(async (userDetails, context) => {
+  let promises = [];
+  let emptyUserBooking = {
+    jumaDate: "",
+    jumaSession: "",
+    sessionHash: "",
+  };
+
+  const [day, month, year] = userDetails.jumaDate.split("-");
+  let userSessionDate = new Date(year, month - 1, day);
+
+  if (userSessionDate < Date.now()) {
+    promises.push(
+      admin
+        .database()
+        .ref("privUserDetails")
+        .child(context.auth.uid)
+        .child("cancelCount")
+        .transaction((count) => {
+          return (count || 0) + 1;
+        })
+    );
+    /*   promises.push(
+      admin
+        .database()
+        .ref("users/" + context.auth.uid)
+        .update(emptyUserBooking)
+    ); */
+
+    /* promises.push(
+      admin
+        .database()
+        .ref("privUserDetails/" + context.auth.uid + "/cancelCount")
+        .update(admin.database.ServerValue.increment(1))
+    ); */
+  }
+  return Promise.all(promises);
+});
+
 exports.checkUserBooking = functions.https.onCall(
   async (userDetails, context) => {
     let emptyUserBooking = {
@@ -248,7 +287,7 @@ exports.bookSession = functions.https.onCall((data, context) => {
   if (!(context.auth && context.auth.token)) {
     throw new functions.https.HttpsError(
       "permission-denied",
-      "Must be an administrative user to initiate delete."
+      "Must be an administrative user to initiate booking."
     );
   }
 
