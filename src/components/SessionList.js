@@ -8,7 +8,7 @@ function SessionList(
   handleClick,
   openSessions,
   userDetails,
-  globalFriday
+  globalFridayNF
 ) {
   /* console.log(
     "listDetails" +
@@ -23,9 +23,13 @@ function SessionList(
   ); */
 
   function loopSessions() {
+    console.log("cccc", openSessions);
+    console.log("cccc", globalFridayNF);
+
+    console.log("cccc", latestSessionTimes);
     let result = latestSessionTimes.map((sessionDetails) => {
       // console.log("globalFriday subs", globalFriday.substring(7));
-      let sub = globalFriday.substring(7);
+      let sub = globalFridayNF;
       console.log("loopSessions sub", sub);
       /*       console.log("userDetails jumadate", userDetails.jumaDate);
       console.log("openSessions[max.", openSessions);
@@ -49,8 +53,8 @@ function SessionList(
         >
           {sessionDetails.time}
           <Badge variant="warning" pill>
-            {openSessions[globalFriday][sessionDetails.time].maxPerSession -
-              openSessions[globalFriday][sessionDetails.time].currentBooked}
+            {openSessions[globalFridayNF][sessionDetails.time].maxPerSession -
+              openSessions[globalFridayNF][sessionDetails.time].currentBooked}
           </Badge>
         </ListGroup.Item>
       );

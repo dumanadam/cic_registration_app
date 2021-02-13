@@ -7,6 +7,7 @@ import {
   Row,
   Col,
   Container,
+  InputGroup,
 } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
@@ -17,6 +18,11 @@ import TEXTDEFINITION from "../text/TextDefinition";
 import styled from "styled-components";
 import FindFriday from "../components/FindFriday";
 import WithTemplate from "../components/wrappers/WithTemplate";
+import {
+  BsChevronBarRight,
+  BsChevronBarLeft,
+  BsGearFill,
+} from "react-icons/bs";
 var QRCode = require("qrcode.react");
 var md5Qr = require("md5");
 
@@ -92,7 +98,8 @@ export default function Sessions(props) {
     openSessions,
     userDetails,
     bookSession,
-    globalFridayUnformatted,
+
+    globalFridayNF,
   } = useAuth();
   const [error, setError] = useState("");
   const [session, setSession] = useState({});
@@ -103,10 +110,15 @@ export default function Sessions(props) {
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
+  const [modalText, setModalText] = useState(undefined);
 
   useEffect(() => {
     console.log("sessions props", props);
+    console.log(" globalFridayNF, ", globalFridayNF);
     props.setHeaders(TEXTDEFINITION.BOOKINGS_SESSION_CARD_HEADER);
+    setSession({
+      jumaDate: !!userDetails.jumaDate ? userDetails.jumaDate : globalFridayNF,
+    });
   }, []);
 
   useEffect(() => {
@@ -127,7 +139,7 @@ export default function Sessions(props) {
 
   useEffect(() => {
     console.log("userDetails", userDetails);
-    console.log("session", session);
+    console.log("session+++", session);
   }, [session]);
 
   useEffect(() => {
@@ -142,6 +154,7 @@ export default function Sessions(props) {
       openSessions &&
       modalDetails.bodyText === TEXTDEFINITION.LOADING_DEFAULT
     ) {
+      setModalText("Getting latest sessions");
       getSessionTimes();
       setListKey(checkKey());
       setLoading(false);
@@ -174,19 +187,18 @@ export default function Sessions(props) {
     };
     e.preventDefault();
     setLoading(true);
-    console.log("sessions handlesubmit loading", loading);
-    setModalDetails({
-      bodyText: "Booking Session",
-    });
+    setModalText("Booking Session");
 
-    if (!session.jumaSession) {
-      setModalDetails({
-        bodyText: "Selected Session hasnt changed\n Please try again",
-      });
+    if (
+      !session.jumaSession ||
+      session.jumaSession === listKey.substring(1, 8)
+    ) {
+      setModalText("Selected Session hasnt changed\n Please try again");
+
       setTimeout(() => {
         setLoading(false);
         console.log("sessions jumasession loading", loading);
-        setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
+        setModalText(TEXTDEFINITION.LOADING_DEFAULT);
       }, 2000);
       return;
     }
@@ -201,9 +213,8 @@ export default function Sessions(props) {
       history.push("/session-confirmed");
     } else {
       setLoading(true);
-      setModalDetails({
-        bodyText: "Booking Failed, Try again in 5 mins",
-      });
+      setModalText("Booking Failed, Try again in 5 mins");
+
       setTimeout(() => {
         history.push("/");
       }, 1000);
@@ -239,11 +250,11 @@ export default function Sessions(props) {
       .catch((e) => {
         console.log("delete error=>", error);
         console.log("delete error=>", e);
-        setModalDetails({ bodyText: e.message });
+        setModalText(e.message);
         setTimeout(() => {
           console.log("sessions handlecancel promise loading", loading);
-          setLoading(false);
-          setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
+          // setLoading(false);
+          setModalText(TEXTDEFINITION.LOADING_DEFAULT);
         }, 1000);
       })
       .finally(() => {
@@ -252,18 +263,19 @@ export default function Sessions(props) {
   }
 
   function handleClick(time) {
-    console.log("time", time);
-    console.log("jumadate", globalFridayUnformatted.substring(7));
+    console.log("time+++", time);
+    console.log("jumadate+++", globalFridayNF);
+    console.log("listke+++", listKey.substring(1, 8));
     let toMD5 = {
       firstname: userDetails.firstname,
       surname: userDetails.surname,
-      jumaDate: globalFridayUnformatted.substring(7),
+      jumaDate: globalFridayNF,
       jumaSession: time,
     };
 
     setSession({
       jumaSession: time,
-      jumaDate: globalFridayUnformatted,
+      jumaDate: globalFridayNF,
       sessionHash: md5Qr(JSON.stringify(toMD5)),
     });
   }
@@ -276,36 +288,21 @@ export default function Sessions(props) {
     }
   }
 
-  function checkJuma() {
+  function checkUserSession() {
     if (userDetails.jumaDate) {
       return (
         <>
-          <Row>
-            <Col>
-              <div className=" text-center w-100">
-                {TEXTDEFINITION.SESSIONS_CONFIRMED_JUMA}
-              </div>
-              <div className=" text-center w-100"> {session.jumaDate}</div>
-            </Col>
-            <Col>
+          <Col className="text-light col p-0 mr-2 ">
+            <Link to="/">
               <Button
                 disabled={loading}
-                variant="danger w-100 border-0 mt-2"
+                variant="danger w-100"
                 onClick={handleCancel}
               >
-                Cancel Session
+                Cancel Booking
               </Button>
-            </Col>
-          </Row>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <div className=" text-center w-100">
-            {TEXTDEFINITION.SESSIONS_NEXT_JUMA}
-          </div>
-          <div className=" text-center w-100"> {globalFridayUnformatted}</div>
+            </Link>
+          </Col>
         </>
       );
     }
@@ -314,16 +311,20 @@ export default function Sessions(props) {
   function showBody(params) {
     return (
       <>
-        {checkJuma()}
-        <div className="text-center mb-2 mt-3 text-light">
-          <strong>
-            <u>Available Sessions</u>
-          </strong>
-        </div>{" "}
+        <div className="text-center mb-2 mt-3 text-light" style={{}}></div>
+
         <ListGroup
           className="d-flex justify-content-between align-items-center w-100 "
           defaultActiveKey={listKey}
         >
+          <div
+            style={{
+              position: "relative",
+
+              minWidth: "75vw",
+              marginBottom: "8vh",
+            }}
+          ></div>
           {loading
             ? null
             : SessionList(
@@ -332,13 +333,66 @@ export default function Sessions(props) {
                 handleClick,
                 openSessions,
                 userDetails,
-                globalFridayUnformatted
+                globalFridayNF
               )}
         </ListGroup>
-        <div className="text-center pb-4">
-          <strong className=" mr-2">Selected Session :</strong>
+        {/*         <div className="pb-4 mt-4 text-warning">
+          <strong className=" mr-2 ">Selected Session :</strong>
           {session.jumaSession}
-        </div>
+        </div> */}
+        <Container
+          style={{
+            minHeight: "7vh",
+            marginTop: "6vh",
+            borderTop: "1px solid white",
+          }}
+        >
+          <Row>
+            <Col>
+              <div className="mt-4 mb-2 text-warning">
+                <strong>Booking Details</strong>
+              </div>
+            </Col>
+          </Row>
+          <Row className="d-flex align-items-center text-light ">
+            <Col xs={5}>
+              <Card
+                style={{
+                  border: "0px ",
+                  minHeight: "7vh",
+                  backgroundColor: "transparent",
+                  //border: "1px solid white",
+                }}
+                className="d-flex align-items-center text-light justify-content-center "
+              >
+                <div>
+                  {userDetails.jumaDate ? userDetails.jumaDate : "No Booking"}
+                </div>
+                <div>{userDetails.jumaSession}</div>
+              </Card>
+            </Col>
+            <Col xs={2}>
+              <BsChevronBarRight
+                size={25}
+                color="#ffc107 "
+                style
+              ></BsChevronBarRight>
+            </Col>
+            <Col xs={5}>
+              <Card
+                style={{
+                  border: "0px ",
+                  minHeight: "7vh",
+                  backgroundColor: "transparent",
+                }}
+                className="d-flex align-items-center text-light justify-content-center "
+              >
+                <div>{session.jumaDate}</div>
+                <div>{session.jumaSession}</div>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
         {/* {showButtons()} */}
       </>
     );
@@ -346,26 +400,35 @@ export default function Sessions(props) {
 
   function showButtons() {
     return (
-      <Container className="p-0 pt-2">
-        <Form onSubmit={handleSubmit}>
-          <Button disabled={loading} className="w-100" type="submit">
-            {checkButton()}
-          </Button>
-          <Link className="text-light " to="/">
+      <>
+        <Row className="w-100">
+          {checkUserSession()}
+
+          <Col className="text-light p-0 ">
             <Button
               disabled={loading}
-              variant="outline-light w-100 mt-2 border-0"
+              variant="primary w-100"
+              onClick={(e) => handleSubmit(e)}
             >
-              Dashboard
+              {checkButton()}
             </Button>
-          </Link>
-        </Form>
-      </Container>
+          </Col>
+        </Row>
+
+        <Link className="text-light " to="/">
+          <Button
+            disabled={loading}
+            variant="outline-light w-100 mt-2 border-0"
+          >
+            Dashboard
+          </Button>
+        </Link>
+      </>
     );
   }
   function checkButton() {
     if (userDetails.jumaDate) {
-      return "Update Session";
+      return "Change Session";
     } else {
       return "Book Session";
     }
@@ -374,7 +437,7 @@ export default function Sessions(props) {
     <>
       <WithTemplate
         buttons={showButtons()}
-        modal={{ loading: loading, modalText: "sessions text" }}
+        modal={{ loading: loading, modalText: modalText }}
       >
         {showBody()}
       </WithTemplate>

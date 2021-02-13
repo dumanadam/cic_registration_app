@@ -74,7 +74,7 @@ function App() {
       setbgJSON({
         ...bgJSON,
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${bgImage})`,
-        height: "105vh",
+        height: "100%",
       });
     }
     firstRun && setfirstRun(false);

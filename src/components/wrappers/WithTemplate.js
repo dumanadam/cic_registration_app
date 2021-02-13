@@ -9,10 +9,12 @@ const WithTemplate = (WrappedComp) => {
 
   useEffect(() => {
     setModalText(WrappedComp.modal.modalText);
+    console.log("with modaltext", WrappedComp.modal.modalText);
   }, [WrappedComp.modal.modalText]);
 
   useEffect(() => {
     setModalText(WrappedComp.errorMessage);
+    console.log("with errormsg", WrappedComp.errorMessage);
   }, [WrappedComp.errorMessage]);
 
   function showWrappedComponent() {

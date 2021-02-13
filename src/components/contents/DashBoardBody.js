@@ -45,8 +45,10 @@ function DashboardBody(props) {
           props.userDetails.jumaDate == "" ? "Book Session" : "Update Session",
         link: "/sessions",
         variant: "primary w-100",
-        loading: !!props.openSessions ? false : true,
-        disabled: props.openSessions == null ? true : false,
+        loading: false,
+        disabled: props.openSessions[props.myProps.globalFridayNF]
+          ? false
+          : true,
       },
       b2: {
         buttonText: "Update Profile",
@@ -77,7 +79,10 @@ function DashboardBody(props) {
   }, [noSessions]);
 
   useEffect(() => {
-    console.log("props.userDetails.jumaDate", props.userDetails.jumaDate);
+    console.log(
+      "props.openSessions[props.myProps.globalFridayNF] == null",
+      props.openSessions[props.myProps.globalFridayNF]
+    );
     props.myProps.checkUserBooking();
   }, [props.openSessions]);
 
@@ -200,7 +205,8 @@ function DashboardBody(props) {
   function noSessionBookedPrintMessage() {
     return (
       <div className="text-light text-center ">
-        {props.openSessions ? (
+        {props.openSessions &&
+        !!props.openSessions[props.myProps.globalFridayNF] ? (
           <>
             <div className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL1}</div>
             <span className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL2}</span>
@@ -291,10 +297,10 @@ function DashboardBody(props) {
           <Col
             bg="light"
             style={{
-              padding: "16px 3vh 1vh",
-              margin: "8px 101px",
+              padding: "3vw 3vw",
+              margin: "0vh 29%",
 
-              alignSelf: "flex-start",
+              //alignSelf: "flex-start",
 
               backgroundColor: props.userDetails.jumaDate
                 ? "white"
@@ -302,7 +308,17 @@ function DashboardBody(props) {
             }}
           >
             <QRCode
-              style={{}}
+              style={{
+                height: "123px",
+                width: "128px",
+                alignSelf: "space-around",
+                paddingLeft: 0,
+                paddingRight: 0,
+                marginLeft: "auto",
+                marginRight: "auto",
+                display: "block",
+                /* width: 800px, */
+              }}
               renderAs="SVG"
               value={props.userDetails.sessionHash}
               fgColor="#000"
@@ -313,14 +329,23 @@ function DashboardBody(props) {
       </>
     );
   }
+  function checkUsersBooking() {
+    if (
+      props.userDetails.jumaDate == "" ||
+      props.openSessions[props.myProps.globalFridayNF] == null
+    ) {
+      return noSessionBookedPrintMessage();
+    } else {
+      return printBody();
+    }
+  }
 
+  function checkDateValidity() {}
   return (
     <>
       <Container>
         <div style={{ height: "70vh", maxHeight: "70vh", overflow: "clip" }}>
-          {props.userDetails.jumaDate == ""
-            ? noSessionBookedPrintMessage()
-            : printBody()}
+          {checkUsersBooking()}
         </div>
         <div id="bottom-navigation"> {dashboardNavButtons}</div>
         <button onClick={fbclick}>add admin</button>

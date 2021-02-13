@@ -126,8 +126,6 @@ function AttendeeScanner() {
     openSessions,
     userDetails,
     bookSession,
-    globalFriday,
-    globalFridayFb,
     updateAttendance,
     superSessions,
   } = useAuth();

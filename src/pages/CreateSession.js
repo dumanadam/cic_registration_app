@@ -31,7 +31,7 @@ import FormatTimeFirebase from "../components/FormatTimeFirebase";
 
 function CreateSession() {
   const [error, setError] = useState("");
-  const { createSessions, logout, userDetails, globalFriday } = useAuth();
+  const { createSessions, logout, userDetails, globalFridayNF } = useAuth();
   const [checkState, setcheckState] = useState(false);
   const [formPage, setFormPage] = useState(1);
   const [pageTitle, setpageTitle] = useState("");
@@ -168,7 +168,7 @@ function CreateSession() {
     function createUploadObject() {
       let sessionUploadObject = {};
 
-      for (let index = 0; index <= weeksQty - 1; index++) {
+      for (let index = 1; index <= weeksQty; index++) {
         let sessionDateString = FindFriday(index, true);
         console.log("sessionDateString", sessionDateString);
         sessionUploadObject.openSessions = {
@@ -312,7 +312,7 @@ function CreateSession() {
             className="text-light text-center"
             style={{ fontSize: "18px", padding: 0 }}
           >
-            {globalFriday}
+            {globalFridayNF}
           </Col>
         </Row>
         <Row className="mt-4 mb-4">
@@ -449,7 +449,7 @@ function CreateSession() {
   }
   function tab3() {
     const confirmSessionCreation = [
-      { title: "Starting Juma :", detail: globalFriday.substring(6) },
+      { title: "Starting Juma :", detail: globalFridayNF },
       { title: "Repeating weeks :", detail: weeksQty },
       { title: "Sessions per Juma :", detail: sessionQty },
       { title: "First Session starts :", detail: selectedSessiontime },

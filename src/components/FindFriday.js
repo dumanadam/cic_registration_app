@@ -4,8 +4,8 @@ import moment from "moment";
 function FindFriday(weeks = 1, unformatted = false) {
   const dayINeed = 5;
   const today = moment().isoWeekday();
-  /*   console.log("FindFriday friday weeks", weeks);
-  console.log(" FindFriday friday unformatted", unformatted); */
+  console.log("FindFriday friday weeks", weeks);
+  console.log(" FindFriday friday unformatted", unformatted);
   if (today <= dayINeed) {
     // then just give me this week's instance of that day
     if (unformatted) {

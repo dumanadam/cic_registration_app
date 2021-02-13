@@ -17,8 +17,8 @@ const TEXTDEFINITION = {
   SIGNUP_CARD_HEADER: "Signup",
   SCANNER_SESSION_CARD_HEADER: "Scan Attendees",
   LOADING_DEFAULT: "Connecting to CIC",
-  SESSIONS_NEXT_JUMA: "Next Juma Date :",
-  SESSIONS_CONFIRMED_JUMA: "Confirmed Juma :",
+  SESSIONS_NEXT_SESSION: "Next Juma Date :",
+  SESSIONS_CONFIRMED_SESSION: "Confirmed Juma :",
   EMPTY_ADMIN_SESSIONS:
     "To open a new Juma sessiom click Create Session button.",
   ADMIN_DASHBOARD_LINE1: "Please select a session date and time below",

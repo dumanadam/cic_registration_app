@@ -13,11 +13,9 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
   const [userDetails, setUserDetails] = useState(null);
-  const [globalFridayUnformatted, setGlobalFridayUnformatted] = useState(
-    FindFriday(0, true)
-  );
-  const [globalFriday, setGlobalFriday] = useState(FindFriday());
-  const [globalFridayFb, setGlobalFridayFb] = useState(FindFriday(1, true));
+
+  const [globalFridayNU, setGlobalFridayNU] = useState(FindFriday(1, false));
+  const [globalFridayNF, setGlobalFridayNF] = useState(FindFriday(1, true));
   const [openSessions, setOpenSessions] = useState(null);
   const [superSessions, setSuperSessions] = useState(null);
   const [adminSessions, setAdminSessions] = useState(null);
@@ -28,7 +26,6 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
-      setGlobalFridayFb();
 
       setLoading(false);
     });
@@ -45,8 +42,12 @@ export function AuthProvider({ children }) {
   }, [currentUser]);
 
   useEffect(() => {
-    console.log("globalFridayUnformatted auth", globalFridayUnformatted);
-  }, [globalFridayUnformatted]);
+    console.log("authcontext globalFridayNU", globalFridayNU);
+  }, [globalFridayNU]);
+
+  useEffect(() => {
+    console.log("authcontext globalFridayNF", globalFridayNF);
+  }, [globalFridayNF]);
 
   useEffect(() => {
     console.log("authcontext superSessions changed +++++", superSessions);
@@ -276,6 +277,21 @@ export function AuthProvider({ children }) {
     return entryConfirmation;
   }
 
+  async function missedBooking() {
+    let setMissedBooking = fbfunc.httpsCallable("missedBooking");
+
+    let missedBookingres = await setMissedBooking(userDetails)
+      .then((result) => {
+        console.log("res from missedbooking func  ->>> ", result.data);
+        return result.data;
+      })
+      .catch((e) => {
+        console.log("FBfunc missedbooking error returned >>>", e);
+      });
+
+    return missedBookingres;
+  }
+
   function bookSession(
     newSessionDetails,
     oldSessionDetails,
@@ -480,15 +496,16 @@ export function AuthProvider({ children }) {
     createSessions,
     userDetails,
     openSessions,
-    globalFriday,
-    globalFridayFb,
+    globalFridayNU,
+    globalFridayNF,
     updateAttendance,
     checkAdminStatus,
     superSessions,
     checkUserBooking,
-    globalFridayUnformatted,
+
     adminCheckResult,
     getSupSessions,
+    missedBooking,
   };
   return (
     <AuthContext.Provider value={value}>
