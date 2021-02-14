@@ -145,6 +145,7 @@ exports.checkUserBooking = functions.https.onCall(
       });
 
     console.log("adminSessionUserBooking", adminSessionUserBooking);
+    console.log("adminSessionUserBooking userdetails", userDetails);
     console.log(
       "adminSessionUserBooking userDetails.jumaDate",
       userDetails.jumaDate

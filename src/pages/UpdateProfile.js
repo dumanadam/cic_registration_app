@@ -3,11 +3,7 @@ import styled from "styled-components";
 import { Card, Button, Alert, Row, Col, Form } from "react-bootstrap";
 import { Formik, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import {
-  BsChevronBarRight,
-  BsChevronBarLeft,
-  BsGearFill,
-} from "react-icons/bs";
+import { BsChevronUp, BsChevronDown, BsGearFill } from "react-icons/bs";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import TEXTDEFINITION from "../text/TextDefinition";
@@ -303,7 +299,7 @@ const UpdateProfile = () => {
 
   function showBody() {
     return (
-      <div style={{ position: "relative", top: "15%" }}>
+      <>
         <Formik
           initialValues={{
             firstname: "",
@@ -470,7 +466,20 @@ const UpdateProfile = () => {
             </MYFORM>
           )}
         </Formik>
-      </div>
+
+        <Row>
+          <Col className="text-center pt-2">
+            <BsGearFill
+              onClick={() => buttonDetails.b3.openSettings()}
+              className="text-warning"
+            ></BsGearFill>
+
+            {buttonDetails.b3.showSettings
+              ? buttonDetails.b3.renderDelete()
+              : ""}
+          </Col>
+        </Row>
+      </>
     );
   }
 
@@ -496,24 +505,6 @@ const UpdateProfile = () => {
             {buttonDetails.b2.buttonText}
           </Button>
         </Link>
-
-        <div className="row ">
-          <div className="col text-center pt-2">
-            <Form.Label
-              variant="light"
-              onClick={() => buttonDetails.b3.openSettings()}
-              className="text-light"
-            >
-              <BsGearFill></BsGearFill>
-              {buttonDetails.b3.showSettings ? (
-                <BsChevronBarRight></BsChevronBarRight>
-              ) : (
-                <BsChevronBarLeft></BsChevronBarLeft>
-              )}
-            </Form.Label>
-          </div>
-          {buttonDetails.b3.showSettings ? buttonDetails.b3.renderDelete() : ""}
-        </div>
       </>
     );
   }

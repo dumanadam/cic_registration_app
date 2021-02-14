@@ -92,7 +92,7 @@ function App() {
           style={width > 600 ? { width: "100vw" } : { width: "100vw" }}
         >
           <Header headerTitle={header}></Header>
-  
+        </Container>
         <Container
           style={
             width > 600

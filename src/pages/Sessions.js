@@ -8,6 +8,8 @@ import {
   Col,
   Container,
   InputGroup,
+  Modal,
+  Spinner,
 } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
@@ -23,6 +25,7 @@ import {
   BsChevronBarLeft,
   BsGearFill,
 } from "react-icons/bs";
+import { TiChevronRightOutline, TiTimesOutline } from "react-icons/ti";
 var QRCode = require("qrcode.react");
 var md5Qr = require("md5");
 
@@ -102,6 +105,7 @@ export default function Sessions(props) {
     globalFridayNF,
   } = useAuth();
   const [error, setError] = useState("");
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [session, setSession] = useState({});
   const [latestSessionTimes, setLatestSessionTimes] = useState({});
   const [loading, setLoading] = useState(true);
@@ -115,9 +119,14 @@ export default function Sessions(props) {
   useEffect(() => {
     console.log("sessions props", props);
     console.log(" globalFridayNF, ", globalFridayNF);
-    props.setHeaders(TEXTDEFINITION.BOOKINGS_SESSION_CARD_HEADER);
+    !!userDetails.jumaDate
+      ? props.setHeaders(TEXTDEFINITION.SESSION_CARD_HEADER_UPDATE)
+      : props.setHeaders(TEXTDEFINITION.SESSION_CARD_HEADER_BOOKING);
     setSession({
-      jumaDate: !!userDetails.jumaDate ? userDetails.jumaDate : globalFridayNF,
+      jumaDate: globalFridayNF,
+      jumaSession: !!userDetails.jumaSession
+        ? userDetails.jumaSession
+        : undefined,
     });
   }, []);
 
@@ -129,9 +138,9 @@ export default function Sessions(props) {
     console.log("sessiosn listkey", listKey);
   }, [listKey]); */
 
-  /*   useEffect(() => {
-    console.log("session obj", session);
-  }, [session]); */
+  useEffect(() => {
+    console.log("session obj listkey", session);
+  }, [session]);
 
   /*   useEffect(() => {
     //  console.log("session", session);
@@ -188,10 +197,12 @@ export default function Sessions(props) {
     e.preventDefault();
     setLoading(true);
     setModalText("Booking Session");
+    console.log("listKey.substring(1, 8)", listKey.substring(1, 9));
+    console.log("listkey jumasession", session.jumaSession);
 
     if (
       !session.jumaSession ||
-      session.jumaSession === listKey.substring(1, 8)
+      session.jumaSession === listKey.substring(1, 9)
     ) {
       setModalText("Selected Session hasnt changed\n Please try again");
 
@@ -222,15 +233,14 @@ export default function Sessions(props) {
   }
 
   function handleCancel(e) {
-    console.log("hit submit");
+    console.log("hit cancel");
+
     let currentUserSession = {
       jumaDate: userDetails.jumaDate,
       jumaSession: userDetails.jumaSession,
       sessionHash: userDetails.sessionHash,
     };
     e.preventDefault();
-    console.log("sessions handlecancel loading", loading);
-    setLoading(true);
 
     const promises = [];
     promises.push(
@@ -291,19 +301,17 @@ export default function Sessions(props) {
   function checkUserSession() {
     if (userDetails.jumaDate) {
       return (
-        <>
-          <Col className="text-light col p-0 mr-2 ">
-            <Link to="/">
-              <Button
-                disabled={loading}
-                variant="danger w-100"
-                onClick={handleCancel}
-              >
-                Cancel Booking
-              </Button>
-            </Link>
-          </Col>
-        </>
+        <BUTTON
+          variant="outline-danger text-warning mt-0"
+          style={{ fontWeight: "lighter", fontSize: ".8em" }}
+          disabled={loading}
+          className=" w-100 "
+          loading={loading}
+          onClick={() => setShow(!show)}
+          size="sm"
+        >
+          cancel booking
+        </BUTTON>
       );
     }
   }
@@ -311,88 +319,74 @@ export default function Sessions(props) {
   function showBody(params) {
     return (
       <>
-        <div className="text-center mb-2 mt-3 text-light" style={{}}></div>
-
-        <ListGroup
-          className="d-flex justify-content-between align-items-center w-100 "
-          defaultActiveKey={listKey}
+        <Row
+          className="text-light  h-100 "
+          style={{
+            height: "7vh",
+            alignItems: "center",
+          }}
         >
-          <div
-            style={{
-              position: "relative",
+          <Col>
+            <Row>
+              <Col xs={5} md={5} className=" align-self-center">
+                <Row>
+                  <Col xs={12} md={12}>
+                    {userDetails.jumaDate === "" && "New Booking"}
+                  </Col>
+                  <Col className=" text-center">
+                    <div>{userDetails.jumaDate && userDetails.jumaDate}</div>
+                  </Col>
+                  <Col>
+                    <div>{userDetails.jumaSession}</div>
+                  </Col>
+                  <Col>{userDetails.jumaDate ? checkUserSession() : null}</Col>
+                </Row>
+              </Col>
+              <Col xs={2} className=" align-self-center">
+                <TiChevronRightOutline size={25} color="#ffc107 " />
+              </Col>
+              <Col xs={5} md={5}>
+                <Row style={{ minHeight: "7vh" }} className=" w-100">
+                  <Col xs={12} md={12} className=" align-self-center">
+                    {session.jumaDate}
+                  </Col>
+                  <Col xs={12} md={12} className=" align-self-center">
+                    {session.jumaSession}
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
 
-              minWidth: "75vw",
-              marginBottom: "8vh",
-            }}
-          ></div>
-          {loading
-            ? null
-            : SessionList(
-                listKey,
-                latestSessionTimes,
-                handleClick,
-                openSessions,
-                userDetails,
-                globalFridayNF
-              )}
-        </ListGroup>
+            <ListGroup
+              className="d-flex justify-content-between align-items-center w-100 "
+              defaultActiveKey={listKey}
+            >
+              <div
+                style={{
+                  position: "relative",
+
+                  minWidth: "100%",
+                  marginBottom: "8vh",
+                }}
+              ></div>
+              {loading
+                ? null
+                : SessionList(
+                    listKey,
+                    latestSessionTimes,
+                    handleClick,
+                    openSessions,
+                    userDetails,
+                    globalFridayNF
+                  )}
+            </ListGroup>
+          </Col>
+        </Row>
         {/*         <div className="pb-4 mt-4 text-warning">
           <strong className=" mr-2 ">Selected Session :</strong>
           {session.jumaSession}
         </div> */}
-        <Container
-          style={{
-            minHeight: "7vh",
-            marginTop: "6vh",
-            borderTop: "1px solid white",
-          }}
-        >
-          <Row>
-            <Col>
-              <div className="mt-4 mb-2 text-warning">
-                <strong>Booking Details</strong>
-              </div>
-            </Col>
-          </Row>
-          <Row className="d-flex align-items-center text-light ">
-            <Col xs={5}>
-              <Card
-                style={{
-                  border: "0px ",
-                  minHeight: "7vh",
-                  backgroundColor: "transparent",
-                  //border: "1px solid white",
-                }}
-                className="d-flex align-items-center text-light justify-content-center "
-              >
-                <div>
-                  {userDetails.jumaDate ? userDetails.jumaDate : "No Booking"}
-                </div>
-                <div>{userDetails.jumaSession}</div>
-              </Card>
-            </Col>
-            <Col xs={2}>
-              <BsChevronBarRight
-                size={25}
-                color="#ffc107 "
-                style
-              ></BsChevronBarRight>
-            </Col>
-            <Col xs={5}>
-              <Card
-                style={{
-                  border: "0px ",
-                  minHeight: "7vh",
-                  backgroundColor: "transparent",
-                }}
-                className="d-flex align-items-center text-light justify-content-center "
-              >
-                <div>{session.jumaDate}</div>
-                <div>{session.jumaSession}</div>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
+
         {/* {showButtons()} */}
       </>
     );
@@ -402,23 +396,22 @@ export default function Sessions(props) {
     return (
       <>
         <Row className="w-100">
-          {checkUserSession()}
-
-          <Col className="text-light p-0 ">
-            <Button
+          <Col className="text-light col p-0 mr-2 ">
+            <BUTTON
+              variant="primary "
               disabled={loading}
-              variant="primary w-100"
+              className=" w-100 "
+              loading={loading}
               onClick={(e) => handleSubmit(e)}
             >
-              {checkButton()}
-            </Button>
+              {userDetails.jumaDate ? "Update Session" : "Book Session"}
+            </BUTTON>
           </Col>
         </Row>
-
-        <Link className="text-light " to="/">
+        <Link className="text-light col p-0 pt-2  " to="/">
           <Button
             disabled={loading}
-            variant="outline-light w-100 mt-2 border-0"
+            variant="outline-light  w-100 mt-2 border-0"
           >
             Dashboard
           </Button>
@@ -428,13 +421,47 @@ export default function Sessions(props) {
   }
   function checkButton() {
     if (userDetails.jumaDate) {
-      return "Change Session";
+      return "Update Session";
     } else {
       return "Book Session";
     }
   }
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(!show);
+  function cancelModal() {
+    return (
+      <Modal
+        show={show}
+        onHide={modalDetails.handleClose}
+        backdrop="static"
+        keyboard={true}
+        centered
+        aria-labelledby="example-custom-modal-styling-title"
+        className="d-flex align-items-center text-dark justify-content-center "
+        size="sm"
+      >
+        <Modal.Body className="modal-dialog-scrollable text-center">
+          <div className="w-100">
+            <Card.Text>Cancel Current Booking? </Card.Text>
+            <div className="mt-2">
+              <Button variant="danger w-100" onClick={(e) => handleCancel(e)}>
+                Yes
+              </Button>
+              <Button
+                variant="outline-primary w-100 mt-2"
+                onClick={() => handleClose()}
+              >
+                Back
+              </Button>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
+    );
+  }
   return (
     <>
+      {cancelModal()}
       <WithTemplate
         buttons={showButtons()}
         modal={{ loading: loading, modalText: modalText }}

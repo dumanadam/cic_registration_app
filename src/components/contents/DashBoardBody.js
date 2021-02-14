@@ -204,17 +204,27 @@ function DashboardBody(props) {
 
   function noSessionBookedPrintMessage() {
     return (
-      <div className="text-light text-center ">
-        {props.openSessions &&
-        !!props.openSessions[props.myProps.globalFridayNF] ? (
-          <>
-            <div className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL1}</div>
-            <span className="">{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL2}</span>
-          </>
-        ) : (
-          <span className="">{TEXTDEFINITION.NO_SESSIONS_AVAILABLE_USER}</span>
-        )}
-      </div>
+      <Container className="h-100 ">
+        <Row className="text-light text-center h-75 ">
+          {props.openSessions &&
+          !!props.openSessions[props.myProps.globalFridayNF] ? (
+            <>
+              <Col className="align-self-center">
+                <Row>
+                  <Col className="mb-4 text-warning" sm={12}>
+                    {TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL1}
+                  </Col>
+                  <Col sm={12}>{TEXTDEFINITION.JUMA_BOOKED_CHECK_FAIL2}</Col>
+                </Row>
+              </Col>
+            </>
+          ) : (
+            <span className="">
+              {TEXTDEFINITION.NO_SESSIONS_AVAILABLE_USER}
+            </span>
+          )}
+        </Row>
+      </Container>
     );
   }
 
@@ -345,7 +355,7 @@ function DashboardBody(props) {
     <>
       <Container>
         <div style={{ height: "70vh", maxHeight: "70vh", overflow: "clip" }}>
-          {checkUsersBooking()}
+          {!!props.userDetails && checkUsersBooking()}
         </div>
         <div id="bottom-navigation"> {dashboardNavButtons}</div>
         <button onClick={fbclick}>add admin</button>
