@@ -88,11 +88,19 @@ function App() {
   return (
     <>
       <div style={bgJSON}>
-        <Container style={width > 600 ? { width: "25vw" } : { width: "100vw" }}>
-          <Header headerTitle={header}></Header>
-        </Container>
         <Container
-          style={width > 600 ? { width: "25vw" } : { width: "100vw" }}
+          style={width > 600 ? { width: "100vw" } : { width: "100vw" }}
+        >
+          <Header headerTitle={header}></Header>
+  
+        <Container
+          style={
+            width > 600
+              ? width > 1200
+                ? { width: "40vw" }
+                : { width: "75vw" }
+              : { width: "100vw" }
+          }
           // style={{ minHeight: "70vh" }}
         >
           <Router>
@@ -122,14 +130,16 @@ function App() {
                   component={DeleteProfile}
                 />
                 <PrivateRoute
-                  path="/Sessions"
+                  path="/sessions"
                   component={(props) => (
                     <Sessions {...props} setHeaders={setHeader} />
                   )}
                 />
                 <PrivateRoute
                   path="/session-confirmed"
-                  component={SessionConfirmed}
+                  component={(props) => (
+                    <SessionConfirmed {...props} setHeaders={setHeader} />
+                  )}
                 />
                 <PrivateRoute path="/test" component={TestQr} />
                 <PrivateRoute path="/scanner" component={AttendeeScanner} />
