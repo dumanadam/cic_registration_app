@@ -40,7 +40,7 @@ const WithTemplate = (WrappedComp) => {
         </div> */}
         <Card.Body
           className="mt-0 pt-0 "
-          style={{ height: "70vh", maxHeight: "70vh", overflow: "clip" }}
+          style={{ minHeight: "70vh", maxHeight: "70vh", overflow: "clip" }}
         >
           {WrappedComp.children}
         </Card.Body>

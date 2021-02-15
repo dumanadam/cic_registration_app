@@ -58,24 +58,7 @@ function DeleteProfile(props) {
       currentUser
         .delete()
         .then(function () {
-          // User deleted.
-          Promise.all(promises)
-            .then(() => {
-              history.push("/");
-              console.log("after push after db update");
-            })
-            .catch((e) => {
-              console.log("delete error=>", error);
-              console.log("delete error=>", e);
-              setModalDetails({ bodyText: e.message });
-              setTimeout(() => {
-                setLoading(false);
-                setModalDetails({ bodyText: TEXTDEFINITION.LOADING_DEFAULT });
-              }, 1000);
-            })
-            .finally(() => {
-              setLoading(false);
-            });
+          history.push("/");
         })
         .catch(function (error) {
           // An error happened.

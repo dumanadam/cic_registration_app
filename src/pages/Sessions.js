@@ -101,7 +101,7 @@ export default function Sessions(props) {
     openSessions,
     userDetails,
     bookSession,
-
+    cancelUserBooking,
     globalFridayNF,
   } = useAuth();
   const [error, setError] = useState("");
@@ -114,7 +114,7 @@ export default function Sessions(props) {
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
-  const [modalText, setModalText] = useState(undefined);
+  const [modalText, setModalText] = useState(TEXTDEFINITION.LOADING_DEFAULT);
 
   useEffect(() => {
     console.log("sessions props", props);
@@ -128,6 +128,7 @@ export default function Sessions(props) {
         ? userDetails.jumaSession
         : undefined,
     });
+    setModalText("");
   }, []);
 
   useEffect(() => {
@@ -139,8 +140,8 @@ export default function Sessions(props) {
   }, [listKey]); */
 
   useEffect(() => {
-    console.log("session obj listkey", session);
-  }, [session]);
+    console.log("session modaltext", modalText);
+  }, [modalText]);
 
   /*   useEffect(() => {
     //  console.log("session", session);
@@ -158,11 +159,8 @@ export default function Sessions(props) {
   useEffect(() => {
     console.log("session openSessions", openSessions);
     console.log("session modaldetails", modalDetails);
-    console.log("session modaldetails", TEXTDEFINITION.LOADING_DEFAULT);
-    if (
-      openSessions &&
-      modalDetails.bodyText === TEXTDEFINITION.LOADING_DEFAULT
-    ) {
+    console.log("session modaltext", modalText);
+    if (openSessions && modalText === TEXTDEFINITION.LOADING_DEFAULT) {
       setModalText("Getting latest sessions");
       getSessionTimes();
       setListKey(checkKey());
@@ -213,14 +211,11 @@ export default function Sessions(props) {
       }, 2000);
       return;
     }
-    let cancelBooking = false;
-    let bookingResult = await bookSession(
-      session,
-      currentUserSession,
-      cancelBooking
-    );
+
+    let bookingResult = await bookSession(session, currentUserSession);
     console.log("booksession res", bookingResult);
     if (!!bookingResult) {
+      setModalText("");
       history.push("/session-confirmed");
     } else {
       setLoading(true);
@@ -243,18 +238,10 @@ export default function Sessions(props) {
     e.preventDefault();
 
     const promises = [];
-    promises.push(
-      bookSession(
-        {
-          jumaDate: "",
-          jumaSession: "",
-        },
-        currentUserSession,
-        true
-      )
-    );
+    promises.push(cancelUserBooking(currentUserSession));
     Promise.all(promises)
-      .then(() => {
+      .then((res) => {
+        console.log("res from cancel", res);
         history.push("/");
       })
       .catch((e) => {
@@ -310,7 +297,7 @@ export default function Sessions(props) {
           onClick={() => setShow(!show)}
           size="sm"
         >
-          cancel booking
+          cancel current booking
         </BUTTON>
       );
     }
@@ -320,66 +307,73 @@ export default function Sessions(props) {
     return (
       <>
         <Row
-          className="text-light  h-100 "
+          className="text-light  "
           style={{
-            height: "7vh",
             alignItems: "center",
+            minHeight: "70vh",
           }}
         >
-          <Col>
+          <Col className=" align-self-center">
             <Row>
               <Col xs={5} md={5} className=" align-self-center">
                 <Row>
                   <Col xs={12} md={12}>
                     {userDetails.jumaDate === "" && "New Booking"}
                   </Col>
-                  <Col className=" text-center">
+                  <Col xs={12} md={12} className=" text-center">
                     <div>{userDetails.jumaDate && userDetails.jumaDate}</div>
                   </Col>
-                  <Col>
+                  <Col xs={12} md={12}>
                     <div>{userDetails.jumaSession}</div>
                   </Col>
-                  <Col>{userDetails.jumaDate ? checkUserSession() : null}</Col>
                 </Row>
               </Col>
               <Col xs={2} className=" align-self-center">
                 <TiChevronRightOutline size={25} color="#ffc107 " />
               </Col>
               <Col xs={5} md={5}>
-                <Row style={{ minHeight: "7vh" }} className=" w-100">
-                  <Col xs={12} md={12} className=" align-self-center">
+                <Row>
+                  <Col xs={12} md={12}>
                     {session.jumaDate}
                   </Col>
-                  <Col xs={12} md={12} className=" align-self-center">
+                  <Col xs={12} md={12}>
                     {session.jumaSession}
                   </Col>
                 </Row>
               </Col>
             </Row>
+            <Row>
+              <Col xs={5}>
+                {userDetails.jumaDate ? checkUserSession() : null}
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <ListGroup
+                  className="d-flex justify-content-between align-items-center w-100 "
+                  defaultActiveKey={listKey}
+                >
+                  <div
+                    style={{
+                      position: "relative",
 
-            <ListGroup
-              className="d-flex justify-content-between align-items-center w-100 "
-              defaultActiveKey={listKey}
-            >
-              <div
-                style={{
-                  position: "relative",
-
-                  minWidth: "100%",
-                  marginBottom: "8vh",
-                }}
-              ></div>
-              {loading
-                ? null
-                : SessionList(
-                    listKey,
-                    latestSessionTimes,
-                    handleClick,
-                    openSessions,
-                    userDetails,
-                    globalFridayNF
-                  )}
-            </ListGroup>
+                      minWidth: "100%",
+                      marginBottom: "8vh",
+                    }}
+                  ></div>
+                  {loading
+                    ? null
+                    : SessionList(
+                        listKey,
+                        latestSessionTimes,
+                        handleClick,
+                        openSessions,
+                        userDetails,
+                        globalFridayNF
+                      )}
+                </ListGroup>
+              </Col>
+            </Row>
           </Col>
         </Row>
         {/*         <div className="pb-4 mt-4 text-warning">

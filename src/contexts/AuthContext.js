@@ -14,8 +14,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [userDetails, setUserDetails] = useState(null);
 
-  const [globalFridayNU, setGlobalFridayNU] = useState(FindFriday(1, false));
-  const [globalFridayNF, setGlobalFridayNF] = useState(FindFriday(1, true));
+  const [globalFridayNU, setGlobalFridayNU] = useState(FindFriday(0, false));
+  const [globalFridayNF, setGlobalFridayNF] = useState(FindFriday(0, true));
   const [openSessions, setOpenSessions] = useState(null);
   const [superSessions, setSuperSessions] = useState(null);
   const [adminSessions, setAdminSessions] = useState(null);
@@ -79,7 +79,7 @@ export function AuthProvider({ children }) {
 
   function getOpenSessions(adminCompany) {
     try {
-      db.ref("pubSessions/" + adminCompany.toLowerCase() + "/openSessions").on(
+      db.ref("pubSessions/" + adminCompany.toLowerCase() + "/openSessions/").on(
         "value",
         (snapshot) => {
           setOpenSessions(snapshot.val());
@@ -147,7 +147,7 @@ export function AuthProvider({ children }) {
     return auth.sendPasswordResetEmail(email);
   }
 
-  function updateEmail(email) {
+  async function updateEmail(email) {
     let promises = [];
 
     promises.push(currentUser.updateEmail(email));
@@ -158,7 +158,7 @@ export function AuthProvider({ children }) {
     return Promise.all(promises);
   }
 
-  function updatePassword(password) {
+  async function updatePassword(password) {
     let result;
     try {
       result = auth.currentUser.updatePassword(password);
@@ -182,7 +182,7 @@ export function AuthProvider({ children }) {
     return upd;
   }
 
-  function updateSurname(surName) {
+  async function updateSurname(surName) {
     console.log("surname auth");
     let upd = db
       .ref("users/" + auth.currentUser.uid)
@@ -195,7 +195,7 @@ export function AuthProvider({ children }) {
     return upd;
   }
 
-  function updateMobile(mobile) {
+  async function updateMobile(mobile) {
     console.log("mobile auth updating");
     let upd = db
       .ref("users/" + auth.currentUser.uid)
@@ -309,8 +309,8 @@ export function AuthProvider({ children }) {
     })
       .then((result) => {
         console.log("res from bookSession func  ->>> ", result.data);
-        const userDBAddress = "users/" + auth.currentUser.uid;
-        updateDB(userDBAddress, newSessionDetails);
+        /*  const userDBAddress = "users/" + auth.currentUser.uid;
+        updateDB(userDBAddress, newSessionDetails); */
         return result.data;
       })
       .catch((e) => {
@@ -320,18 +320,24 @@ export function AuthProvider({ children }) {
     return bookingRequest;
   }
 
-  /*   function clearUserJumaSession(params) {
-    const userDBAddress = "users/" + auth.currentUser.uid;
-    let blankSessionDetails = {
-      jumaDate: "",
-      jumaSession: "",
-      entryTime: "",
-      qqq: "qqq",
-    };
-    console.log("blankSessionDetails", blankSessionDetails);
+  function cancelUserBooking(oldSessionDetails) {
+    console.log("oldSessionDetails", oldSessionDetails);
 
-    updateDB(userDBAddress, blankSessionDetails);
-  } */
+    let cancelSessionFunc = fbfunc.httpsCallable("cancelUserBooking");
+    let bookingCancellation = cancelSessionFunc({
+      oldSessionDetails,
+      userDetails,
+    })
+      .then((result) => {
+        console.log("res from cacncel func  ->>> ", result.data);
+        return result.data;
+      })
+      .catch((e) => {
+        console.log("FBfunc cancelSessionerror returned >>>", e);
+        return null;
+      });
+    return bookingCancellation;
+  }
 
   async function checkUserBooking() {
     /* let fbObj = {
@@ -392,13 +398,6 @@ export function AuthProvider({ children }) {
 
     return auth.currentUser.updatePassword(password);
   }
-  /*   useEffect(() => {
-    if (superSessions == null) {
-      console.log("createAdminSess superSessions null");
-    } else {
-      console.log("createAdminSess superSessions ", superSessions);
-    }
-  }, [superSessions]); */
 
   async function checkAdminStatus() {
     let adminStatus;
@@ -502,7 +501,7 @@ export function AuthProvider({ children }) {
     checkAdminStatus,
     superSessions,
     checkUserBooking,
-
+    cancelUserBooking,
     adminCheckResult,
     getSupSessions,
     missedBooking,

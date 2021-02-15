@@ -260,24 +260,133 @@ exports.confirmAttendance = functions.https.onCall((data, context) => {
 // auth trigger (user deleted)
 exports.userDeleted = functions.auth.user().onDelete(async (user) => {
   console.log("user deleted: ", user.email, user.uid);
-  let deleteDetails = {
-    deleteDetails: {
-      lastupdate: admin.database.ServerValue.TIMESTAMP,
-    },
-  };
+
   let promises = [];
+  var userDetails = await admin
+    .database()
+    .ref("privUserDetails/" + user.uid)
+    .once("value")
+    .then((snap) => {
+      return snap.val();
+    });
+
+  userDetails = {
+    ...userDetails,
+    deleteDate: admin.database.ServerValue.TIMESTAMP,
+  };
 
   promises.push(
     admin
       .database()
-      .ref("/users/" + user.uid)
-      .remove()
+      .ref("privUserDetails/deleted/" + user.uid)
+      .set(userDetails)
   );
+
   promises.push(
     admin
       .database()
       .ref("privUserDetails/" + user.uid)
-      .update(deleteDetails)
+      .remove()
+  );
+
+  return Promise.all(promises)
+    .then((res) => {
+      console.log("delete res is ", res);
+      return admin
+        .database()
+        .ref("/users/" + user.uid)
+        .remove();
+    })
+    .catch((e) => {
+      return e;
+    });
+});
+
+exports.cancelUserBooking = functions.https.onCall((data, context) => {
+  if (!(context.auth && context.auth.token)) {
+    throw new functions.https.HttpsError(
+      "permission-denied",
+      "Must be an administrative user to initiate booking."
+    );
+  }
+
+  let promises = [];
+  let uid = context.auth.uid;
+  let oldBookingDate = data.oldSessionDetails.jumaDate;
+  let oldBookingSession = data.oldSessionDetails.jumaSession;
+  let oldBookingSessionHash = data.oldSessionDetails.sessionHash;
+  let bookingData = {
+    firstname: data.userDetails.firstname,
+    surname: data.userDetails.surname,
+    mobileNum: data.userDetails.mobileNum,
+    uid: uid,
+    entryTime: data.userDetails.entryTime,
+  };
+
+  console.log("hit cancel ------- bookingdata", data);
+  promises.push(
+    admin
+      .database()
+      .ref(
+        "adminSessions/cancelled/openSessions/" +
+          oldBookingDate +
+          "/" +
+          oldBookingSession +
+          "/cancelled/" +
+          oldBookingSessionHash
+      )
+      .update({
+        ...bookingData,
+        userCancelBooking: admin.database.ServerValue.TIMESTAMP,
+      })
+      .then((res) => {
+        console.log("canceled usersession adminsession", res);
+        return "canceled usersession adminsession";
+      })
+  );
+  promises.push(
+    admin
+      .database()
+      .ref(
+        "adminSessions/cic/openSessions/" +
+          oldBookingDate +
+          "/" +
+          oldBookingSession +
+          "/booked/" +
+          oldBookingSessionHash
+      )
+      .remove()
+  );
+
+  promises.push(
+    admin
+      .database()
+      .ref("users/" + uid)
+      .update(bookingData)
+      .then((res) => {
+        console.log("user details updated", res);
+        return "updated user booking";
+      })
+  );
+
+  promises.push(
+    admin
+      .database()
+      .ref(
+        "pubSessions/cic/openSessions/" +
+          oldBookingDate +
+          "/" +
+          oldBookingSession +
+          "/currentBooked"
+      )
+      .set(admin.database.ServerValue.increment(-1))
+  );
+
+  promises.push(
+    admin
+      .database()
+      .ref("privUserDetails/" + uid + "/cancelCount")
+      .set(admin.database.ServerValue.increment(1))
   );
 
   return Promise.all(promises);
@@ -317,7 +426,14 @@ exports.bookSession = functions.https.onCall((data, context) => {
     uid: uid,
     entryTime: data.userDetails.entryTime,
   };
-
+  console.log(
+    "canceled usersession adminsession old date",
+    JSON.stringify(data)
+  );
+  console.log(
+    "canceled usersession adminsession old date",
+    JSON.stringify(bookingData)
+  );
   if (newBookingDate !== "") {
     console.log("hit true adm2 ", data);
 
@@ -336,6 +452,15 @@ exports.bookSession = functions.https.onCall((data, context) => {
         .then((res) => {
           console.log("updated adminsession");
           return "updated adminsession";
+        })
+    );
+    promises.push(
+      admin
+        .database()
+        .ref("privUserDetails/" + uid)
+        .update(bookingData)
+        .then((res) => {
+          return "updated pUserDetails";
         })
     );
     if (oldBookingDate !== "") {
@@ -357,42 +482,28 @@ exports.bookSession = functions.https.onCall((data, context) => {
           })
       );
     }
-  }
-
-  if (data.userCancelBooking) {
-    console.log("hit cancel -------");
     promises.push(
       admin
         .database()
-        .ref(
-          "adminSessions/cancelled/openSessions/" +
-            oldBookingDate +
-            "/" +
-            oldBookingSession +
-            "/cancelled/" +
-            oldBookingSessionHash
-        )
-        .update({
-          ...bookingData,
-          userCancelBooking: admin.database.ServerValue.TIMESTAMP,
-        })
+        .ref("users/" + uid)
+        .update(bookingData)
         .then((res) => {
-          console.log("canceled usersession adminsession");
-          return "canceled usersession adminsession";
+          console.log("user details updated", res);
+          return "updated user booking";
         })
     );
+
     promises.push(
       admin
         .database()
         .ref(
-          "adminSessions/cic/openSessions/" +
-            oldBookingDate +
+          "pubSessions/cic/openSessions/" +
+            newBookingDate +
             "/" +
-            oldBookingSession +
-            "/booked/" +
-            oldBookingSessionHash
+            newBookingSession +
+            "/currentBooked"
         )
-        .remove()
+        .set(admin.database.ServerValue.increment(1))
     );
   }
 

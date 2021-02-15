@@ -28,21 +28,6 @@ function SessionList(
 
     console.log("cccc", latestSessionTimes);
     let result = latestSessionTimes.map((sessionDetails) => {
-      // console.log("globalFriday subs", globalFriday.substring(7));
-      let sub = globalFridayNF;
-      console.log("loopSessions sub", sub);
-      /*       console.log("userDetails jumadate", userDetails.jumaDate);
-      console.log("openSessions[max.", openSessions);
-      console.log(
-        "openSessions[max.",
-        openSessions[globalFriday][sessionDetails.time].maxPerSession -
-          openSessions[globalFriday][sessionDetails.time].currentBooked
-      ); */
-      /*   console.log(
-        "openSessions[booked.",
-        openSessions[globalFriday][sessionDetails.time].currentBooked
-      );
-      console.log("subs = > ", openSessions[sub]); */
       return (
         <ListGroup.Item
           action

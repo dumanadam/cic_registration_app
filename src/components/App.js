@@ -89,7 +89,13 @@ function App() {
     <>
       <div style={bgJSON}>
         <Container
-          style={width > 600 ? { width: "100vw" } : { width: "100vw" }}
+          style={
+            width > 600
+              ? width > 1200
+                ? { width: "40vw" }
+                : { width: "75vw" }
+              : { width: "100vw" }
+          }
         >
           <Header headerTitle={header}></Header>
         </Container>

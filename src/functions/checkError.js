@@ -10,6 +10,13 @@ export const checkError = (errorType) => {
     case "auth/network-request-failed":
       errorText = "Check Network Connection";
       break;
+    case "auth/email-already-in-use":
+      errorText = "The email address is already in use by another account";
+      break;
+    case "auth/requires-recent-login":
+      errorText =
+        "Password change requires recent login. Please logout & login";
+      break;
     default:
     // code block
   }
