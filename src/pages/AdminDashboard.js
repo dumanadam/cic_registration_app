@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 
 import { Link, useHistory } from "react-router-dom";
-import CustomLink from "../components/CustomLink";
 
 import {
   Button,
@@ -16,33 +15,32 @@ import {
 } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 
-import PageTitle from "../components/PageTitle";
 import TEXTDEFINITION from "../text/TextDefinition.js";
 import NavButtons from "../components/NavButtons";
-
+import { BsArchive, BsTrash } from "react-icons/bs";
 import ShowModal from "../components/ShowModal";
+import WithTemplate from "../components/wrappers/WithTemplate";
 
 function AdminDashboard(props) {
   const [error, setError] = useState("");
   const {
-    globalFridayFb,
-    logout,
     userDetails,
     openSessions,
     superSessions,
     checkAdminStatus,
     adminCheckResult,
     getSupSessions,
+    archiveSessions,
   } = useAuth();
-  const [pageTitle, setpageTitle] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [adminNavButtons, setAdminNavButtons] = useState("");
   const history = useHistory();
-  const sessionOptions = [{ label: "Send QR Code email" }];
   const [session, setSession] = useState({});
   const [showSessions, setShowSessions] = useState(false);
   const [clickedDate, setClickedDate] = useState("");
   const [buttonDetails, setButtonDetails] = useState(null);
+  const [modalText, setModalText] = useState(undefined);
 
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
@@ -50,8 +48,8 @@ function AdminDashboard(props) {
 
   useEffect(() => {
     setLoading(true);
-    setpageTitle(PageTitle("Dashboard"));
-
+    setModalText("Connecting to CIC Servers");
+    props.setHeaders(TEXTDEFINITION.CARD_HEADER_ADMIN_DASHBOARD);
     checkAdminStatus();
 
     /*     if (adminResult === "no-sessions") {
@@ -180,10 +178,16 @@ function AdminDashboard(props) {
     //
   }, [adminCheck]); */
 
+  function handleArchive(e) {
+    e.preventDefault();
+    console.log("e.target.textContent", e);
+    //archiveSessions(;)
+  }
+
   function handleSelectDate(e) {
     e.preventDefault();
     console.log("e.target.textContent", e.target.textContent);
-    setSession(e.target.textContent);
+    setSession(e.target.textContent.trim());
     setClickedDate(e.target.textContent);
     setShowSessions(true);
   }
@@ -213,19 +217,81 @@ function AdminDashboard(props) {
           console.log("index is", index); */
           return (
             <>
-              <ListGroup.Item
-                // disabled={showSessions}
-                action
-                className="d-flex justify-content-between align-items-center"
-                onClick={(clicked) => handleSelectDate(clicked)}
-                key={key}
-                id={key}
-                href={key}
-              >
-                <Row className="w-100 text-center">
-                  <Col>{key}</Col>
+              <style type="text/css">
+                {`
+    .col-flat {
+      background-color: purple;
+      color: white;
+    }
+
+    .btn-xxl {
+      padding: 1rem 1.5rem;
+      font-size: 1.5rem;
+    }
+    `}
+              </style>
+              <Container>
+                <Row>
+                  <Col>
+                    <ListGroup.Item
+                      // disabled={showSessions}
+                      action
+                      className="d-flex justify-content-between align-items-center"
+                      onClick={(clicked) => handleSelectDate(clicked)}
+                      key={key}
+                      id={key}
+                      href={key}
+                    >
+                      <Row>
+                        <Col xl={8} xs={8}>
+                          <Button variant="outline-primary">{key}</Button>
+                        </Col>
+                        <Col
+                          xl={2}
+                          xs={2}
+                          onClick={() => console.log("archive")}
+                        >
+                          <Button variant="outline">
+                            <BsArchive></BsArchive>
+                          </Button>
+                        </Col>
+                        <Col
+                          xl={2}
+                          xs={2}
+                          onClick={() => console.log("archive")}
+                        >
+                          <Button variant="outline">
+                            <BsTrash style={{ color: "black" }}></BsTrash>
+                          </Button>
+                        </Col>
+                      </Row>
+                    </ListGroup.Item>
+                  </Col>
+                  {/*  <Col
+                    style={{
+                      backgroundColor: "white",
+                      borderBottom: "1px solid lightgray",
+                    }}
+                  >
+                    <span
+                      onClick={(clicked) => handleArchive(clicked)}
+                      style={{
+                        paddingLeft: "3%",
+                        float: "right",
+                        paddingBottom: "10px",
+                      }}
+                    >
+                      <BsTrash style={{ color: "black" }}></BsTrash>
+                    </span>
+                    <span
+                      classname="text-warning mx-4 text-right pl-4"
+                      style={{ float: "right", color: "black" }}
+                    >
+                      <BsArchive></BsArchive>
+                    </span>
+                  </Col> */}
                 </Row>
-              </ListGroup.Item>
+              </Container>
             </>
           );
         });
@@ -288,49 +354,57 @@ function AdminDashboard(props) {
 
   function showBody() {
     return (
-      <div className="text-light">
-        <Card
-          className=" border-0 h-100"
-          bg="transparent"
-          style={{ minHeight: "57vh" }}
+      <>
+        <Row
+          className="text-light  "
+          style={{
+            alignItems: "center",
+            minHeight: "70vh",
+          }}
         >
-          <Card.Header className="h3 text-center text-light border-1">
-            {TEXTDEFINITION.ADMIN_CARD_HEADER}
-          </Card.Header>
-          <Card.Body className="mt-0 pt-0 ">
-            <div style={{ height: "50vh" }}>
-              {/*  <ListGroup
-              className="d-flex justify-content-between align-items-center w-100 "
-              defaultActiveKey={checkKey()}
-            >
-              {SessionList(listDetails)}
-            </ListGroup> */}
-              <Row className="p-4 justify-content-center ">
-                <div className="text-light text-center ">
-                  <div className="">{TEXTDEFINITION.ADMIN_DASHBOARD_LINE1}</div>
-                </div>
-              </Row>
-
-              {SessionList()}
-              {/* <Row>Select Date : {printSessionDates()}</Row> */}
-              {showSessions ? listSessionTimes() : null}
-            </div>
-            <Row variant="d-flex align-items-stretch h-100">
-              {adminNavButtons}
+          <Col className=" align-self-center text-center ">
+            <Row>
+              {!!openSessions ? (
+                <Col className="mb-3 text-warning ">
+                  <div>
+                    {TEXTDEFINITION.ADMIN_DASHBOARD_LINE1}
+                    {TEXTDEFINITION.ADMIN_DASHBOARD_LINE2}
+                  </div>
+                </Col>
+              ) : (
+                <>
+                  <Col className="mb-3 text-warning ">
+                    <div>{TEXTDEFINITION.ADMIN_DASHBOARD_NO_SESSION_LINE1}</div>{" "}
+                    <div>{TEXTDEFINITION.ADMIN_DASHBOARD_NO_SESSION_LINE2}</div>
+                  </Col>
+                </>
+              )}
             </Row>
-          </Card.Body>
-        </Card>
-      </div>
+            <Row className=" align-items-center text-center ">
+              <Col>{SessionList()}</Col>
+            </Row>
+
+            <Row>
+              <Col>{showSessions ? listSessionTimes() : null}</Col>
+            </Row>
+
+            <Row variant="d-flex align-items-stretch h-100"></Row>
+          </Col>
+        </Row>
+      </>
     );
   }
-
+  function showButtons() {
+    return adminNavButtons;
+  }
   return (
     <>
-      {loading === true ? (
-        <ShowModal loading={loading} modalDetails={modalDetails} />
-      ) : (
-        showBody()
-      )}
+      <WithTemplate
+        buttons={showButtons()}
+        modal={{ loading: loading, modalText: modalText }}
+      >
+        {showBody()}
+      </WithTemplate>
     </>
   );
 }

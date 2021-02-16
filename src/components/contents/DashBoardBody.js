@@ -29,6 +29,7 @@ function DashboardBody(props) {
 
   useEffect(() => {
     console.log("Dashboard body props", props);
+    console.log("Dashboard body props nf", props.openSessions);
 
     setBookingsText([
       {
@@ -79,10 +80,11 @@ function DashboardBody(props) {
   }, [noSessions]);
 
   useEffect(() => {
-    console.log(
-      "props.openSessions[props.myProps.globalFridayNF] == null",
-      props.openSessions[props.myProps.globalFridayNF]
-    );
+    !!props.openSessions &&
+      console.log(
+        "props.openSessions[props.myProps.globalFridayNF] == null",
+        props.openSessions[props.myProps.globalFridayNF]
+      );
     props.myProps.checkUserBooking();
   }, [props.openSessions]);
 
@@ -219,39 +221,19 @@ function DashboardBody(props) {
               </Col>
             </>
           ) : (
-            <span className="">
-              {TEXTDEFINITION.NO_SESSIONS_AVAILABLE_USER}
-            </span>
+            <Col className="align-self-center">
+              <Row>
+                <Col className="mb-4 text-warning" sm={12}>
+                  <span className="">
+                    {TEXTDEFINITION.NO_SESSIONS_AVAILABLE_USER}
+                  </span>
+                </Col>
+              </Row>
+            </Col>
           )}
         </Row>
       </Container>
     );
-  }
-
-  function fbclick(params) {
-    console.log("params", params);
-    const sayHello = fbfunc.httpsCallable("testFunc");
-    sayHello({ name: "asd" }).then((result) => {
-      console.log("res from func  - ", result.data);
-    });
-  }
-
-  function adminPage() {
-    history.push("/admin");
-  }
-
-  async function backupDb() {
-    let backupdb = fbfunc.httpsCallable("backupDbRef");
-
-    let dbres = await backupdb()
-      .then((result) => {
-        console.log("res from backupDbRef func  ->>> ", result.data);
-        return result.data;
-      })
-      .catch((e) => {
-        console.log("FBfunc backupDbRef error returned >>>", e);
-      });
-    console.log("res from backupDbRef func  ->>> ", dbres);
   }
 
   function printBody() {
@@ -358,9 +340,6 @@ function DashboardBody(props) {
           {!!props.userDetails && checkUsersBooking()}
         </div>
         <div id="bottom-navigation"> {dashboardNavButtons}</div>
-        <button onClick={fbclick}>add admin</button>
-        <button onClick={adminPage}>admin page</button>
-        <button onClick={backupDb}>backupDB page</button>
       </Container>
     </>
   );

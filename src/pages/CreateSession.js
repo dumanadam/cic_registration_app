@@ -19,8 +19,9 @@ import {
 } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import moment from "moment";
-import PageTitle from "../components/PageTitle";
+
 import TEXTDEFINITION from "../text/TextDefinition.js";
+import APPDEFINITION from "../text/AppDefinitions";
 import NavButtons from "../components/NavButtons";
 import PrivacyPolicy from "../components/PrivacyPolicy";
 import myStyle from "../components/styling/CardStyling";
@@ -34,7 +35,7 @@ function CreateSession() {
   const { createSessions, logout, userDetails, globalFridayNF } = useAuth();
   const [checkState, setcheckState] = useState(false);
   const [formPage, setFormPage] = useState(1);
-  const [pageTitle, setpageTitle] = useState("");
+
   const [loading, setLoading] = useState(true);
 
   const [adminNavButtons, setAdminNavButtons] = useState("");
@@ -61,17 +62,6 @@ function CreateSession() {
   const [selectedSessionInterval, setSelectedSessionInterval] = useState(
     timeBetwwenSession[1]
   );
-  const bookingsText = [
-    { title: "Next Juma :", detail: userDetails.jumaDate },
-    { title: "How many weeks to repeat?", detail: userDetails.jumaSession },
-    { title: "How many sessions?", detail: userDetails.jumaSession },
-    {
-      title: "When does the first session start?",
-      detail: userDetails.jumaSession,
-    },
-    { title: "Time between each session?", detail: userDetails.jumaSession },
-    { title: "Max people per session?", detail: userDetails.jumaSession },
-  ];
 
   const sessionOptions = [{ label: "Send QR Code email" }];
   let buttonDetails = {
@@ -111,7 +101,6 @@ function CreateSession() {
   }, [userDetails]);
 
   useEffect(() => {
-    setpageTitle(PageTitle("Dashboard"));
     console.log("Dashboard userDetails", userDetails);
     setAdminNavButtons(NavButtons(3, buttonDetails));
   }, []);
@@ -168,7 +157,7 @@ function CreateSession() {
     function createUploadObject() {
       let sessionUploadObject = {};
 
-      for (let index = 1; index <= weeksQty; index++) {
+      for (let index = 0; index <= weeksQty; index++) {
         let sessionDateString = FindFriday(index, true);
         console.log("sessionDateString", sessionDateString);
         sessionUploadObject.openSessions = {
@@ -306,10 +295,10 @@ function CreateSession() {
       <>
         <Row className="mt-4 mb-4">
           <Col className="text-warning text-left" style={{ fontSize: "18px" }}>
-            {bookingsText[0].title}
+            {APPDEFINITION.CREATE_SESSION_QUESTIONS[0].title}
           </Col>
           <Col
-            className="text-light text-center"
+            className="text-light text-right"
             style={{ fontSize: "18px", padding: 0 }}
           >
             {globalFridayNF}
@@ -320,7 +309,7 @@ function CreateSession() {
             className="text-warning text-left"
             style={{ fontSize: "18px", paddingRight: 0 }}
           >
-            {bookingsText[1].title}
+            {APPDEFINITION.CREATE_SESSION_QUESTIONS[1].title}
           </Col>
           <Col
             className="text-light text-right"
@@ -341,7 +330,7 @@ function CreateSession() {
         </Row>
         <Row className="mt-4 mb-4">
           <Col className="text-warning text-left" style={{ fontSize: "18px" }}>
-            {bookingsText[2].title}
+            {APPDEFINITION.CREATE_SESSION_QUESTIONS[2].title}
           </Col>
           <Col
             className="text-light text-right"
@@ -390,7 +379,7 @@ function CreateSession() {
       <>
         <Row className="mt-4 mb-4">
           <Col className="text-warning text-left" style={{ fontSize: "18px" }}>
-            {bookingsText[3].title}
+            {APPDEFINITION.CREATE_SESSION_QUESTIONS[3].title}
           </Col>
           <Col
             className="text-light text-center"
@@ -407,7 +396,7 @@ function CreateSession() {
         </Row>
         <Row className="mt-4 mb-4">
           <Col className="text-warning text-left" style={{ fontSize: "18px" }}>
-            {bookingsText[4].title}
+            {APPDEFINITION.CREATE_SESSION_QUESTIONS[4].title}
           </Col>
           <Col
             className="text-light text-center"
@@ -427,7 +416,7 @@ function CreateSession() {
             className="text-warning text-center"
             style={{ fontSize: "18px" }}
           >
-            {bookingsText[5].title}
+            {APPDEFINITION.CREATE_SESSION_QUESTIONS[5].title}
           </Col>
           <Col
             className="text-light text-center"

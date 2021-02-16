@@ -287,7 +287,7 @@ export default function Signup(props) {
         >
           <Col className=" align-self-center">
             <Row>
-              <Col xs={5} md={5} xl={12} className=" align-self-center">
+              <Col xs={12} md={12} xl={12} className=" align-self-center">
                 <Formik
                   initialValues={{
                     firstname: "",

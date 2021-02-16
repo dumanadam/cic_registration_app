@@ -277,6 +277,21 @@ export function AuthProvider({ children }) {
     return entryConfirmation;
   }
 
+  async function archiveSessions(selectedArchiveDate) {
+    let archiveSession = fbfunc.httpsCallable("archiveSession");
+
+    let archiveSessionResult = await archiveSession(selectedArchiveDate)
+      .then((result) => {
+        console.log("res from missedbooking func  ->>> ", result.data);
+        return result.data;
+      })
+      .catch((e) => {
+        console.log("FBfunc archive error returned >>>", e);
+      });
+
+    return archiveSessionResult;
+  }
+
   async function missedBooking() {
     let setMissedBooking = fbfunc.httpsCallable("missedBooking");
 
@@ -505,6 +520,7 @@ export function AuthProvider({ children }) {
     adminCheckResult,
     getSupSessions,
     missedBooking,
+    archiveSessions,
   };
   return (
     <AuthContext.Provider value={value}>

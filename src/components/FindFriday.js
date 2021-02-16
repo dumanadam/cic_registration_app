@@ -27,11 +27,11 @@ function FindFriday(weeks = 1, unformatted = false) {
     // otherwise, give me *next week's* instance of that same day
     if (unformatted)
       return moment()
-        .add(weeks, "weeks")
+        .add(weeks + 1, "weeks")
         .isoWeekday(dayINeed)
         .format("DD-MM-YYYY");
     return moment()
-      .add(weeks, "weeks")
+      .add(weeks + 1, "weeks")
       .isoWeekday(dayINeed)
       .format("dddd DD/MM/YYYY");
   }

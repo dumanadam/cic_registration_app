@@ -1,5 +1,5 @@
 import React from "react";
-import { ListGroup, Badge } from "react-bootstrap";
+import { ListGroup, Badge, Row, Col } from "react-bootstrap";
 import PropTypes from "prop-types";
 
 function SessionList(
@@ -32,15 +32,21 @@ function SessionList(
         <ListGroup.Item
           action
           href={"#" + sessionDetails.time}
-          className="d-flex justify-content-between align-items-center"
+          className="d-flex justify-content-between "
           onClick={() => handleClick(sessionDetails.time)}
           key={sessionDetails.time}
         >
-          {sessionDetails.time}
-          <Badge variant="warning" pill>
-            {openSessions[globalFridayNF][sessionDetails.time].maxPerSession -
-              openSessions[globalFridayNF][sessionDetails.time].currentBooked}
-          </Badge>
+          <Row className="w-100">
+            <Col xl={10}>{sessionDetails.time}</Col>
+            <Col xl={2}>
+              <Badge variant="warning" pill>
+                {openSessions[globalFridayNF][sessionDetails.time]
+                  .maxPerSession -
+                  openSessions[globalFridayNF][sessionDetails.time]
+                    .currentBooked}
+              </Badge>
+            </Col>
+          </Row>
         </ListGroup.Item>
       );
     });
@@ -50,7 +56,7 @@ function SessionList(
 
   return (
     <ListGroup
-      className="pt-3 pb-3 d-flex justify-content-between align-items-center w-100"
+      className="py-3 px-3 d-flex justify-content-between align-items-center w-100"
       defaultActiveKey={listKey}
     >
       {loopSessions()}

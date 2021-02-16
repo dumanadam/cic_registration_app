@@ -59,41 +59,50 @@ function Login(props) {
   function showBody() {
     return (
       <>
-        <Form
-          onSubmit={handleSubmit}
-          className="mt-0 text-light "
-          id="login-form"
+        <Row
+          className="text-light  "
           style={{
-            position: "relative",
-            top: "20%",
+            alignItems: "center",
+            minHeight: "70vh",
           }}
         >
-          <Form.Group id="email">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="email"
-              ref={emailRef}
-              required
-              placeholder={props.wid}
-              defaultValue="asdd@asd.asd"
-              autoComplete="usernmame"
-              className="text-center"
-              // onChange={(change) => setEnteredEmail(change)}
-            />
-          </Form.Group>
-          <Form.Group id="password">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              ref={passwordRef}
-              required
-              placeholder={props.hei}
-              autoComplete="current-password"
-              className="text-center"
-              defaultValue="asdwer"
-            />
-          </Form.Group>
-        </Form>
+          <Col className=" align-self-center">
+            <Form
+              onSubmit={handleSubmit}
+              className="mt-0 text-light "
+              id="login-form"
+              style={{
+                position: "relative",
+                top: "20%",
+              }}
+            >
+              <Form.Group id="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  ref={emailRef}
+                  required
+                  // placeholder={props.wid}
+
+                  autoComplete="usernmame"
+                  className="text-center"
+                  // onChange={(change) => setEnteredEmail(change)}
+                />
+              </Form.Group>
+              <Form.Group id="password">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  ref={passwordRef}
+                  required
+                  //  placeholder={props.hei}
+                  autoComplete="current-password"
+                  className="text-center"
+                />
+              </Form.Group>
+            </Form>
+          </Col>
+        </Row>
       </>
     );
   }

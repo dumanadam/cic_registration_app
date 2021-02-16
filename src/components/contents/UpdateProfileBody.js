@@ -8,7 +8,7 @@ import {
 import { Link, useHistory } from "react-router-dom";
 
 import NavButtons from "../NavButtons";
-import PageTitle from "../PageTitle";
+
 import TEXTDEFINITION from "../../text/TextDefinition";
 import { useAuth } from "../../contexts/AuthContext";
 import MainShell from "../MainShell";
@@ -36,7 +36,7 @@ function UpdateProfileBody(props) {
   const mobileRef = useRef();
   const [surName, setSurName] = useState("");
   const [showSettings, setShowSettings] = useState(false);
-  const [pageTitle, setpageTitle] = useState("");
+
   const history = useHistory();
   const [dashboardNavButtons, setDashboardNavButtons] = useState("");
 

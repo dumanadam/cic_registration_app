@@ -11,7 +11,6 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
-import PageTitle from "../components/PageTitle";
 import NavButtons from "../components/NavButtons";
 import ShowModal from "../components/ShowModal";
 import TEXTDEFINITION from "../text/TextDefinition";
@@ -22,8 +21,6 @@ export default function SessionConfirmed(props) {
   const { userDetails, bookSession } = useAuth();
   const [error, setError] = useState("");
   const [session, setSession] = useState({});
-
-  const [pageTitle, setpageTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const history = useHistory();
 
@@ -60,39 +57,43 @@ export default function SessionConfirmed(props) {
 
   function showBody() {
     return (
-      <Container className="h-100">
-        <Row className="h-100">
-          <Col className="align-self-center">
-            <Card>
-              <Card.Body className="mt-0 pt-0 ">
-                <div>
-                  <div className="pt-4 text-center w-100">
-                    <QRCode
-                      style={{}}
-                      renderAs="SVG"
-                      value={userDetails.sessionHash}
-                      fgColor="#004619"
-                      //bgColor="#faa61a"
-                    />
-                  </div>
-                  <Card.Title className="pt-4 ">
-                    {userDetails.jumaSession}
-                  </Card.Title>
-                  <Card.Subtitle className="text-muted ">
-                    {userDetails.jumaDate}
-                  </Card.Subtitle>
-                  <Card.Title className="pt-4 text-left">
-                    Please Note :
-                  </Card.Title>
-                  <Card.Subtitle className=" text-muted text-left">
-                    {TEXTDEFINITION.BOOKING_CONFIRMED_NOTE}
-                  </Card.Subtitle>
+      <Row
+        className="text-dark  "
+        style={{
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <Col className=" align-self-center">
+          <Card>
+            <Card.Body className="mt-0 pt-0 ">
+              <div>
+                <div className="pt-4 text-center w-100">
+                  <QRCode
+                    style={{}}
+                    renderAs="SVG"
+                    value={userDetails.sessionHash}
+                    fgColor="#004619"
+                    //bgColor="#faa61a"
+                  />
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+                <Card.Title className="pt-4 ">
+                  {userDetails.jumaSession}
+                </Card.Title>
+                <Card.Subtitle className="text-muted ">
+                  {userDetails.jumaDate}
+                </Card.Subtitle>
+                <Card.Title className="pt-4 text-center">
+                  Please Note :
+                </Card.Title>
+                <Card.Subtitle className=" text-muted text-left">
+                  {TEXTDEFINITION.BOOKING_CONFIRMED_NOTE}
+                </Card.Subtitle>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
     );
   }
 

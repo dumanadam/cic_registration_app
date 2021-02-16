@@ -32,6 +32,7 @@ import Login from "../pages/Login";
 
 import TestQr from "../pages/TestQr";
 import AttendeeScanner from "../pages/AttendeeScanner";
+import Access from "../pages/Access";
 
 function App() {
   const { height, width } = GetWindow();
@@ -42,7 +43,7 @@ function App() {
   const [firstRun, setfirstRun] = useState(true);
   const [currentHeight, setcurrentHeight] = useState(height);
   const [currentWidth, setcurrentWidth] = useState(width);
-  const [header, setHeader] = useState("XXX");
+  const [header, setHeader] = useState("CIC Registrations");
   const [bgJSON, setbgJSON] = useState({
     /* backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${bgImage})`,
     backgroundSize: "auto cover",
@@ -120,7 +121,20 @@ function App() {
                   )}
                 />
 
-                <PrivateRoute exact path="/admin" component={AdminDashboard} />
+                <PrivateRoute
+                  exact
+                  path="/admin"
+                  component={(props) => (
+                    <AdminDashboard {...props} setHeaders={setHeader} />
+                  )}
+                />
+                <PrivateRoute
+                  exact
+                  path="/access"
+                  component={(props) => (
+                    <Access {...props} setHeaders={setHeader} />
+                  )}
+                />
 
                 <PrivateRoute
                   exact

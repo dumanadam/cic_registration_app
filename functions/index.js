@@ -194,7 +194,11 @@ exports.testFunc = functions.https.onCall((data, context) => {
     });
 }); */
   return user.once("value").then((snapshot) => {
-    return adminUser.update(snapshot.val() || "Anonymous");
+    let adminObj = {
+      ...snapshot.val(),
+      active: 1,
+    };
+    return adminUser.update(adminObj || "Anonymous");
   });
 });
 
@@ -214,6 +218,29 @@ exports.createSessions = functions.https.onCall((data, context) => {
   );
   promises.push(
     admin.database().ref("pubSessions/cic/").set(data.sessionDetails)
+  );
+
+  return Promise.all(promises);
+});
+
+exports.archiveSession = functions.https.onCall(async (data, context) => {
+  let promises = [];
+  let selectedSessionDate = await admin
+    .database()
+    .ref("adminSessions/" + data.sessionDate)
+    .once("value")
+    .then((snapshot) => {
+      return snapshot.val();
+    });
+
+  promises.push(
+    admin
+      .database()
+      .ref("adminSessions/cic/archive/" + data.sessionDate)
+      .set(selectedSessionDate)
+      .then((snapshot) => {
+        return "Archived Session";
+      })
   );
 
   return Promise.all(promises);
@@ -463,6 +490,20 @@ exports.bookSession = functions.https.onCall((data, context) => {
           return "updated pUserDetails";
         })
     );
+
+    promises.push(
+      admin
+        .database()
+        .ref(
+          "pubSessions/cic/openSessions/" +
+            newBookingDate +
+            "/" +
+            newBookingSession +
+            "/currentBooked"
+        )
+        .set(admin.database.ServerValue.increment(1))
+    );
+
     if (oldBookingDate !== "") {
       promises.push(
         admin
@@ -481,6 +522,19 @@ exports.bookSession = functions.https.onCall((data, context) => {
             return "deleted old";
           })
       );
+
+      promises.push(
+        admin
+          .database()
+          .ref(
+            "pubSessions/cic/openSessions/" +
+              oldBookingDate +
+              "/" +
+              oldBookingSession +
+              "/currentBooked"
+          )
+          .set(admin.database.ServerValue.increment(-1))
+      );
     }
     promises.push(
       admin
@@ -491,19 +545,6 @@ exports.bookSession = functions.https.onCall((data, context) => {
           console.log("user details updated", res);
           return "updated user booking";
         })
-    );
-
-    promises.push(
-      admin
-        .database()
-        .ref(
-          "pubSessions/cic/openSessions/" +
-            newBookingDate +
-            "/" +
-            newBookingSession +
-            "/currentBooked"
-        )
-        .set(admin.database.ServerValue.increment(1))
     );
   }
 

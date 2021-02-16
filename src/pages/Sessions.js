@@ -349,29 +349,24 @@ export default function Sessions(props) {
             </Row>
             <Row>
               <Col>
-                <ListGroup
-                  className="d-flex justify-content-between align-items-center w-100 "
-                  defaultActiveKey={listKey}
-                >
-                  <div
-                    style={{
-                      position: "relative",
+                <div
+                  style={{
+                    position: "relative",
 
-                      minWidth: "100%",
-                      marginBottom: "8vh",
-                    }}
-                  ></div>
-                  {loading
-                    ? null
-                    : SessionList(
-                        listKey,
-                        latestSessionTimes,
-                        handleClick,
-                        openSessions,
-                        userDetails,
-                        globalFridayNF
-                      )}
-                </ListGroup>
+                    minWidth: "100%",
+                    marginBottom: "8vh",
+                  }}
+                ></div>
+                {loading
+                  ? null
+                  : SessionList(
+                      listKey,
+                      latestSessionTimes,
+                      handleClick,
+                      openSessions,
+                      userDetails,
+                      globalFridayNF
+                    )}
               </Col>
             </Row>
           </Col>
@@ -390,7 +385,7 @@ export default function Sessions(props) {
     return (
       <>
         <Row className="w-100">
-          <Col className="text-light col p-0 mr-2 ">
+          <Col className="text-light col p-0 ">
             <BUTTON
               variant="primary "
               disabled={loading}
