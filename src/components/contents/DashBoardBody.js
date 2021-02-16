@@ -47,9 +47,11 @@ function DashboardBody(props) {
         link: "/sessions",
         variant: "primary w-100",
         loading: false,
-        disabled: props.openSessions[props.myProps.globalFridayNF]
-          ? false
-          : true,
+        disabled:
+          !!props.openSessions &&
+          props.openSessions[props.myProps.globalFridayNF]
+            ? false
+            : true,
       },
       b2: {
         buttonText: "Update Profile",
@@ -205,11 +207,11 @@ function DashboardBody(props) {
   }
 
   function noSessionBookedPrintMessage() {
+    console.log("qqqq", props.openSessions);
     return (
       <Container className="h-100 ">
         <Row className="text-light text-center h-75 ">
-          {props.openSessions &&
-          !!props.openSessions[props.myProps.globalFridayNF] ? (
+          {!!props.openSessions ? (
             <>
               <Col className="align-self-center">
                 <Row>
@@ -322,10 +324,7 @@ function DashboardBody(props) {
     );
   }
   function checkUsersBooking() {
-    if (
-      props.userDetails.jumaDate == "" ||
-      props.openSessions[props.myProps.globalFridayNF] == null
-    ) {
+    if (props.userDetails.jumaDate == "" || props.openSessions == null) {
       return noSessionBookedPrintMessage();
     } else {
       return printBody();

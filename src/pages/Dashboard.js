@@ -27,7 +27,7 @@ const Dashboard = (props) => {
 
   useEffect(() => {
     console.log("userDetails dashboard before", userDetails);
-    if (!!userDetails && !!openSessions) {
+    if (!!userDetails) {
       console.log("userDetails dashboard received", userDetails);
       const [day, month, year] = userDetails.jumaDate.split("-");
       let userSessionDate = new Date(year, month - 1, day);

@@ -4,7 +4,7 @@ const TEXTDEFINITION = {
   JUMA_BOOKED_CHECK_FAIL2:
     'Click the "Book Session" button below to book the next available Juma session.',
   NO_SESSIONS_AVAILABLE_USER:
-    "The venue has not made any sessions available at this time, please try again later",
+    "The venue has not opened any sessions at this time, please check back shortly",
   NO_SESSIONS_AVAILABLE_ADMIN:
     "Please create sessions with the Create Session button",
   DASHBOARD_CARD_HEADER: "CIC Juma Registrations",
@@ -31,6 +31,7 @@ const TEXTDEFINITION = {
     "To create a new session click the Create Session button below ",
   DASHBOARD_GREETING: "Salamu Aleykum",
   BOOKING_CONFIRMED_NOTE: "Please show CIC staff on arrival.",
+  CARD_HEADER_DEFAULT: "CIC Registrations",
 };
 
 export default TEXTDEFINITION;

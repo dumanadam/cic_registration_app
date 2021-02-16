@@ -20,6 +20,7 @@ import NavButtons from "../components/NavButtons";
 import { BsArchive, BsTrash } from "react-icons/bs";
 import ShowModal from "../components/ShowModal";
 import WithTemplate from "../components/wrappers/WithTemplate";
+import CheckModal from "../components/modals/CheckModal";
 
 function AdminDashboard(props) {
   const [error, setError] = useState("");
@@ -41,51 +42,19 @@ function AdminDashboard(props) {
   const [clickedDate, setClickedDate] = useState("");
   const [buttonDetails, setButtonDetails] = useState(null);
   const [modalText, setModalText] = useState(undefined);
-
+  const [showModal, setShowModal] = useState(false);
+  const [selectedArchiveDate, setSelectedArchiveDate] = useState(undefined);
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
   });
 
   useEffect(() => {
-    setLoading(true);
-    setModalText("Connecting to CIC Servers");
     props.setHeaders(TEXTDEFINITION.CARD_HEADER_ADMIN_DASHBOARD);
+    setModalText("Connecting to CIC Servers");
     checkAdminStatus();
-
-    /*     if (adminResult === "no-sessions") {
-      // setAdminNavButtons(NavButtons(3, buttonDetails));
-      console.log("admindash supersessions not null", superSessions);
-      if (superSessions.code === "unauthenticated") {
-      } else if (superSessions === "no-sessions") {
-        console.log("admindashboard supersessions", superSessions);
-
-        setLoading(false);
-      } else {
-        setLoading(false);
-      }
-    } else {
-      console.log("admindash hit false supersessions");
-    } */
   }, []);
 
-  /*   useEffect(() => {
-    if (openSessions === "unauthenticated") {
-      history.push({
-        pathname: "/",
-      });
-    } else {
-      setLoading(false);
-    }
-    console.log("admindashboard opensessions", openSessions);
-  }, [openSessions]); */
-
   useEffect(() => {
-    console.log(
-      "admindash supersessions useeff +++++",
-      typeof superSessions,
-      superSessions
-    );
-
     if (!!superSessions) {
       setButtonDetails(
         {
@@ -114,11 +83,6 @@ function AdminDashboard(props) {
   }, [superSessions]);
 
   useEffect(() => {
-    /*     if (loading === false) {
-      console.log("loading admindash hit false ", loading);
-      console.log("loading admindash hit false ", userDetails);
-      setAdminNavButtons(NavButtons(3, buttonDetails));
-    }*/
     if (!!buttonDetails) {
       setAdminNavButtons(NavButtons(3, buttonDetails));
       setLoading(false);
@@ -127,20 +91,6 @@ function AdminDashboard(props) {
   }, [buttonDetails]);
 
   useEffect(() => {
-    console.log("user details", userDetails);
-  }, [userDetails]);
-
-  useEffect(() => {
-    console.log("loading admindash", loading);
-  }, [loading]);
-
-  useEffect(() => {
-    console.log("admindash adminCheckResult", adminCheckResult);
-
-    //  console.log("admin resa", adminCheckResult);
-    console.log("admin resa", adminCheckResult);
-    // console.log("admin resa", adminCheckResult.message);
-
     if (adminCheckResult === 401) {
       console.log("admin resa", typeof adminCheckResult);
 
@@ -156,37 +106,38 @@ function AdminDashboard(props) {
     }
 
     if (adminCheckResult) {
-      console.log("adminCheckResult is true admindash", adminCheckResult);
       getSupSessions();
     }
   }, [adminCheckResult]);
 
-  /*   useEffect(() => {
-    console.log("admincheck  updated", buttonDetails);
-    if (adminCheck == "no-sessions") {
-      setButtonDetails({
-        ...buttonDetails,
-        b1: {
-          buttonText: "Create Session",
-          link: "/create-session",
-          variant: "primary w-100",
-          loading: loading,
-        },
-      });
-    }
-
-    //
-  }, [adminCheck]); */
-
-  function handleArchive(e) {
+  async function handleArchive(e) {
     e.preventDefault();
-    console.log("e.target.textContent", e);
-    //archiveSessions(;)
+    setShowSessions(false);
+    setShowModal(!showModal);
+
+    console.log("archive target parentnode", e.target.parentNode.id);
+
+    setSelectedArchiveDate(e.target.parentNode.id);
+  }
+
+  async function handleConfirm(params) {
+    let res = await archiveSessions(selectedArchiveDate);
+
+    if (res) {
+      setShowModal(!showModal);
+    }
+  }
+
+  useEffect(() => {
+    console.log("selected archive date", selectedArchiveDate);
+  }, [selectedArchiveDate]);
+  function handleReject(params) {
+    setShowModal(!showModal);
   }
 
   function handleSelectDate(e) {
     e.preventDefault();
-    console.log("e.target.textContent", e.target.textContent);
+    console.log("HANDLE DATE", e.target.textContent);
     setSession(e.target.textContent.trim());
     setClickedDate(e.target.textContent);
     setShowSessions(true);
@@ -217,81 +168,63 @@ function AdminDashboard(props) {
           console.log("index is", index); */
           return (
             <>
-              <style type="text/css">
-                {`
-    .col-flat {
-      background-color: purple;
-      color: white;
-    }
+              <ListGroup.Item
+                // disabled={showSessions}
 
-    .btn-xxl {
-      padding: 1rem 1.5rem;
-      font-size: 1.5rem;
-    }
-    `}
-              </style>
-              <Container>
-                <Row>
-                  <Col>
-                    <ListGroup.Item
-                      // disabled={showSessions}
-                      action
-                      className="d-flex justify-content-between align-items-center"
+                className="d-flex align-items-center "
+                style={{ backgroundColor: "transparent" }}
+              >
+                <Row className="mx-auto">
+                  <Col className="align-self-center">
+                    <Button
                       onClick={(clicked) => handleSelectDate(clicked)}
                       key={key}
                       id={key}
                       href={key}
                     >
-                      <Row>
-                        <Col xl={8} xs={8}>
-                          <Button variant="outline-primary">{key}</Button>
-                        </Col>
-                        <Col
-                          xl={2}
-                          xs={2}
-                          onClick={() => console.log("archive")}
-                        >
-                          <Button variant="outline">
-                            <BsArchive></BsArchive>
-                          </Button>
-                        </Col>
-                        <Col
-                          xl={2}
-                          xs={2}
-                          onClick={() => console.log("archive")}
-                        >
-                          <Button variant="outline">
-                            <BsTrash style={{ color: "black" }}></BsTrash>
-                          </Button>
-                        </Col>
-                      </Row>
-                    </ListGroup.Item>
+                      {key}
+                    </Button>
                   </Col>
-                  {/*  <Col
-                    style={{
-                      backgroundColor: "white",
-                      borderBottom: "1px solid lightgray",
-                    }}
-                  >
-                    <span
-                      onClick={(clicked) => handleArchive(clicked)}
-                      style={{
-                        paddingLeft: "3%",
-                        float: "right",
-                        paddingBottom: "10px",
-                      }}
-                    >
-                      <BsTrash style={{ color: "black" }}></BsTrash>
-                    </span>
-                    <span
-                      classname="text-warning mx-4 text-right pl-4"
-                      style={{ float: "right", color: "black" }}
-                    >
-                      <BsArchive></BsArchive>
-                    </span>
+                  <Col className="align-self-center">
+                    <Row>
+                      <Col xl={12} id={key}>
+                        <BsArchive
+                          variant="outline text-light"
+                          onClick={(clicked) => handleArchive(clicked)}
+                          id={key}
+                          name={key}
+                          style={{ cursor: "pointer" }}
+                        ></BsArchive>
+                      </Col>
+                      <Col>
+                        <div
+                          className="text-light "
+                          style={{ fontSize: "x-small" }}
+                        >
+                          Archive
+                        </div>
+                      </Col>
+                    </Row>
+                  </Col>
+                  {/*      <Col onClick={() => console.log("archive")}>
+                    <Row>
+                      <Col xl={12}>
+                        <Button variant="outline text-light">
+                          <BsTrash></BsTrash>
+                        </Button>
+                      </Col>
+                      <Col>
+                        <div
+                          className="text-light "
+                          style={{ fontSize: "x-small" }}
+                        >
+                          Delete
+                        </div>
+                      </Col>
+                    </Row>
                   </Col> */}
                 </Row>
-              </Container>
+              </ListGroup.Item>
             </>
           );
         });
@@ -311,7 +244,7 @@ function AdminDashboard(props) {
     return (
       <ListGroup
         defaultActiveKey={clickedDate}
-        className="pt-3 pb-3 d-flex justify-content-between align-items-center w-100"
+        className="pt-3 pb-3 d-flex align-items-center w-100 "
       >
         {loopSessions()}
       </ListGroup>
@@ -325,8 +258,6 @@ function AdminDashboard(props) {
       key,
       index
     ) {
-      /*   console.log("listsession key is", key);
-      console.log("index is", index); */
       return (
         <>
           <Col>
@@ -366,10 +297,8 @@ function AdminDashboard(props) {
             <Row>
               {!!openSessions ? (
                 <Col className="mb-3 text-warning ">
-                  <div>
-                    {TEXTDEFINITION.ADMIN_DASHBOARD_LINE1}
-                    {TEXTDEFINITION.ADMIN_DASHBOARD_LINE2}
-                  </div>
+                  <div>{TEXTDEFINITION.ADMIN_DASHBOARD_LINE1} </div>
+                  <div> {TEXTDEFINITION.ADMIN_DASHBOARD_LINE2}</div>
                 </Col>
               ) : (
                 <>
@@ -385,7 +314,11 @@ function AdminDashboard(props) {
             </Row>
 
             <Row>
-              <Col>{showSessions ? listSessionTimes() : null}</Col>
+              <Col>
+                <ListGroup>
+                  {showSessions ? listSessionTimes() : null}
+                </ListGroup>
+              </Col>
             </Row>
 
             <Row variant="d-flex align-items-stretch h-100"></Row>
@@ -399,6 +332,15 @@ function AdminDashboard(props) {
   }
   return (
     <>
+      {showModal &&
+        CheckModal({
+          text1:
+            "This will remove the session. All attendees sessions for this date will be cancelled.",
+          text2: "Are you sure?",
+          handleConfirm: handleConfirm,
+          handleReject: handleReject,
+          show: showModal,
+        })}
       <WithTemplate
         buttons={showButtons()}
         modal={{ loading: loading, modalText: modalText }}

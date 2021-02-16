@@ -224,25 +224,49 @@ exports.createSessions = functions.https.onCall((data, context) => {
 });
 
 exports.archiveSession = functions.https.onCall(async (data, context) => {
+  let removeSession;
+  console.log("archive data", data);
   let promises = [];
   let selectedSessionDate = await admin
     .database()
-    .ref("adminSessions/" + data.sessionDate)
+    .ref("adminSessions/" + "cic" + "/openSessions/" + data)
     .once("value")
     .then((snapshot) => {
+      console.log("archive snap adminb", snapshot.val());
       return snapshot.val();
     });
 
   promises.push(
     admin
       .database()
-      .ref("adminSessions/cic/archive/" + data.sessionDate)
+      .ref("archives/" + "cic" + "/" + data)
       .set(selectedSessionDate)
       .then((snapshot) => {
-        return "Archived Session";
+        return "Archived success";
       })
   );
 
+  let success = await Promise.all(promises);
+  console.log("archive success", success);
+  promises = [];
+  promises.push(
+    admin
+      .database()
+      .ref("adminSessions/" + "cic" + "/openSessions/" + data)
+      .remove()
+      .then(() => {
+        return "Priv_Removal_Succesfull";
+      })
+  );
+  promises.push(
+    admin
+      .database()
+      .ref("pubSessions/" + "cic" + "/openSessions/" + data)
+      .remove()
+      .then(() => {
+        return "Pub_Removal_Succesfull";
+      })
+  );
   return Promise.all(promises);
 });
 

@@ -33,6 +33,7 @@ import Login from "../pages/Login";
 import TestQr from "../pages/TestQr";
 import AttendeeScanner from "../pages/AttendeeScanner";
 import Access from "../pages/Access";
+import TEXTDEFINITION from "../text/TextDefinition";
 
 function App() {
   const { height, width } = GetWindow();
@@ -43,7 +44,7 @@ function App() {
   const [firstRun, setfirstRun] = useState(true);
   const [currentHeight, setcurrentHeight] = useState(height);
   const [currentWidth, setcurrentWidth] = useState(width);
-  const [header, setHeader] = useState("CIC Registrations");
+  const [header, setHeader] = useState(TEXTDEFINITION.CARD_HEADER_DEFAULT);
   const [bgJSON, setbgJSON] = useState({
     /* backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${bgImage})`,
     backgroundSize: "auto cover",

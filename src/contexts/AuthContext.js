@@ -278,11 +278,12 @@ export function AuthProvider({ children }) {
   }
 
   async function archiveSessions(selectedArchiveDate) {
+    console.log("auth archive ", selectedArchiveDate);
     let archiveSession = fbfunc.httpsCallable("archiveSession");
 
     let archiveSessionResult = await archiveSession(selectedArchiveDate)
       .then((result) => {
-        console.log("res from missedbooking func  ->>> ", result.data);
+        console.log("res from archive func  ->>> ", result.data);
         return result.data;
       })
       .catch((e) => {
@@ -444,33 +445,7 @@ export function AuthProvider({ children }) {
       }
       return result.data ? setAdminCheckResult(true) : setAdminCheckResult(401);
     });
-    /*       .catch((error) => {
-        //console.log("res from  checkAdminStatus err---error", error);
-        console.log("res from  checkAdminStatus err---type", typeof error);
-        console.log("res from  checkAdminStatus err---name", error.name);
-        console.log("res from  checkAdminStatus err--- mesg", error.message);
-        adminStatus = error;
-      }); */
 
-    /*     try {
-      console.log("hit try res");
-      adminSessions = db
-        .ref("adminSessions/cic/openSessions/")
-        .on("value", (snapshot) => {
-          console.log(
-            "res from checkAdminStatus func  superSessions ->>> adminsessions",
-            snapshot
-          );
-          setSuperSessions(snapshot.val());
-          return true;
-        });
-    } catch (error) {
-      console.log("adminsessions error", error);
-    }
-*/
-
-    console.log("res checkAdminStatus adminSessions ", adminSessions);
-    console.log("res checkAdminStatus adminSessions adminStatus ", adminStatus);
     return adminStatus;
   }
 
