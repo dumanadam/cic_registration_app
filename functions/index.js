@@ -11,20 +11,16 @@ exports.backupDbRef = functions.https.onCall(async (data, context) => {
     .ref("/adminSessions/cic/openSessions")
     .once("value")
     .then((snap) => {
-      console.log("snap db", snap.val());
       return snap.val();
     });
 });
 
 exports.checkAdminStatus = functions.https.onCall(async (data, context) => {
-  let openAdminSession;
-  console.log("hit getsession");
   let adminUser = await admin
     .database()
     .ref("adminUsers/" + context.auth.uid)
     .once("value")
     .then((snapshot) => {
-      console.log("adminUser adminuser+++++", JSON.stringify(snapshot.val()));
       if (snapshot.val() === null) {
         throw new functions.https.HttpsError(
           "unauthenticated",
@@ -33,95 +29,97 @@ exports.checkAdminStatus = functions.https.onCall(async (data, context) => {
       } else {
         return true;
       }
-      /*   if (snapshot.val() === null) {
-        throw new functions.https.HttpsError(
-          "unauthenticated",
-          "You must be authenticated to call this function."
-        );
-      } */
     })
 
     .catch((e) => {
-      console.log("caught adminuser error", e);
       return e;
     });
 
-  /*   if (adminUser === true) {
-    openAdminSession = await admin
-      .database()
-      .ref("adminSessions/cic/openSessions/")
-      .once("value")
-      .then(async (snap) => {
-        console.log("isAdmin snap", JSON.stringify(snap.val()));
-        if (snap.val() === null) {
-          return "no-sessions";
-        } else {
-          return { adminSessions: snap.val() };
-        }
-      })
-      .catch((e) => {
-        console.log("caught folder adminuser error", e);
-        return e;
-      });
-  } */
-  console.log("adminUser adminuser", JSON.stringify(adminUser));
-  console.log("openAdminSession adminuser", JSON.stringify(openAdminSession));
-  /* if (Object.keys(adminUser).length === 0 && adminUser.constructor === Object) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "You must be authenticated to call this function."
-    );
-  } else { */
-  /*   if (adminUser) {
-    adminSessions = await admin
-      .database()
-      .ref("adminSessions/")
-      .once("value")
-      .then((snap) => {
-        console.log("snap", snap.val());
-        return snap.val();
-      });
-    console.log("adminSessions", adminSessions);
-  } */
   return adminUser;
 });
 
 exports.missedBooking = functions.https.onCall(async (userDetails, context) => {
+  console.log("missed user", userDetails);
+
   let promises = [];
   let emptyUserBooking = {
     jumaDate: "",
     jumaSession: "",
     sessionHash: "",
   };
+  let missedSessions = {
+    [userDetails.jumaDate]: {
+      missedAcceptTime: admin.database.ServerValue.TIMESTAMP,
+      jumaSession: userDetails.jumaSession,
+    },
+  };
+
+  let entryTimeUpdateObj = {
+    entryTime: admin.database.ServerValue.TIMESTAMP,
+  };
 
   const [day, month, year] = userDetails.jumaDate.split("-");
-  let userSessionDate = new Date(year, month - 1, day);
+  // let userSessionDate = new Date(year, month - 1, day);
 
-  if (userSessionDate < Date.now()) {
-    promises.push(
-      admin
-        .database()
-        .ref("privUserDetails")
-        .child(context.auth.uid)
-        .child("cancelCount")
-        .transaction((count) => {
-          return (count || 0) + 1;
-        })
-    );
-    /*   promises.push(
-      admin
-        .database()
-        .ref("users/" + context.auth.uid)
-        .update(emptyUserBooking)
-    ); */
+  promises.push(
+    admin
+      .database()
+      .ref("privUserDetails/" + context.auth.uid + "/missedCount")
+      .set(admin.database.ServerValue.increment(1))
+      .then(() => {
+        return userDetails.firstname + " missed booking";
+      })
+  );
 
-    /* promises.push(
-      admin
-        .database()
-        .ref("privUserDetails/" + context.auth.uid + "/cancelCount")
-        .update(admin.database.ServerValue.increment(1))
-    ); */
-  }
+  promises.push(
+    admin
+      .database()
+      .ref(
+        "privUserDetails/" +
+          context.auth.uid +
+          "/missedSessions/" +
+          year +
+          "/" +
+          month +
+          "/"
+      )
+      .push()
+      .set(missedSessions)
+      .then(() => {
+        return userDetails.firstname + " updated aSession";
+      })
+  );
+
+  promises.push(
+    admin
+      .database()
+      .ref("users/" + context.auth.uid)
+      .update(emptyUserBooking)
+      .then((res) => {
+        return "removed user booking";
+      })
+  );
+
+  /*   promises.push(
+    admin
+      .database()
+      .ref(
+        "adminSessions/missed/openSessions/" +
+          userDetails.jumaDate +
+          "/" +
+          userDetails.jumaSession +
+          "/" +
+          context.auth.uid
+      )
+      .update({
+        ...bookingData,
+        userCancelBooking: admin.database.ServerValue.TIMESTAMP,
+      })
+      .then((res) => {
+        return "canceled usersession adminsession";
+      })
+  ); */
+
   return Promise.all(promises);
 });
 
@@ -143,13 +141,6 @@ exports.checkUserBooking = functions.https.onCall(
       .then((snap) => {
         return snap.val();
       });
-
-    console.log("adminSessionUserBooking", adminSessionUserBooking);
-    console.log("adminSessionUserBooking userdetails", userDetails);
-    console.log(
-      "adminSessionUserBooking userDetails.jumaDate",
-      userDetails.jumaDate
-    );
 
     if (
       adminSessionUserBooking !== null &&
@@ -225,14 +216,13 @@ exports.createSessions = functions.https.onCall((data, context) => {
 
 exports.archiveSession = functions.https.onCall(async (data, context) => {
   let removeSession;
-  console.log("archive data", data);
+
   let promises = [];
   let selectedSessionDate = await admin
     .database()
     .ref("adminSessions/" + "cic" + "/openSessions/" + data)
     .once("value")
     .then((snapshot) => {
-      console.log("archive snap adminb", snapshot.val());
       return snapshot.val();
     });
 
@@ -247,7 +237,7 @@ exports.archiveSession = functions.https.onCall(async (data, context) => {
   );
 
   let success = await Promise.all(promises);
-  console.log("archive success", success);
+
   promises = [];
   promises.push(
     admin
@@ -278,7 +268,6 @@ exports.confirmAttendance = functions.https.onCall((data, context) => {
       "The function must be called " + "while authenticated."
     );
   }
-  console.log("attendeance data", data);
   let promises = [];
   let entryTimeUpdateObj = {
     entryTime: admin.database.ServerValue.TIMESTAMP,
@@ -310,8 +299,6 @@ exports.confirmAttendance = functions.https.onCall((data, context) => {
 
 // auth trigger (user deleted)
 exports.userDeleted = functions.auth.user().onDelete(async (user) => {
-  console.log("user deleted: ", user.email, user.uid);
-
   let promises = [];
   var userDetails = await admin
     .database()
@@ -342,7 +329,6 @@ exports.userDeleted = functions.auth.user().onDelete(async (user) => {
 
   return Promise.all(promises)
     .then((res) => {
-      console.log("delete res is ", res);
       return admin
         .database()
         .ref("/users/" + user.uid)
@@ -352,7 +338,7 @@ exports.userDeleted = functions.auth.user().onDelete(async (user) => {
       return e;
     });
 });
-
+//TODO change cancel to privuserdetails
 exports.cancelUserBooking = functions.https.onCall((data, context) => {
   if (!(context.auth && context.auth.token)) {
     throw new functions.https.HttpsError(
@@ -363,18 +349,22 @@ exports.cancelUserBooking = functions.https.onCall((data, context) => {
 
   let promises = [];
   let uid = context.auth.uid;
-  let oldBookingDate = data.oldSessionDetails.jumaDate;
-  let oldBookingSession = data.oldSessionDetails.jumaSession;
-  let oldBookingSessionHash = data.oldSessionDetails.sessionHash;
+  let oldBookingDate = data.jumaDate;
+  let oldBookingSession = data.jumaSession;
+  let oldBookingSessionHash = data.sessionHash;
+  let emptyUserBooking = {
+    jumaDate: "",
+    jumaSession: "",
+    sessionHash: "",
+  };
   let bookingData = {
-    firstname: data.userDetails.firstname,
-    surname: data.userDetails.surname,
-    mobileNum: data.userDetails.mobileNum,
+    firstname: data.firstname,
+    surname: data.surname,
+    mobileNum: data.mobileNum,
     uid: uid,
-    entryTime: data.userDetails.entryTime,
+    entryTime: data.entryTime,
   };
 
-  console.log("hit cancel ------- bookingdata", data);
   promises.push(
     admin
       .database()
@@ -383,7 +373,7 @@ exports.cancelUserBooking = functions.https.onCall((data, context) => {
           oldBookingDate +
           "/" +
           oldBookingSession +
-          "/cancelled/" +
+          "/" +
           oldBookingSessionHash
       )
       .update({
@@ -391,7 +381,6 @@ exports.cancelUserBooking = functions.https.onCall((data, context) => {
         userCancelBooking: admin.database.ServerValue.TIMESTAMP,
       })
       .then((res) => {
-        console.log("canceled usersession adminsession", res);
         return "canceled usersession adminsession";
       })
   );
@@ -407,15 +396,17 @@ exports.cancelUserBooking = functions.https.onCall((data, context) => {
           oldBookingSessionHash
       )
       .remove()
+      .then(() => {
+        return "canceled aSession";
+      })
   );
 
   promises.push(
     admin
       .database()
       .ref("users/" + uid)
-      .update(bookingData)
+      .update(emptyUserBooking)
       .then((res) => {
-        console.log("user details updated", res);
         return "updated user booking";
       })
   );
@@ -431,6 +422,9 @@ exports.cancelUserBooking = functions.https.onCall((data, context) => {
           "/currentBooked"
       )
       .set(admin.database.ServerValue.increment(-1))
+      .then((res) => {
+        return "i true";
+      })
   );
 
   promises.push(
@@ -438,6 +432,19 @@ exports.cancelUserBooking = functions.https.onCall((data, context) => {
       .database()
       .ref("privUserDetails/" + uid + "/cancelCount")
       .set(admin.database.ServerValue.increment(1))
+      .then((res) => {
+        return "d true";
+      })
+  );
+
+  promises.push(
+    admin
+      .database()
+      .ref("privUserDetails/" + uid)
+      .update(emptyUserBooking)
+      .then((res) => {
+        return "updated pDdetails booking";
+      })
   );
 
   return Promise.all(promises);
@@ -461,13 +468,6 @@ exports.bookSession = functions.https.onCall((data, context) => {
   let oldBookingSession = data.oldSessionDetails.jumaSession;
   let oldBookingSessionHash = data.oldSessionDetails.sessionHash;
   let newBookingSessionHash = data.newSessionDetails.sessionHash;
-  console.log("contextauth", context.auth.uid);
-  console.log("newBookingDate", newBookingDate);
-  console.log("data.newBookingSession", newBookingSession);
-  console.log("data.oldBookingDate", oldBookingDate);
-  console.log("oldBookingSession", oldBookingSession);
-  console.log("usercancel", data.userCancelBooking);
-  console.log("qqqqq", uid);
 
   let bookingData = {
     ...data.newSessionDetails,
@@ -477,17 +477,8 @@ exports.bookSession = functions.https.onCall((data, context) => {
     uid: uid,
     entryTime: data.userDetails.entryTime,
   };
-  console.log(
-    "canceled usersession adminsession old date",
-    JSON.stringify(data)
-  );
-  console.log(
-    "canceled usersession adminsession old date",
-    JSON.stringify(bookingData)
-  );
-  if (newBookingDate !== "") {
-    console.log("hit true adm2 ", data);
 
+  if (newBookingDate !== "") {
     promises.push(
       admin
         .database()
@@ -501,7 +492,6 @@ exports.bookSession = functions.https.onCall((data, context) => {
         )
         .update(bookingData)
         .then((res) => {
-          console.log("updated adminsession");
           return "updated adminsession";
         })
     );
@@ -542,7 +532,6 @@ exports.bookSession = functions.https.onCall((data, context) => {
           )
           .remove()
           .then((res) => {
-            console.log("deleted old adminsession");
             return "deleted old";
           })
       );
@@ -566,7 +555,6 @@ exports.bookSession = functions.https.onCall((data, context) => {
         .ref("users/" + uid)
         .update(bookingData)
         .then((res) => {
-          console.log("user details updated", res);
           return "updated user booking";
         })
     );
@@ -617,7 +605,6 @@ exports.userDetailsUpdated = functions.database
           )
           .update(personalDetails)
           .then((res) => {
-            console.log("Personal details updated in adminsessions");
             return "Personal details updated in adminsessions";
           })
       );
@@ -629,7 +616,6 @@ exports.userDetailsUpdated = functions.database
 exports.newUserDetails = functions.database
   .ref("/users/{userId}")
   .onCreate((snapshot, context) => {
-    console.log("newUserDetails user snapshot", snapshot.val());
     let privUserDetailsObj = {
       firstname: snapshot.val().firstname,
       surname: snapshot.val().surname,
@@ -652,11 +638,6 @@ exports.newUserDetails = functions.database
       .set(privUserDetailsObj);
   });
 
-function calculateBooked(before, after, context) {
-  /*   console.log("before", before);
-  console.log("after", after);
-  console.log("context", context); */
-}
 /* let addMessage = fbfunc.httpsCallable("addMessage");
 addMessage({ text: "teh test text" }).then((result) => {
   // Read result of the Cloud Function.
@@ -676,13 +657,6 @@ exports.randomNumber = functions.https.onRequest((request, response) => {
 exports.toTheDojo = functions.https.onRequest((request, response) => {
   response.redirect("https://www.thenetninja.co.uk");
 });
-
-// http callable function
-exports.sayHello = functions.https.onCall((data, context) => {
-  const name = data.name;
-  return `hello ${name} :)`;
-});
-
 
 
 // auth trigger (user deleted)

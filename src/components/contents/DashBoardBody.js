@@ -87,7 +87,7 @@ function DashboardBody(props) {
         "props.openSessions[props.myProps.globalFridayNF] == null",
         props.openSessions[props.myProps.globalFridayNF]
       );
-    props.myProps.checkUserBooking();
+    //  props.myProps.checkUserBooking();
   }, [props.openSessions]);
 
   useEffect(() => {
@@ -108,102 +108,6 @@ function DashboardBody(props) {
       setError("Failed to Logout");
       console.log("error", e);
     }
-  }
-
-  function printSessionInfo() {
-    /*     let result = bookingsText.map((rowDetails) => {
-      let sessionCheck =
-        rowDetails.detail === "" ? "No Booking" : rowDetails.detail;
-      if (rowDetails.title == "Salamu Aleykum") {
-        return (
-          <>
-            <Row className="pb-2">
-              <Col
-                xl={7}
-                xs={6}
-                className="text-warning text-left pr-0"
-                style={{ fontSize: "18px" }}
-              >
-                {rowDetails.title}
-              </Col>
-              <Col
-                className="text-light text-right"
-                style={{ fontSize: "18px" }}
-              >
-                {sessionCheck}
-              </Col>
-            </Row>
-          </>
-        );
-      } else {
-        return (
-          <>
-            <Row className="pb-2">
-              <Col
-                xl={12}
-                xs={12}
-                className="text-warning text-left"
-                style={{ fontSize: "18px" }}
-              >
-                {rowDetails.title}
-              </Col>
-            </Row>
-            <Row>
-              <Col
-                xl={12}
-                xs={12}
-                className="text-light text-left"
-                style={{ fontSize: "18px" }}
-              >
-                {sessionCheck}
-              </Col>
-            </Row>
-          </>
-        );
-      }
-    }); 
-
-    return result;*/
-    return (
-      <>
-        <ListGroupItem.Item
-          style={{ backgroundColor: "transparent" }}
-          className="py-2"
-        >
-          <Row className="text-center">
-            <Col xl={12} xs={12} className="text-warning ">
-              {TEXTDEFINITION.DASHBOARD_GREETING}
-            </Col>
-            <Col xl={12} xs={12} className="text-light ">
-              {props.userDetails.firstname} {props.userDetails.surname}
-            </Col>
-          </Row>
-        </ListGroupItem.Item>
-        <ListGroupItem.Item
-          style={{ backgroundColor: "transparent" }}
-          className="py-2"
-        >
-          <Row className="text-center">
-            <Col>
-              <Col xl={12} xs={12} className="text-warning ">
-                Date
-              </Col>
-              <Col xl={12} xs={12} className="text-light ">
-                {props.userDetails.jumaDate}
-              </Col>
-            </Col>
-            <Col>
-              <Col xl={12} xs={12} className="text-warning ">
-                Session
-              </Col>
-              <Col xl={12} xs={12} className="text-light ">
-                {props.userDetails.jumaSession}
-              </Col>
-            </Col>
-          </Row>
-        </ListGroupItem.Item>
-      </>
-    );
   }
 
   function noSessionBookedPrintMessage() {

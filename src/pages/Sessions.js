@@ -110,6 +110,7 @@ export default function Sessions(props) {
   const [latestSessionTimes, setLatestSessionTimes] = useState({});
   const [loading, setLoading] = useState(true);
   const [listKey, setListKey] = useState("");
+  const [dataReady, setDataReady] = useState(false);
   const history = useHistory();
   const [modalDetails, setModalDetails] = useState({
     bodyText: TEXTDEFINITION.LOADING_DEFAULT,
@@ -119,21 +120,24 @@ export default function Sessions(props) {
   useEffect(() => {
     console.log("sessions props", props);
     console.log(" globalFridayNF, ", globalFridayNF);
-    !!userDetails.jumaDate
-      ? props.setHeaders(TEXTDEFINITION.SESSION_CARD_HEADER_UPDATE)
-      : props.setHeaders(TEXTDEFINITION.SESSION_CARD_HEADER_BOOKING);
-    setSession({
-      jumaDate: globalFridayNF,
-      jumaSession: !!userDetails.jumaSession
-        ? userDetails.jumaSession
-        : undefined,
-    });
-    setModalText("");
   }, []);
 
   useEffect(() => {
     console.log("session userDetails", userDetails);
-  }, [userDetails]);
+    if (!!userDetails && !!openSessions) {
+      !!userDetails.jumaDate
+        ? props.setHeaders(TEXTDEFINITION.SESSION_CARD_HEADER_UPDATE)
+        : props.setHeaders(TEXTDEFINITION.SESSION_CARD_HEADER_BOOKING);
+      setSession({
+        jumaDate: globalFridayNF,
+        jumaSession: !!userDetails.jumaSession
+          ? userDetails.jumaSession
+          : undefined,
+      });
+      setDataReady(true);
+      setLoading(false);
+    }
+  }, [userDetails, openSessions]);
 
   /*   useEffect(() => {
     console.log("sessiosn listkey", listKey);
@@ -164,7 +168,7 @@ export default function Sessions(props) {
       setModalText("Getting latest sessions");
       getSessionTimes();
       setListKey(checkKey());
-      setLoading(false);
+
       console.log("sessions opensessions loading", loading);
     }
   }, [openSessions]);
@@ -229,16 +233,14 @@ export default function Sessions(props) {
 
   function handleCancel(e) {
     console.log("hit cancel");
+    setModalText("Cancelling Booking");
+    setShow(!show);
+    setLoading(true);
 
-    let currentUserSession = {
-      jumaDate: userDetails.jumaDate,
-      jumaSession: userDetails.jumaSession,
-      sessionHash: userDetails.sessionHash,
-    };
     e.preventDefault();
 
     const promises = [];
-    promises.push(cancelUserBooking(currentUserSession));
+    promises.push(cancelUserBooking());
     Promise.all(promises)
       .then((res) => {
         console.log("res from cancel", res);
@@ -408,15 +410,12 @@ export default function Sessions(props) {
       </>
     );
   }
-  function checkButton() {
-    if (userDetails.jumaDate) {
-      return "Update Session";
-    } else {
-      return "Book Session";
-    }
-  }
+
   const [show, setShow] = useState(false);
-  const handleClose = () => setShow(!show);
+  const handleClose = () => {
+    setShow(!show);
+  };
+
   function cancelModal() {
     return (
       <Modal
@@ -450,12 +449,12 @@ export default function Sessions(props) {
   }
   return (
     <>
-      {cancelModal()}
+      {show && cancelModal()}
       <WithTemplate
-        buttons={showButtons()}
+        buttons={dataReady && showButtons()}
         modal={{ loading: loading, modalText: modalText }}
       >
-        {showBody()}
+        {dataReady && showBody()}
       </WithTemplate>
     </>
   );

@@ -175,7 +175,7 @@ function AdminDashboard(props) {
                 style={{ backgroundColor: "transparent" }}
               >
                 <Row className="mx-auto">
-                  <Col className="align-self-center">
+                  <Col className="align-self-center" xs={8}>
                     <Button
                       onClick={(clicked) => handleSelectDate(clicked)}
                       key={key}

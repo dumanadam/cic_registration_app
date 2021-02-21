@@ -57,12 +57,12 @@ function App() {
     zIndex: -1, */
     //   backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${bgImage})`,
     backgroundSize: "cover",
-    backgroundPosition: "center top",
-    backgroundRepeat: "no-repeat",
-    position: "absolute",
+    backgroundPosition: "top",
+    height: "101%",
+    width: "101%",
+    position: "fixed",
     //minHeight: "100vh",
-    minWidth: "100%",
-    height: "150vh",
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${bgImage})`,
   });
 
   useLayoutEffect(() => {
@@ -70,13 +70,12 @@ function App() {
       setbgJSON({
         ...bgJSON,
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${bgImage})`,
-        height: 700, //178,
+        //height: "50%", //178,
       });
     } else {
       setbgJSON({
         ...bgJSON,
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5),rgba(0, 0, 0, 0.5)),url(${bgImage})`,
-        height: "100%",
       });
     }
     firstRun && setfirstRun(false);
@@ -90,17 +89,8 @@ function App() {
   return (
     <>
       <div style={bgJSON}>
-        <Container
-          style={
-            width > 600
-              ? width > 1200
-                ? { width: "40vw" }
-                : { width: "75vw" }
-              : { width: "100vw" }
-          }
-        >
-          <Header headerTitle={header}></Header>
-        </Container>
+        <Header headerTitle={header}></Header>
+
         <Container
           style={
             width > 600

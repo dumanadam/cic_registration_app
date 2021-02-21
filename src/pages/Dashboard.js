@@ -7,6 +7,8 @@ import { useHistory } from "react-router-dom";
 
 const Dashboard = (props) => {
   const [loading, setLoading] = useState(true);
+  const [modalDetails, setModalDetails] = useState();
+
   const [myProps, setMyProps] = useState({});
   const {
     logout,
@@ -14,8 +16,9 @@ const Dashboard = (props) => {
     openSessions,
     checkUserBooking,
     missedBooking,
-    globalFridayNU,
     globalFridayNF,
+    cancelUserBooking,
+    globalFridayNU,
   } = useAuth();
   const history = useHistory();
 
@@ -23,6 +26,8 @@ const Dashboard = (props) => {
     console.log("dashboard props", props);
 
     props.setHeaders(TEXTDEFINITION.DASHBOARD_CARD_HEADER);
+
+    //TODO move this to own function after date test change
   }, []);
 
   useEffect(() => {
@@ -30,12 +35,9 @@ const Dashboard = (props) => {
     if (!!userDetails) {
       console.log("userDetails dashboard received", userDetails);
       const [day, month, year] = userDetails.jumaDate.split("-");
-      let userSessionDate = new Date(year, month - 1, day);
+      let userSessionDate = new Date(year, month, day);
+      var today = new Date();
 
-      if (userSessionDate < Date.now()) {
-        console.log("missed Juma");
-        missedBooking();
-      }
       setMyProps({
         userDetails: userDetails,
         loading: loading,
@@ -45,12 +47,11 @@ const Dashboard = (props) => {
         checkUserBooking: checkUserBooking,
         globalFridayNF: globalFridayNF,
       });
-
-      setLoading(false);
-    }
-
-    if (userDetails == "waiting") {
-      console.log("dashboard userdetails waiting", userDetails);
+      if (today > userSessionDate) {
+        alertMissedBooking();
+      } else {
+        setLoading(false);
+      }
     }
   }, [userDetails, openSessions]);
 
@@ -58,17 +59,81 @@ const Dashboard = (props) => {
     console.log("opensessions dash", openSessions);
   }, [openSessions]);
 
+  function alertMissedBooking(params) {
+    console.log("missed Juma");
+    setModalDetails({
+      titleL1: TEXTDEFINITION.MISSED_SESSION_ASK_L1,
+      bodyText:
+        TEXTDEFINITION.MISSED_SESSION_ASK_L2 + " " + userDetails.jumaDate + "?",
+      //modalType: "error",
+      handleConfirm: true,
+      buttonDetails: {
+        handleAccept: handleMissAccept,
+        handleReject: handleMissReject,
+        textAccept: { text: "yes" },
+        textReject: { text: "no", variant: "outline" },
+      },
+    });
+    setLoading(true);
+    //  missedBooking();
+  }
+
   /*  useEffect(() => {
     console.log("dbody in parent refresh", userDetails);
   }, [DashboardBody]); */
 
+  async function handleMissAccInfo() {
+    let res = await missedBooking(userDetails);
+
+    console.log(("res missed", res));
+    !!res && setLoading(false);
+  }
+
+  async function handleMissRejInfo() {
+    let res = await cancelUserBooking();
+
+    !!res && setLoading(false);
+  }
+
+  async function handleMissAccept() {
+    console.log("modal", modalDetails);
+    setModalDetails({
+      ...modalDetails,
+      titleL1: TEXTDEFINITION.MISSED_SESSION_Attended_L1,
+      bodyText: TEXTDEFINITION.MISSED_SESSION_Attended_L2,
+      handleConfirm: true,
+      buttonDetails: {
+        handleAccept: handleMissAccInfo,
+        textAccept: { text: "OK" },
+      },
+    });
+  }
+
+  async function handleMissReject(params) {
+    const promises = [];
+    let currentUserSession = {
+      jumaDate: userDetails.jumaDate,
+      jumaSession: userDetails.jumaSession,
+      sessionHash: userDetails.sessionHash,
+    };
+    setModalDetails({
+      ...modalDetails,
+      titleL1: TEXTDEFINITION.MISSED_SESSION_ALERT_L1,
+      bodyText: TEXTDEFINITION.MISSED_SESSION_ALERT_L2,
+      handleConfirm: true,
+      buttonDetails: {
+        handleAccept: handleMissRejInfo,
+        textAccept: { text: "OK" },
+      },
+    });
+  }
+
   return (
     <>
       {loading ? (
-        <ShowModal
-          loading={loading}
-          modalDetails={{ bodyText: "Connecting to CIC" }}
-        /> //<ShowModal loading={loading} modalDetails={modalDetails} />
+        !!modalDetails ? (
+          <ShowModal loading={loading} modalDetails={modalDetails} />
+        ) : null
       ) : (
         <DashboardBody
           loading={loading}

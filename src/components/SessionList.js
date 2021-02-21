@@ -37,8 +37,10 @@ function SessionList(
           key={sessionDetails.time}
         >
           <Row className="w-100">
-            <Col xl={10}>{sessionDetails.time}</Col>
-            <Col xl={2}>
+            <Col xl={10} xs={10}>
+              {sessionDetails.time}
+            </Col>
+            <Col xl={2} xs={2}>
               <Badge variant="warning" pill>
                 {openSessions[globalFridayNF][sessionDetails.time]
                   .maxPerSession -

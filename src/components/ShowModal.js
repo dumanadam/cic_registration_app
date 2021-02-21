@@ -4,7 +4,14 @@ import { Card, Button, Modal, Spinner } from "react-bootstrap";
 import { FiSquare, FiCheckSquare } from "react-icons/fi";
 
 function ShowModal(props) {
-  const { modalDetails, loading } = props;
+  console.log("modaldets", props);
+  const {
+    modalDetails = {},
+    modalDetails: { modalType } = {},
+    modalDetails: { buttonDetails },
+    modalDetails: { spinner } = false,
+    loading,
+  } = props;
 
   return (
     <>
@@ -15,63 +22,64 @@ function ShowModal(props) {
         keyboard={false}
         centered
         aria-labelledby="example-custom-modal-styling-title"
-        size="sm"
+        className="w-100"
       >
         {modalDetails.titleL1 && (
           <Modal.Header>
-            <Modal.Title className="text-center col">
-              <div>{modalDetails.titleL1}</div>{" "}
+            <div
+              className={
+                modalType === "error"
+                  ? "text-center col h5 text-danger"
+                  : "text-center col h5 text-primary"
+              }
+            >
+              <div>{modalDetails.titleL1}</div>
               <div>{modalDetails.titleL2}</div>
-            </Modal.Title>
+            </div>
           </Modal.Header>
         )}
 
         {modalDetails.bodyText && (
           <Modal.Body className="modal-dialog-scrollable text-center">
-            <div className="w-100">
-              <Card.Text>{modalDetails.bodyText} </Card.Text>
-
+            <div className="w-100 my-2">
               <Card.Text>
-                <Spinner
-                  animation={
-                    modalDetails.modalType === "error" ? "grow" : "border"
-                  }
-                  variant={
-                    modalDetails.modalType === "error" ? "danger" : "warning"
-                  }
-                />
+                <div>{modalDetails.bodyText}</div>
+                <div>{modalDetails.bodyTextl2}</div>
               </Card.Text>
+
+              {spinner && (
+                <Card.Text>
+                  <Spinner
+                    animation={modalType === "error" ? "grow" : "border"}
+                    variant={modalType === "error" ? "danger" : "warning"}
+                  />
+                </Card.Text>
+              )}
             </div>
           </Modal.Body>
         )}
 
-        {modalDetails.handleAgree && (
+        {modalDetails.handleConfirm && (
           <Modal.Footer>
-            <div className="col text-center">
-              <div className="col ">
+            <div className="mt-2 w-100">
+              <Button
+                variant={
+                  !!buttonDetails.textAccept.variant
+                    ? buttonDetails.textAccept.variant
+                    : "primary w-100"
+                }
+                onClick={(e) => buttonDetails.handleAccept(e)}
+              >
+                {buttonDetails.textAccept.text}
+              </Button>
+              {!!buttonDetails.textReject && (
                 <Button
-                  onClick={modalDetails.handleAgree}
-                  variant={modalDetails.agreeColour}
+                  variant="outline-primary w-100 mt-2"
+                  onClick={() => buttonDetails.handleReject()}
                 >
-                  CIC and Mosque updates{" "}
-                  <span className="ml-2 ">
-                    {modalDetails.agreeNewsletter ? (
-                      <FiCheckSquare></FiCheckSquare>
-                    ) : (
-                      <FiSquare></FiSquare>
-                    )}
-                  </span>
+                  {buttonDetails.textReject.text}
                 </Button>
-              </div>
-
-              <div className="mt-2">
-                <Button
-                  variant="primary w-100"
-                  onClick={modalDetails.handleClose}
-                >
-                  Agree
-                </Button>
-              </div>
+              )}
             </div>
           </Modal.Footer>
         )}

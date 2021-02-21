@@ -32,6 +32,14 @@ const TEXTDEFINITION = {
   DASHBOARD_GREETING: "Salamu Aleykum",
   BOOKING_CONFIRMED_NOTE: "Please show CIC staff on arrival.",
   CARD_HEADER_DEFAULT: "CIC Registrations",
+  MISSED_SESSION_ASK_L1: "Entry Time Missing",
+  MISSED_SESSION_ASK_L2: "Did you attend your booking on",
+  MISSED_SESSION_Attended_L1: "Please Scan QR",
+  MISSED_SESSION_Attended_L2:
+    "Next Time please scan your QR code on entry so CIC can comply with Victorian laws",
+  MISSED_SESSION_ALERT_L1: "Booking Missed",
+  MISSED_SESSION_ALERT_L2:
+    "If you can't attent your next booking, please cancel before 10am so others can attend Juma",
 };
 
 export default TEXTDEFINITION;

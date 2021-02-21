@@ -119,7 +119,7 @@ function Login(props) {
           Log in
         </Button>
 
-        <Row className="mt-4 ">
+        <Row className="mt-1 ">
           <Col xl={6} xs={6}>
             <Link to="/forgot-password">
               <Button disabled={loading} variant="outline-light border-0 ">

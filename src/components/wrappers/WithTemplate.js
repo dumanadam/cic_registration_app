@@ -23,21 +23,6 @@ const WithTemplate = (WrappedComp) => {
         className="d-flex align-items-center w-100 border-0 text-center"
         bg="transparent"
       >
-        {/*         <div
-          style={{
-            height: "0vh",
-            marginBottom: "15vh",
-            width: "100%",
-          }}
-        >
-          {WrappedComp.errorMessage && (
-            <Container>
-              <Alert variant="danger" style={{ fontSize: ".9em" }}>
-                {WrappedComp.errorMessage}
-              </Alert>
-            </Container>
-          )}
-        </div> */}
         <Card.Body
           className="mt-0 pt-0 "
           style={{ minHeight: "70vh", maxHeight: "70vh", overflow: "clip" }}

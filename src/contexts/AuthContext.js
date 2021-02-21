@@ -293,8 +293,9 @@ export function AuthProvider({ children }) {
     return archiveSessionResult;
   }
 
-  async function missedBooking() {
+  async function missedBooking(userDetails) {
     let setMissedBooking = fbfunc.httpsCallable("missedBooking");
+    console.log("missed userDetails", userDetails);
 
     let missedBookingres = await setMissedBooking(userDetails)
       .then((result) => {
@@ -336,14 +337,9 @@ export function AuthProvider({ children }) {
     return bookingRequest;
   }
 
-  function cancelUserBooking(oldSessionDetails) {
-    console.log("oldSessionDetails", oldSessionDetails);
-
+  function cancelUserBooking() {
     let cancelSessionFunc = fbfunc.httpsCallable("cancelUserBooking");
-    let bookingCancellation = cancelSessionFunc({
-      oldSessionDetails,
-      userDetails,
-    })
+    let bookingCancellation = cancelSessionFunc(userDetails)
       .then((result) => {
         console.log("res from cacncel func  ->>> ", result.data);
         return result.data;
